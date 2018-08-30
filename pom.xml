@@ -12,6 +12,8 @@
 
     <modules>
         <module>basic-order-service</module>
+        <module>basic-delivery-service</module>
+        <module>basic-payment-service</module>
     </modules>
 
     <groupId>com.lhiot.oc</groupId>
