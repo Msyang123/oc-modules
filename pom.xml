@@ -20,6 +20,7 @@
     <modules>
         <module>place-order-service</module>
         <module>payment-service</module>
+        <module>delivery-service</module>
     </modules>
 
     <dependencyManagement>
