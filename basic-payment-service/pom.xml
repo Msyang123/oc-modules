@@ -43,6 +43,11 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-config</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.alipay</groupId>
+            <artifactId>alipay-sdk-java</artifactId>
+            <version>20170209153223</version>
+        </dependency>
     </dependencies>
 
     <build>

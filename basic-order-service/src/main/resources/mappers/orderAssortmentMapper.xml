@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhiot.order.mapper.OrderAssortmentMapper">
+    <!--批量新增订单套餐表-->
+    <insert id="createInbatch" parameterType="java.util.List" 
+    	useGeneratedKeys="true" keyProperty="id">
+        insert into order_assortment(assortment_id,buy_count,refund_status,order_id,price,amount_payable,
+        	assortment_discount_price,assortment_name,assortment_image)
+        values
+	        <foreach collection="list" item="item" index="index" separator=",">
+	            (#{item.assortmentId}, #{item.buyCount},#{item.refundStatus},#{item.orderId},#{item.price},
+	            #{item.amountPayable},#{item.assortmentDiscountPrice},#{item.assortmentName},#{item.assortmentImage})
+	        </foreach>
+    </insert>
+
+    <select id="findByOrderId" parameterType="Long" resultType="com.lhiot.order.domain.OrderAssortment">
+        select * from order_assortment where order_id =#{0}
+    </select>
+	
+	    <!--修改订单套餐表-->
+    <update id="updateById" parameterType="com.lhiot.order.domain.OrderAssortment">
+        update order_assortment
+        <trim prefix="set" suffixOverrides="">
+            <if test="assortmentId!=null">
+                assortment_id = #{assortmentId},
+            </if>
+            <if test="buyCount!=null">
+                buy_count = #{buyCount},
+            </if>
+            <if test="refundStatus!=null and refundStatus != ''">
+                refund_status = #{refundStatus},
+            </if>
+            <if test="orderId!=null">
+                order_id = #{orderId},
+            </if>
+            <if test="price!=null">
+                price = #{price},
+            </if>
+            <if test="amountPayable!=null">
+                amount_payable = #{amountPayable},
+            </if>
+            <if test="assortmentDiscountPrice!=null">
+                assortment_discount_price = #{assortmentDiscountPrice},
+            </if>
+            <if test="assortmentName!=null and assortmentName !=''" >
+                assortment_name = #{assortmentName},
+            </if>
+            <if test="assortmentImage!=null and assortmentImage !=''">
+                assortment_image = #{assortmentImage},
+            </if>
+        </trim>
+        where id=#{id}
+    </update>
+    
+    <!-- lynn 根据订单id及套餐id及修改订单商品的状态 -->
+	<update id="updateByOrderIdAndAssortmentId" parameterType="map">
+		update order_assortment set refund_status = #{refundStatus}
+		<trim prefix="where" prefixOverrides="and">
+			<if test="orderId != null">
+				and order_id = #{orderId}
+			</if>
+			<if test="assortmentIds != null">
+				and assortment_id in 
+				<foreach collection="assortmentIds" item="item" separator="," open="(" close=")">
+					#{item}
+				</foreach>
+			</if>
+		</trim>
+	</update>
+	
+    <!--查询订单套餐表-->
+    <select id="list" parameterType="com.lhiot.order.domain.OrderAssortment"
+            resultType="com.lhiot.order.domain.OrderAssortment">
+        select * from order_assortment
+        <trim prefix="where" prefixOverrides="and">
+             <if test="id!=null ">
+                 and id = #{id}
+             </if>
+             <if test="assortmentId!=null ">
+                 and assortment_id = #{assortmentId}
+             </if>
+             <if test="buyCount!=null ">
+                 and buy_count = #{buyCount}
+             </if>
+             <if test="refundStatus!=null and refundStatus!='null' and refundStatus!=''">
+                 and refund_status = #{refundStatus}
+             </if>
+             <if test="orderId!=null ">
+                 and order_id = #{orderId}
+             </if>
+             <if test="price!=null ">
+                 and price = #{price}
+             </if>
+             <if test="amountPayable!=null">
+                 and amount_payable = #{amountPayable}
+             </if>
+             <if test="assortmentDiscountPrice!=null ">
+                 and assortment_discount_price = #{assortmentDiscountPrice}
+             </if>
+        </trim>
+    </select>
+    
+    <!-- 根据订单id以及套餐id查询查询套餐信息 -->
+    <select id="findByOrderIdAndassormentId" parameterType="map" 
+    	resultType="com.lhiot.order.domain.OrderAssortment">
+    	select * from order_assortment where order_id = #{orderId}
+    	and assortment_id in 
+    	<foreach collection="assortmentIds" item="item" open="(" separator="," close=")">
+    		#{item}
+    	</foreach>
+    </select>
+</mapper>
