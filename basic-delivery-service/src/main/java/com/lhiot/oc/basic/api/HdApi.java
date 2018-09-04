@@ -1,6 +1,6 @@
 package com.lhiot.oc.basic.api;
 
-import com.leon.microx.common.wrapper.Tips;
+import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.Jackson;
 import com.leon.microx.util.StringUtils;
 import com.lhiot.order.domain.BaseOrderInfo;

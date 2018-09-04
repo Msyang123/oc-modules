@@ -1,7 +1,10 @@
 package com.lhiot.oc.basic.feign;
 
-import com.leon.microx.common.wrapper.Multiple;
-import com.lhiot.oc.basic.feign.domain.*;
+import com.leon.microx.support.result.Multiple;
+import com.lhiot.oc.basic.feign.domain.Assortment;
+import com.lhiot.oc.basic.feign.domain.ProductsStandard;
+import com.lhiot.oc.basic.feign.domain.StoreInfo;
+import com.lhiot.oc.basic.feign.domain.SystemSetting;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;

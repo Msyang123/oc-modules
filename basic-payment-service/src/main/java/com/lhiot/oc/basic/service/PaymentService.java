@@ -3,14 +3,18 @@ package com.lhiot.oc.basic.service;
 
 import com.alipay.api.AlipayClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.leon.microx.common.wrapper.Tips;
+import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.Jackson;
 import com.leon.microx.util.SnowflakeId;
 import com.leon.microx.util.StringUtils;
 import com.lhiot.oc.basic.domain.Attach;
 import com.lhiot.oc.basic.domain.PaymentLog;
 import com.lhiot.oc.basic.domain.SignParam;
+import com.lhiot.oc.basic.domain.enums.NormalExchange;
+import com.lhiot.oc.basic.domain.enums.OrderStatus;
+import com.lhiot.oc.basic.domain.enums.OrderType;
 import com.lhiot.oc.basic.domain.enums.PublishExchange;
+import com.lhiot.oc.basic.feign.BaseUserServerFeign;
 import com.lhiot.oc.basic.service.payment.AliPayUtil;
 import com.lhiot.oc.basic.service.payment.PaymentProperties;
 import com.lhiot.oc.basic.service.payment.WeChatUtil;
@@ -24,7 +28,6 @@ import org.springframework.util.CollectionUtils;
 import java.sql.Timestamp;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -239,7 +242,7 @@ public class PaymentService {
      * @param signParam
      * @throws JsonProcessingException
      */
-    public void signSavePaymentLog(SignParam signParam) throws JsonProcessingException {
+    public void signSavePaymentLog(SignParam signParam){
         //写签名日志
         PaymentLog paymentLog = null;
         Long orderId = null;
@@ -280,7 +283,7 @@ public class PaymentService {
      * @param attach     自定义参数
      * @param paymentLog 日志
      */
-    public void notifyUpdate(Attach attach, PaymentLog paymentLog) throws Exception {
+    public void notifyUpdate(Attach attach, PaymentLog paymentLog){
         //广播支付消息
         rabbit.convertAndSend(PublishExchange.PUBLISH_PAYMENT_NOTIFIED.getName(), "", Jackson.json(paymentLog));
         log.debug("广播支付回调");

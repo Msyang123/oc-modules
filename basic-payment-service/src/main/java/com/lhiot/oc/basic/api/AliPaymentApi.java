@@ -3,24 +3,24 @@ package com.lhiot.oc.basic.api;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.domain.AlipayTradeAppPayModel;
+import com.alipay.api.domain.AlipayTradeCancelModel;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.leon.microx.common.wrapper.Tips;
+import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.Jackson;
 import com.lhiot.oc.basic.domain.Attach;
 import com.lhiot.oc.basic.domain.PaymentLog;
+import com.lhiot.oc.basic.domain.SignParam;
 import com.lhiot.oc.basic.service.PaymentLogService;
 import com.lhiot.oc.basic.service.PaymentService;
 import com.lhiot.oc.basic.service.payment.AliPayUtil;
 import com.lhiot.oc.basic.service.payment.PaymentProperties;
+import com.lhiot.oc.basic.util.DateFormatUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.Timestamp;
@@ -68,8 +68,8 @@ public class AliPaymentApi {
     }
 
     @ApiOperation(value = "支付 - 异步回调")
-    @PostMapping("/notify")
-    public ResponseEntity<String> notify(HttpServletRequest request) throws Exception {
+    @PostMapping("/pay/notify")
+    public ResponseEntity<String> payNotify(HttpServletRequest request){
 
         log.info("========支付成功，后台回调=======");
         Map<String, String> params = aliPayUtil.aliPayNotifyParams(request);
@@ -107,4 +107,25 @@ public class AliPaymentApi {
         }
         return ResponseEntity.ok("failure");
     }
+
+    @ApiOperation(value = "撤销支付宝支付")
+    @PutMapping("/cancel")
+    public ResponseEntity<Tips> cancel(@RequestParam("orderId") String orderId) throws AlipayApiException {
+        log.info("========撤销支付宝支付成功，后台回调=======");
+        AlipayTradeCancelModel model=new AlipayTradeCancelModel();
+        model.setOutTradeNo(orderId);
+        return ResponseEntity.ok(aliPayUtil.cancel(model));
+    }
+
+
+    @ApiOperation(value = "撤销支付宝支付 - 异步回调")
+    @PostMapping("/cancel/notify")
+    public ResponseEntity<String> cancelNotify(HttpServletRequest request){
+        log.info("========撤销支付宝支付成功，后台回调=======");
+        Map<String, String> params = aliPayUtil.aliPayNotifyParams(request);
+        String orderCode = params.get("trade_no");
+        log.info(orderCode);
+        return ResponseEntity.ok("success");
+    }
+
 }

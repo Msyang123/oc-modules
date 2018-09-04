@@ -3,14 +3,17 @@ package com.lhiot.oc.basic.service.payment;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.domain.AlipayTradeAppPayModel;
+import com.alipay.api.domain.AlipayTradeCancelModel;
 import com.alipay.api.domain.AlipayTradeRefundModel;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.request.AlipayTradeAppPayRequest;
+import com.alipay.api.request.AlipayTradeCancelRequest;
 import com.alipay.api.request.AlipayTradeRefundRequest;
 import com.alipay.api.response.AlipayTradeAppPayResponse;
+import com.alipay.api.response.AlipayTradeCancelResponse;
 import com.alipay.api.response.AlipayTradeRefundResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.leon.microx.common.wrapper.Tips;
+import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.Jackson;
 import com.leon.microx.util.StringUtils;
 import com.lhiot.oc.basic.domain.SignParam;
@@ -51,12 +54,29 @@ public class AliPayUtil {
 
         AlipayTradeAppPayRequest request = new AlipayTradeAppPayRequest();
         request.setBizModel(model);
-        request.setNotifyUrl(config.getNotifyUrl()+"/alipay/notify");
+        request.setNotifyUrl(config.getNotifyUrl());
         AlipayTradeAppPayResponse signed=alipayClient.sdkExecute(request);
         if (Objects.nonNull(signed) && Objects.nonNull(signed.getBody())) {
             return Tips.of("1",signed.getBody());
         }
         return Tips.of("-1","支付宝签名失败");
+    }
+
+    /**
+     * 支付宝撤销支付
+     * @param model
+     * @return
+     * @throws AlipayApiException
+     */
+    public Tips cancel(AlipayTradeCancelModel model) throws AlipayApiException {
+        AlipayTradeCancelRequest request=new AlipayTradeCancelRequest();
+        request.setBizModel(model);
+        request.setNotifyUrl(config.getCancelNotifyUrl());
+        AlipayTradeCancelResponse signed=alipayClient.sdkExecute(request);
+        if (Objects.nonNull(signed) && Objects.nonNull(signed.getBody())) {
+            return Tips.of("1",signed.getBody());
+        }
+        return Tips.of("-1","支付宝撤销失败");
     }
 
     /**

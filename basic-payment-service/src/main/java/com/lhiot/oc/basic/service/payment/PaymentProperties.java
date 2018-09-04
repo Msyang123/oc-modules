@@ -15,7 +15,7 @@ import java.util.Map;
 @ConfigurationProperties(prefix = PaymentProperties.PROPERTIES_PREFIX)
 public class PaymentProperties {
 
-    public static final String PROPERTIES_PREFIX = "wx-small.payment";
+    public static final String PROPERTIES_PREFIX = "payment";
     /**
      * 编码
      */
@@ -23,12 +23,12 @@ public class PaymentProperties {
     /**
      * 发送验证码的第三方推送服务地址
      */
-    private InetRemoteUrl sendSms;
+    //private InetRemoteUrl sendSms;
 
     /**
      * 验证发送验证码服务地址
      */
-    private InetRemoteUrl validateSms;
+    //private InetRemoteUrl validateSms;
     /**
      * http连接超时（毫秒数）
      */
@@ -36,7 +36,7 @@ public class PaymentProperties {
     /**
      * 临时订单时效毫秒（订单从待支付到支付完成的有效毫秒数，过期则修改订单状态为失效）
      */
-    private long temporaryOrderExpirationMs = 30 * 60 * 1000;
+    private long temporaryOrderExpirationMs;
 
     private WeChatOauth weChatOauth;
 
@@ -53,17 +53,17 @@ public class PaymentProperties {
         /**
          * APP密钥
          */
-        private String appSecret;
+        //private String appSecret;
 
         /**
          * 授权后跳转到的地址
          */
-        private String appRedirectUri;
+        //private String appRedirectUri;
 
         /**
          * 调整到前端页面的地址
          */
-        private String appFrontUri;
+        //private String appFrontUri;
     }
 
     private WeChatPayConfig weChatPay;
@@ -109,30 +109,6 @@ public class PaymentProperties {
              */
             private Resource pkcs12;
         }
-
-        /**
-         * 异步支付回调地址
-         */
-        private String rechargeNotifyUrl;
-        /**
-         * 异步订单回调地址
-         */
-        private String orderNotifyUrl;
-
-        /**
-         * 异步发票回调地址
-         */
-        private String invoiceNotifyUrl;
-
-        /**
-         * 异步账款订单回调地址
-         */
-        private String orderOfflineNotifyUrl;
-        
-        /**
-         * 异步账款订单回调地址
-         */
-        private String payOrderNotifyUrl;
 
         /**
          * 微信支付回调统一地址
@@ -226,9 +202,15 @@ public class PaymentProperties {
          * 异步回调地址
          */
         private String notifyUrl;
+
+        /**
+         * 调用支付宝取消支付异步回调地址
+         *
+         */
+        private String cancelNotifyUrl;
     }
 
-    @Data
+/*    @Data
     public static class InetRemoteUrl {
         private String url;
         private String version;
@@ -247,5 +229,5 @@ public class PaymentProperties {
             }
             return new HttpEntity<>(parameters, headers);
         }
-    }
+    }*/
 }

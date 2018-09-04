@@ -1,27 +1,10 @@
 package com.lhiot.oc.basic.api;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.leon.microx.common.wrapper.Tips;
+import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.IOUtils;
 import com.leon.microx.util.StringUtils;
 import com.leon.microx.util.auditing.MD5;
 import com.lhiot.oc.basic.service.DeliveryNoteService;
-import com.lhiot.order.domain.BaseOrderInfo;
-import com.lhiot.order.domain.DeliverNote;
-import com.lhiot.order.domain.enums.OrderStatus;
-import com.lhiot.order.domain.inparam.CreateOrderParam;
-import com.lhiot.order.feign.BaseServiceFeign;
-import com.lhiot.order.feign.domain.ProductsStandard;
-import com.lhiot.order.feign.domain.StoreInfo;
-import com.lhiot.order.service.BaseOrderService;
-import com.lhiot.order.service.Delivery.DeliveryProperties;
-import com.lhiot.order.service.Delivery.DeliveryService;
-import com.lhiot.order.service.Delivery.DeliveryUtil;
-import com.lhiot.order.util.*;
-import com.sgsl.components.dada.DadaDeliver;
-import com.sgsl.components.dada.DadaProps;
-import com.sgsl.components.dada.DadaService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -72,6 +55,7 @@ public class DeliveryApi {
     @PostMapping("/callback/dada")
     @ApiOperation(value = "达达配送回调", response = String.class)
     public ResponseEntity<?> callBack(HttpServletRequest request) {
+        Tips.info("")
         log.info("达达配送回调");
         try {
             InputStream result = request.getInputStream();
@@ -92,7 +76,7 @@ public class DeliveryApi {
     }
 
     @PostMapping("/cancel/reasons")
-    @ApiOperation(value = "达达配送取消原因列表", response = JSONObject.class)
+    @ApiOperation(value = "达达配送取消原因列表", response = String.class)
     public ResponseEntity<?> cancelReasons() {
         // 读取配置信息
         DadaProps config = new DadaProps();
@@ -108,13 +92,7 @@ public class DeliveryApi {
         DadaDeliver dadaDeliver = new DadaDeliver(config);
         DadaService dadaService = new DadaService(dadaDeliver, JSON::toJSONString);
 
-        JSONObject resultList = null;
-        try {
-            resultList = JSONObject.parseObject(dadaService.cancelOrderReasons());
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-        return ResponseEntity.ok(resultList);
+        return ResponseEntity.ok(dadaService.cancelOrderReasons());
     }
 
     @PostMapping("/cancel")

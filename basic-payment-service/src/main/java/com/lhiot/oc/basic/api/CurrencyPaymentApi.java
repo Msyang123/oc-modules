@@ -1,9 +1,13 @@
 package com.lhiot.oc.basic.api;
 
-import com.leon.microx.common.wrapper.Tips;
+import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.Jackson;
 import com.leon.microx.util.StringUtils;
+import com.lhiot.oc.basic.domain.enums.Apply;
 import com.lhiot.oc.basic.domain.enums.NormalExchange;
+import com.lhiot.oc.basic.domain.enums.OrderType;
+import com.lhiot.oc.basic.feign.BaseUserServerFeign;
+import com.lhiot.oc.basic.feign.domain.BaseUser;
 import com.lhiot.order.domain.BaseOrderInfo;
 import com.lhiot.order.domain.enums.Apply;
 import com.lhiot.order.domain.enums.NormalExchange;
@@ -33,15 +37,15 @@ import java.util.Objects;
 @Api("鲜果币公共支付api")
 @RequestMapping("/currencypayment")
 public class CurrencyPaymentApi {
-    private final BaseOrderService baseOrderService;
     private final RabbitTemplate rabbit;
+    private final BaseUserServerFeign baseUserServerFeign;
     @Autowired
-    public CurrencyPaymentApi(BaseOrderService baseOrderService, RabbitTemplate rabbit) {
-        this.baseOrderService = baseOrderService;
+    public CurrencyPaymentApi(RabbitTemplate rabbit, BaseUserServerFeign baseUserServerFeign) {
         this.rabbit = rabbit;
+        this.baseUserServerFeign = baseUserServerFeign;
     }
 
-    @ApiOperation(value = "鲜果币支付订单接口")
+    @ApiOperation(value = "鲜果币支付接口")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "query", name = "baseUserId", value = "基础用户ID", dataType = "Long", required = true),
             @ApiImplicitParam(paramType = "query", name = "orderCode", value = "订单编码", dataType = "String", required = true),
@@ -52,7 +56,7 @@ public class CurrencyPaymentApi {
     public ResponseEntity<?> currencyPay(@RequestParam("id") Long baseUserId,
                                          @RequestParam("orderCode") String orderCode,
                                          @RequestParam("memo") String memo,
-                                         @RequestParam("apply") Apply apply) throws Exception {
+                                         @RequestParam("apply") Apply apply){
         if (baseUserId == null) {
             return ResponseEntity.badRequest().body(Tips.of("-1", "基础用户ID为空"));
         }
@@ -62,34 +66,11 @@ public class CurrencyPaymentApi {
         if (StringUtils.isBlank(orderCode)) {
             return ResponseEntity.badRequest().body(Tips.of("-1", "订单编码为空"));
         }
-        BaseOrderInfo baseOrderInfo = baseOrderService.findOrderByCode(orderCode);
-        if (Objects.isNull(baseOrderInfo)) {
-            return ResponseEntity.badRequest().body(Tips.of("-1", "未找到订单"));
-        }
-        //非待支付状态订单
-        if (!Objects.equals(baseOrderInfo.getStatus(), OrderStatus.WAIT_PAYMENT)) {
-            return ResponseEntity.badRequest().body(Tips.of("-1", "订单非待支付状态"));
-        }
-        //鲜果币支付订单
-        Tips backMsg = baseOrderService.currencyPayOrder(baseOrderInfo, baseUserId, memo,apply);
-        if (backMsg.getCode().equals("-1")) {
-            return ResponseEntity.badRequest().body(backMsg.getMessage());
-        } else {
-            //发送到队列处理
-            //如果发送海鼎减库存失败，则发送到队列中进行重试
-            //团购订单不在此处发送海鼎 单独掉接口发送
-            if(Objects.equals(baseOrderInfo.getOrderType(),OrderType.TEAM_BUYING)){
-                return ResponseEntity.ok(backMsg);
-            }else if(Objects.equals(baseOrderInfo.getOrderType(), OrderType.TO_STORE)){
-                //购买到仓库
-                //TODO 发送到个人仓库 不需要发送海鼎
-                //baseUserServerFeign.xxxxx;
-                return ResponseEntity.ok(backMsg);
-            }else{
-                //通过主题队列异步处理海鼎订单发送与配送业务
-                rabbit.convertAndSend(NormalExchange.SEND_TO_HD.getExchangeName(), NormalExchange.SEND_TO_HD.getQueueName(), Jackson.json(baseOrderInfo));
-                return ResponseEntity.ok(backMsg);
-            }
-        }
+
+        BaseUser baseUser=new BaseUser();
+        baseUser.setApplicationType(apply);
+        baseUser.setId(baseUserId);
+        return baseUserServerFeign.updateCurrencyById(baseUserId,memo,baseUser);
+
     }
 }

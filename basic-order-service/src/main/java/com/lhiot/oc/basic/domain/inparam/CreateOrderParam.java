@@ -18,8 +18,8 @@ public class CreateOrderParam {
     private Apply apply;
     private OrderType orderType;
     private Long storeId;
-/*    private String storeCode;
-    private String storeName;*/
+    private String storeCode;
+    private String storeName;
     private ReceivingWay receivingWay;
     private Integer couponAmount;
     private Integer totalAmount;
