@@ -7,5 +7,5 @@ ${AnsiColor.BRIGHT_GREEN}
  #+#        #+#    #+#           #+#          #+#    #+#      #+#
 ########## ###    ###       ###########       ########       ###
 ${AnsiColor.BRIGHT_RED}
-Application Name: basic-order-service
+Application Name: delivery-service
 Spring Boot Version: 1.0
