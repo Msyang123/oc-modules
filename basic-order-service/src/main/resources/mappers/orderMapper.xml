@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhiot.order.mapper.OrderMapper">
+
+    <sql id="orderInfo">
+        SELECT t1.id AS orderId,t1.code,t1.user_id AS userId,t1.apply_type AS applicationType,t1.order_type AS orderType,t1.store_id AS storeId,t1.total_amount AS totalAmount
+        ,t1.store_code AS storeCode,t1.coupon_amount AS couponAmount,t1.amount_payable AS amountPayable,t1.receiving_way AS receivingWay,t1.status AS status,t1.receive_user AS receiveUser
+        ,t1.contact_phone AS contactPhone,t1.address AS address,t1.hd_status AS hdStatus,t1.remark,t1.delivery_end_time AS deliveryEndTime,
+        t2.id AS opid,t2.standard_id AS standardId,t2.price AS price,t2.standard_price AS standardPrice,t2.product_qty AS productQty,
+        t2.standard_qty AS standardQty,t2.refund_status AS refundStatus,t2.discount_price AS discountPrice,t3.id AS ofid,t3.status AS flowStatus,t3.pre_status AS preStatus,
+        t1.create_at AS orderCreateAt,t1.hd_stock_at AS hdStockAt,t3.create_at AS flowCreateAt,t1.reason as reason,t1.hd_order_code as hdOrderCode,t1.delivery_amount as deliveryAmount,
+	    t1.deliver_time as deliverTime,t1.coupon_id as couponId,t1.allow_refund as allowRefund,t1.coordx,t1.coordy,t1.recieve_time as recieveTime,t1.delivery_time as deliveryTime,
+	    t1.nickname as nickname,t1.store_name as storeName
+        FROM base_order t1
+        LEFT JOIN order_product t2 ON t1.id = t2.order_id
+        LEFT JOIN order_flow t3 ON t1.id = t3.order_id
+    </sql>
+
+    <resultMap id="BaseOrderInfo" type="com.lhiot.order.domain.BaseOrderInfo">
+        <id column="orderId" javaType="Long" jdbcType="BIGINT" property="id" />
+        <result column="code" property="code" />
+        <result column="userId"  property="userId" />
+        <result column="applicationType"  property="applicationType" />
+        <result column="orderType"  property="orderType" />
+        <result column="storeId" property="storeId" />
+        <result column="storeCode" property="storeCode" />
+        <result column="totalAmount" property="totalAmount" />
+        <result column="couponAmount" property="couponAmount" />
+        <result column="amountPayable" property="amountPayable" />
+        <result column="receivingWay" property="receivingWay" />
+        <result column="status" property="status" />
+        <result column="receiveUser" property="receiveUser" />
+        <result column="contactPhone" property="contactPhone" />
+        <result column="address" property="address" />
+        <result column="remark" property="remark" />
+        <result column="hdStatus" property="hdStatus" />
+        <result column="deliveryEndTime" property="deliveryEndTime" />
+        <result column="hdStockAt" property="hdStockAt"/>
+        <result column="orderCreateAt" property="createAt"/>
+        <result column="reason" property="reason"/>
+        <result column="hdOrderCode" property="hdOrderCode"/>
+        <result column="deliveryAmount" property="deliveryAmount"/>
+        <result column="deliverTime" property="deliverTime"/>
+        <result column="couponId" property="couponId"/>
+        <result column="allowRefund" property="allowRefund"/>
+        <result column="coordx" property="coordx"/>
+        <result column="coordy" property="coordy"/>
+        <result column="recieveTime" property="recieveTime"/>
+        <result column="deliveryTime" property="deliveryTime"/>
+        <result column="nickname" property="nickname"/>
+        <result column="storeName" property="storeName"/>
+        <collection  property="orderProducts"  ofType="com.lhiot.order.domain.OrderProduct">
+            <id column="opid" property="id"/>
+            <result column="orderId" property="orderId" />
+            <result column="standardId" property="standardId" />
+            <result column="price" property="price" />
+            <result column="standardPrice" property="standardPrice" />
+            <result column="productQty" property="productQty" />
+            <result column="standardQty" property="standardQty" />
+            <result column="refundStatus" property="refundStatus" />
+            <result column="discountPrice" property="discountPrice" />
+        </collection>
+        <collection property="orderFlows" ofType="com.lhiot.order.domain.OrderFlow">
+            <id column="ofid" property="id"/>
+            <result column="orderId" property="orderId" />
+            <result column="flowStatus" property="status" />
+            <result column="preStatus" property="preStatus" />
+            <result column="flowCreateAt" property="createAt" />
+        </collection>
+        <collection property="orderAssortment" ofType="com.lhiot.order.domain.OrderAssortment">
+            <id column="oaid" property="id"/>
+            <result column="assortmentId" property="assortmentId" />
+            <result column="buyCount" property="buyCount" />
+            <result column="refundStatus" property="refundStatus" />
+            <result column="orderId" property="orderId" />
+            <result column="price" property="price" />
+            <result column="amountPayable" property="amountPayable" />
+            <result column="assortmentDiscountPrice" property="assortmentDiscountPrice" />
+            <result column="assortmentName" property="assortmentName" />
+            <result column="assortmentImage" property="assortmentImage" />
+        </collection>
+    </resultMap>
+
+    <select id="findById" parameterType="long" resultMap="BaseOrderInfo">
+      <include refid="orderInfo"></include>
+      WHERE t1.id = #{0}
+    </select>
+
+     <insert id="create" parameterType="com.lhiot.order.domain.BaseOrderInfo">
+      INSERT INTO base_order(id,code,user_id,apply_type,order_type,store_code,store_id,total_amount,coupon_amount,amount_payable
+      ,receiving_way,status,receive_user,contact_phone,address,hd_status,remark,delivery_end_time,create_at,hd_order_code,nickname,store_name)
+      VALUE (#{id},#{code},#{userId},#{applicationType},#{orderType},#{storeCode},#{storeId},#{totalAmount},#{couponAmount},#{amountPayable}
+      ,#{receivingWay},#{status},#{receiveUser},#{contactPhone},#{address},#{hdStatus},#{remark},#{deliveryEndTime},#{createAt},#{hdOrderCode},#{nickname},#{storeName}
+     )
+    </insert>
+
+    <!--更新订单信息 不操作订单状态-->
+    <update id="update" parameterType="com.lhiot.order.domain.BaseOrderInfo">
+        update base_order
+        <trim prefix="set" suffixOverrides=",">
+            <if test="id!=null">
+                id = #{id},
+            </if>
+            <if test="code!=null">
+                code = #{code},
+            </if>
+            <if test="applicationType!=null">
+                apply_type = #{applicationType},
+            </if>
+            <if test="createAt!=null">
+                create_at = #{createAt},
+            </if>
+            <if test="userId!=null">
+                user_id = #{userId},
+            </if>
+            <if test="orderType!=null">
+                order_type = #{orderType},
+            </if>
+            <if test="storeId!=null">
+                store_id = #{storeId},
+            </if>
+            <if test="totalAmount!=null">
+                total_amount = #{totalAmount},
+            </if>
+            <if test="couponAmount!=null">
+                coupon_amount = #{couponAmount},
+            </if>
+            <if test="amountPayable!=null">
+                amount_payable = #{amountPayable},
+            </if>
+            <if test="receivingWay!=null">
+                receiving_way = #{receivingWay},
+            </if>
+            <if test="receiveUser!=null">
+                receive_user = #{receiveUser},
+            </if>
+            <if test="contactPhone!=null">
+                contact_phone = #{contactPhone},
+            </if>
+            <if test="address!=null">
+                address = #{address},
+            </if>
+            <if test="hdStatus!=null">
+                hd_status = #{hdStatus},
+            </if>
+            <if test="status!=null">
+                status = #{status},
+            </if>
+            <if test="remark!=null">
+                remark = #{remark},
+            </if>
+            <if test="deliveryEndTime!=null">
+                delivery_end_time = #{deliveryEndTime},
+            </if>
+            <if test="storeCode!=null">
+                store_code = #{storeCode},
+            </if>
+            <if test="hdStockAt!=null">
+                hd_stock_at = #{hdStockAt},
+            </if>
+            <if test="reason!=null">
+                reason = #{reason},
+            </if>
+            <if test="hdOrderCode!=null">
+                hd_order_code = #{hdOrderCode},
+            </if>
+            <if test="couponId!=null">
+                coupon_id = #{couponId},
+            </if>
+            <if test="deliverTime!=null">
+                deliver_time = #{deliverTime},
+            </if>
+            <if test="allowRefund!=null">
+                allow_refund = #{allowRefund},
+            </if>
+        </trim>
+        where id=#{id}
+    </update>
+
+    <update id="updateOrderStatusById" parameterType="com.lhiot.order.domain.BaseOrderInfo">
+        update base_order status = #{status}
+         where id=#{id}
+    </update>
+
+    <update id="updateOrderStatusByCode" parameterType="com.lhiot.order.domain.BaseOrderInfo">
+        update base_order status = #{status}
+        where code=#{code}
+    </update>
+
+    <select id="findByCode" parameterType="String" resultMap="BaseOrderInfo">
+        <include refid="orderInfo"></include>
+        WHERE t1.code = #{0}
+    </select>
+
+    <select id="findByHdCode" parameterType="String" resultMap="BaseOrderInfo">
+        <include refid="orderInfo"></include>
+        WHERE t1.hd_order_code = #{0}
+    </select>
+
+    <!-- 订单查询后台管理  where条件-->
+    <sql id="orderQueryWhere">
+        <where>
+            <if test="orderCode != null and orderCode != ''">and t1.code = #{orderCode}</if>
+            <if test="phone != null and phone != ''">and t1.contact_phone = #{phone}</if>
+            <if test="startTime != null">and t1.create_at &gt;= #{startTime} </if>
+            <if test="endTime != null">and t1.create_at &lt;= #{endTime} </if>
+            <if test="status != null ">and t1.status = #{status}</if>
+            <if test="hdStatus != null ">and t1.hd_status = #{hdStatus}</if>
+            <if test="storeId != null ">and t1.store_id = #{storeId}</if>
+            <if test="userId != null ">and t1.user_id = #{userId}</if>
+            <if test="userIdList != null ">
+                and t1.user_id in
+                <foreach collection="userIdList" item = "item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="applyType != null ">and t1.apply_type = #{applyType}</if>
+        </where>
+
+    </sql>
+
+    <select id="orderQuery" parameterType="com.lhiot.order.domain.inparam.QueryParam" resultMap="BaseOrderInfo">
+        select * from base_order t1
+        <include refid="orderQueryWhere"></include>
+        <include refid="common.pager" />
+    </select>
+
+    <select id="orderQueryCounts" parameterType="com.lhiot.order.domain.inparam.QueryParam" resultType="long">
+        SELECT
+        count(1)orderQuery
+        FROM
+        base_order t1
+        <include refid="orderQueryWhere"></include>
+    </select>
+
+    <select id="orderByWaitPayment"  resultMap="BaseOrderInfo">
+        <include refid="orderInfo"></include>
+        WHERE status = 'WAIT_PAYMENT' AND NOW() >= DATE_ADD(create_at,INTERVAL 5 MINUTE)
+    </select>
+
+    <select id="orderByWaitSendOut"  resultMap="BaseOrderInfo">
+        <include refid="orderInfo"></include>
+        WHERE status = 'WAIT_SEND_OUT' AND NOW() >= DATE_SUB(delivery_end_time,INTERVAL 1 DAY)
+    </select>
+</mapper>
