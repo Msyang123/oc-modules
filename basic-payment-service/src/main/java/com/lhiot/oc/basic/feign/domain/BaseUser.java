@@ -2,7 +2,7 @@ package com.lhiot.oc.basic.feign.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.lhiot.oc.basic.domain.common.PagerRequestObject;
-import com.lhiot.oc.basic.domain.enums.Apply;
+import com.lhiot.oc.basic.domain.enums.ApplicationTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -61,8 +61,8 @@ public class BaseUser extends PagerRequestObject {
     *应用类型ID
     */
     @JsonProperty("applicationType")
-    @ApiModelProperty(value = "应用类型ID", dataType = "Apply")
-    private Apply applicationType;
+    @ApiModelProperty(value = "应用类型ID", dataType = "ApplicationTypeEnum")
+    private ApplicationTypeEnum applicationType;
 
     /**
      *unionId

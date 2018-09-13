@@ -3,13 +3,13 @@ package com.lhiot.oc.basic.api;
 import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.Jackson;
 import com.leon.microx.util.StringUtils;
-import com.lhiot.oc.basic.domain.enums.Apply;
+import com.lhiot.oc.basic.domain.enums.ApplicationTypeEnum;
 import com.lhiot.oc.basic.domain.enums.NormalExchange;
 import com.lhiot.oc.basic.domain.enums.OrderType;
 import com.lhiot.oc.basic.feign.BaseUserServerFeign;
 import com.lhiot.oc.basic.feign.domain.BaseUser;
 import com.lhiot.order.domain.BaseOrderInfo;
-import com.lhiot.order.domain.enums.Apply;
+import com.lhiot.order.domain.enums.ApplicationTypeEnum;
 import com.lhiot.order.domain.enums.NormalExchange;
 import com.lhiot.order.domain.enums.OrderStatus;
 import com.lhiot.order.domain.enums.OrderType;
@@ -50,13 +50,13 @@ public class CurrencyPaymentApi {
             @ApiImplicitParam(paramType = "query", name = "baseUserId", value = "基础用户ID", dataType = "Long", required = true),
             @ApiImplicitParam(paramType = "query", name = "orderCode", value = "订单编码", dataType = "String", required = true),
             @ApiImplicitParam(paramType = "query", name = "memo", value = "鲜果币扣款备注", dataType = "String", required = true),
-            @ApiImplicitParam(paramType = "query", name = "apply", value = "应用类型", dataType = "Apply", required = true),
+            @ApiImplicitParam(paramType = "query", name = "applicationType", value = "应用类型", dataType = "ApplicationTypeEnum", required = true),
     })
     @GetMapping("/currency/pay")
     public ResponseEntity<?> currencyPay(@RequestParam("id") Long baseUserId,
                                          @RequestParam("orderCode") String orderCode,
                                          @RequestParam("memo") String memo,
-                                         @RequestParam("apply") Apply apply){
+                                         @RequestParam("applicationType") ApplicationTypeEnum applicationType){
         if (baseUserId == null) {
             return ResponseEntity.badRequest().body(Tips.of("-1", "基础用户ID为空"));
         }
@@ -68,7 +68,7 @@ public class CurrencyPaymentApi {
         }
 
         BaseUser baseUser=new BaseUser();
-        baseUser.setApplicationType(apply);
+        baseUser.setApplicationType(applicationType);
         baseUser.setId(baseUserId);
         return baseUserServerFeign.updateCurrencyById(baseUserId,memo,baseUser);
 

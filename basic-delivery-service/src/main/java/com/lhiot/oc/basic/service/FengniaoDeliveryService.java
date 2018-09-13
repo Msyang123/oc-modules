@@ -139,7 +139,7 @@ public class FengniaoDeliveryService implements IDelivery{
 			return resultJson;
 		}
 			orderParam.setOriginId(order.getHdOrderCode());
-			orderParam.setOriginMark(order.getApply().name());//order.getStr("customer_note"));
+			orderParam.setOriginMark(order.getApplicationTypeEnum().name());//order.getStr("customer_note"));
 			orderParam.setReceiverAddress(deliveryAddress);
 			orderParam.setReceiverName(order.getReceiveUser());
 			orderParam.setReceiverPhone(order.getContactPhone());

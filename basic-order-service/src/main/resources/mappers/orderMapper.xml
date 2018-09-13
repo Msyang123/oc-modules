@@ -3,7 +3,7 @@
 <mapper namespace="com.lhiot.order.mapper.OrderMapper">
 
     <sql id="orderInfo">
-        SELECT t1.id AS orderId,t1.code,t1.user_id AS userId,t1.apply_type AS apply,t1.order_type AS orderType,t1.store_id AS storeId,t1.total_amount AS totalAmount
+        SELECT t1.id AS orderId,t1.code,t1.user_id AS userId,t1.apply_type AS applicationType,t1.order_type AS orderType,t1.store_id AS storeId,t1.total_amount AS totalAmount
         ,t1.store_code AS storeCode,t1.coupon_amount AS couponAmount,t1.amount_payable AS amountPayable,t1.receiving_way AS receivingWay,t1.status AS status,t1.receive_user AS receiveUser
         ,t1.contact_phone AS contactPhone,t1.address AS address,t1.hd_status AS hdStatus,t1.remark,t1.delivery_end_time AS deliveryEndTime,
         t2.id AS opid,t2.standard_id AS standardId,t2.price AS price,t2.standard_price AS standardPrice,t2.product_qty AS productQty,
@@ -20,7 +20,7 @@
         <id column="orderId" javaType="Long" jdbcType="BIGINT" property="id" />
         <result column="code" property="code" />
         <result column="userId"  property="userId" />
-        <result column="apply"  property="apply" />
+        <result column="applicationType"  property="applicationType" />
         <result column="orderType"  property="orderType" />
         <result column="storeId" property="storeId" />
         <result column="storeCode" property="storeCode" />
@@ -89,7 +89,7 @@
      <insert id="create" parameterType="com.lhiot.order.domain.BaseOrderInfo">
       INSERT INTO base_order(id,code,user_id,apply_type,order_type,store_code,store_id,total_amount,coupon_amount,amount_payable
       ,receiving_way,status,receive_user,contact_phone,address,hd_status,remark,delivery_end_time,create_at,hd_order_code,nickname,store_name)
-      VALUE (#{id},#{code},#{userId},#{apply},#{orderType},#{storeCode},#{storeId},#{totalAmount},#{couponAmount},#{amountPayable}
+      VALUE (#{id},#{code},#{userId},#{applicationType},#{orderType},#{storeCode},#{storeId},#{totalAmount},#{couponAmount},#{amountPayable}
       ,#{receivingWay},#{status},#{receiveUser},#{contactPhone},#{address},#{hdStatus},#{remark},#{deliveryEndTime},#{createAt},#{hdOrderCode},#{nickname},#{storeName}
      )
     </insert>
@@ -104,8 +104,8 @@
             <if test="code!=null">
                 code = #{code},
             </if>
-            <if test="apply!=null">
-                apply_type = #{apply},
+            <if test="applicationType!=null">
+                apply_type = #{applicationType},
             </if>
             <if test="createAt!=null">
                 create_at = #{createAt},

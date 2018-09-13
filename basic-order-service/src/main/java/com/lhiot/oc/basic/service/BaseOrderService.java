@@ -339,7 +339,7 @@ public class BaseOrderService {
 
         baseOrder.setId(orderId);
         baseOrder.setCode(code);
-        baseOrder.setApply(Apply.FRUIT_DOCTOR);
+        baseOrder.setApplicationTypeEnum(ApplicationTypeEnum.FRUIT_DOCTOR);
         baseOrder.setCreateAt(new Timestamp(System.currentTimeMillis()));
         baseOrder.setHdOrderCode(code);//初始海鼎订单编码为订单编码
         baseOrder.setHdStatus(HdStatus.NOT_SEND);
@@ -467,7 +467,7 @@ public class BaseOrderService {
 
         baseOrder.setId(orderId);
         baseOrder.setCode(code);
-        baseOrder.setApply(Apply.FRUIT_DOCTOR);
+        baseOrder.setApplicationTypeEnum(ApplicationTypeEnum.FRUIT_DOCTOR);
         baseOrder.setCreateAt(new Timestamp(System.currentTimeMillis()));
         baseOrder.setHdOrderCode(code);
         baseOrder.setHdStatus(HdStatus.NOT_SEND);
@@ -884,7 +884,7 @@ public class BaseOrderService {
      * @param memo
      * @return
      */
-    public Tips currencyPayOrder(BaseOrderInfo baseOrderInfo, Long baseUserId, String memo, Apply apply){
+    public Tips currencyPayOrder(BaseOrderInfo baseOrderInfo, Long baseUserId, String memo, ApplicationTypeEnum applicationType){
         //修改订单状态为支付中 不需要支付中状态了 因为没有混合支付
         //baseOrderInfo.setStatus(OrderStatus.PAYMENTING);
         //this.updateOrderStatusByCode(baseOrderInfo);
@@ -898,7 +898,7 @@ public class BaseOrderService {
         BaseUser baseUser=new BaseUser();
         baseUser.setCurrency(-needPay);
         baseUser.setId(baseUserId);
-        baseUser.setApplicationType(apply);
+        baseUser.setApplicationType(applicationType);
 
         //扣除鲜果币
         ResponseEntity<Object> entity = baseUserServerFeign.updateCurrencyById(baseUser.getId(), memo, baseUser);
@@ -913,7 +913,7 @@ public class BaseOrderService {
             PaymentLog paymentLog = new PaymentLog();
             paymentLog.setPayStep("paid");//支付步骤：sign-签名成功 paid-支付成功
             paymentLog.setUserId(baseUserId);//余额支付使用的是基础用户编号 用于退款的时候能够直接依据基础用户信息退鲜果币
-            paymentLog.setApply(baseOrderInfo.getApply());
+            paymentLog.setApplicationTypeEnum(baseOrderInfo.getApplicationTypeEnum());
             paymentLog.setSourceType(Attach.SourceType.ORDER.toString());
             paymentLog.setPayType(SignParam.PayPlatformType.BALANCE.toString());
             paymentLog.setPayFee(needPay);//支付金额

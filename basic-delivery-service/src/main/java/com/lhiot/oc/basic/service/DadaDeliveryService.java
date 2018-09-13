@@ -131,7 +131,7 @@ public class DadaDeliveryService implements IDelivery {
             return resultJson.toJSONString();
         }
         orderParam.setOriginId(order.getHdOrderCode());
-        orderParam.setOriginMark(order.getApply().name());//order.getStr("customer_note"));
+        orderParam.setOriginMark(order.getApplicationTypeEnum().name());//order.getStr("customer_note"));
         orderParam.setReceiverAddress(deliveryAddress);
         orderParam.setReceiverName(order.getReceiveUser());
         orderParam.setReceiverPhone(order.getContactPhone());
@@ -377,7 +377,7 @@ public class DadaDeliveryService implements IDelivery {
         }
         // 预调用处理，不传递正式订单编号
         orderParamVo.setOriginId(snowflakeId.stringId() + "0");
-        orderParamVo.setOriginMark(orderParam.getApply().toString());
+        orderParamVo.setOriginMark(orderParam.getApplicationTypeEnum().toString());
         orderParamVo.setReceiverAddress(orderParam.getAddress());
         orderParamVo.setReceiverName(orderParam.getReceiveUser());
         orderParamVo.setReceiverPhone(orderParam.getContactPhone());

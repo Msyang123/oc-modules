@@ -15,7 +15,7 @@ import java.util.List;
 public class CreateOrderParam {
 
     private Long userId;
-    private Apply apply;
+    private ApplicationTypeEnum applicationType;
     private OrderType orderType;
     private Long storeId;
     private String storeCode;

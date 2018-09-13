@@ -42,7 +42,7 @@ public interface ThirdPartyServiceFeign {
 
     //达达取消
     @RequestMapping(value = "/delivery/dada/cancel/{orderId}/{cancelReasonId}/{cancelReason}", method = RequestMethod.GET)
-    ResponseEntity<String> reasons(@RequestParam("orderId") String orderId, @RequestParam("cancelReasonId") int cancelReasonId,
+    ResponseEntity<String> cancel(@RequestParam("orderId") String orderId, @RequestParam("cancelReasonId") int cancelReasonId,
                                    @RequestParam("cancelReason") String cancelReason);
 
     //达达配送单详细查询
@@ -77,7 +77,7 @@ public interface ThirdPartyServiceFeign {
 
     //取消蜂鸟配送订单
     @RequestMapping(value = "/delivery/fengniao/cancel", method = RequestMethod.POST)
-    ResponseEntity<String> cancelOrder(@RequestBody ElemeCancelOrderRequest.ElemeCancelOrderRequstData orderParam);
+    ResponseEntity<String> cancel(@RequestBody ElemeCancelOrderRequest.ElemeCancelOrderRequstData orderParam);
 
 
     //投诉蜂鸟配送订单

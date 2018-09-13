@@ -2,7 +2,7 @@ package com.lhiot.oc.basic.domain;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.lhiot.oc.basic.domain.enums.Apply;
+import com.lhiot.oc.basic.domain.enums.ApplicationTypeEnum;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,7 +26,7 @@ public class PaymentLog {
 
     //应用类型 小程序 app等
     @JsonProperty("appType")
-    private Apply apply;
+    private ApplicationTypeEnum applicationType;
 
     //来源类型 充值 订单
     @JsonProperty("sourceType")

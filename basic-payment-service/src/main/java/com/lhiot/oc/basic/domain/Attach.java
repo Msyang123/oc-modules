@@ -1,6 +1,6 @@
 package com.lhiot.oc.basic.domain;
 
-import com.lhiot.oc.basic.domain.enums.Apply;
+import com.lhiot.oc.basic.domain.enums.ApplicationTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -23,7 +23,7 @@ public class Attach {
     @ApiModelProperty(value = "userId", dataType = "Long")
     private Long userId;
     @ApiModelProperty(value = "应用类型", dataType = "ApplicationType")
-    private Apply apply;
+    private ApplicationTypeEnum applicationType;
     @ApiModelProperty(value = "支付类型", dataType = "SourceType")
     private SourceType sourceType;
 
