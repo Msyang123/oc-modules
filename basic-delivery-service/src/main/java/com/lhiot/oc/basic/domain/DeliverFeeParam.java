@@ -18,7 +18,7 @@ public class DeliverFeeParam {
 
     @ApiModelProperty(notes = "订单费用",dataType = "Integer")
     private Integer orderFee;
-    @ApiModelProperty(notes = "订单费用",dataType = "Long")
+    @ApiModelProperty(notes = "订单所在门店",dataType = "Long")
     private Long storeId;
 
     @ApiModelProperty(notes = "订单重量(kg)",dataType = "Double")

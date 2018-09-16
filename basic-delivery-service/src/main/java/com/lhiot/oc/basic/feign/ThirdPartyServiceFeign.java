@@ -83,4 +83,8 @@ public interface ThirdPartyServiceFeign {
     //投诉蜂鸟配送订单
     @RequestMapping(value = "/delivery/fengniao/complaint", method = RequestMethod.POST)
     ResponseEntity<String> orderComplaint(@RequestBody ElemeOrderComplaintRequest.ElemeOrderComplaintRequstData orderParam);
+
+    //蜂鸟取消原因列表
+    @RequestMapping(value = "/delivery/fengniao/cancel/reasons", method = RequestMethod.GET)
+    ResponseEntity<String> cancelFengniaoOrderReasons();
 }

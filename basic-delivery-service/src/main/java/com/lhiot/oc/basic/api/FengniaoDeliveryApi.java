@@ -1,21 +1,18 @@
 package com.lhiot.oc.basic.api;
 
-import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.IOUtils;
-import com.leon.microx.util.Jackson;
 import com.leon.microx.util.SnowflakeId;
 import com.leon.microx.util.StringUtils;
 import com.leon.microx.util.auditing.MD5;
 import com.lhiot.oc.basic.domain.DeliverNote;
 import com.lhiot.oc.basic.feign.ThirdPartyServiceFeign;
 import com.lhiot.oc.basic.service.DeliveryNoteService;
+import com.lhiot.oc.basic.service.FengniaoDeliveryService;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,7 +20,6 @@ import java.io.*;
 import java.net.URLDecoder;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 @Slf4j
@@ -32,18 +28,15 @@ import java.util.Objects;
 @RequestMapping("/fengniao-delivery")
 public class FengniaoDeliveryApi {
 
-    private final ThirdPartyServiceFeign thirdPartyServiceFeign;
-
-    private final SnowflakeId snowflakeId;
+    private final FengniaoDeliveryService fengniaoDeliveryService;
 
     private final DeliveryNoteService deliveryNoteService;
 
     @Autowired
-    public FengniaoDeliveryApi(DeliveryNoteService deliveryNoteService, ThirdPartyServiceFeign thirdPartyServiceFeign, SnowflakeId snowflakeId) {
+    public FengniaoDeliveryApi(DeliveryNoteService deliveryNoteService, FengniaoDeliveryService fengniaoDeliveryService) {
 
         this.deliveryNoteService = deliveryNoteService;
-        this.thirdPartyServiceFeign = thirdPartyServiceFeign;
-        this.snowflakeId = snowflakeId;
+        this.fengniaoDeliveryService = fengniaoDeliveryService;
     }
     /**
      * 蜂鸟配送回调
@@ -227,6 +220,12 @@ public class FengniaoDeliveryApi {
         log.info("accessToken replaceAll之后的值：" + fengniaoAccessToken);
 
         return ResponseEntity.ok(deliveryService.sendFn(hdOrderCode, fengniaoAccessToken, null));
+    }
+
+    @GetMapping("/cancel/reasons")
+    @ApiOperation(value = "蜂鸟配送取消原因列表", response = String.class)
+    public ResponseEntity<String> cancelReasons() {
+        return ResponseEntity.ok(fengniaoDeliveryService.cancelOrderReasons());
     }
 
 }

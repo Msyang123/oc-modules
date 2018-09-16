@@ -1,11 +1,11 @@
 server:
-  port: 8211
+  port: 8111
 spring:
   application:
-    name: basic-delivery-service-v1-0
+    name: basic-order-service-v1-0
   cloud:
     config:
-      name: basic-delivery-service-v1-0, rabbit-mq, application
+      name: basic-order-service-v1-0, rabbit-mq, application
       profile: ${RUN_LEVEL:dev}
       label: ${RUN_LEVEL:dev}
       failFast: true

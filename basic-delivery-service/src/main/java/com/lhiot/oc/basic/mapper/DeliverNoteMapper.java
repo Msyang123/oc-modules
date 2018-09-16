@@ -54,6 +54,13 @@ public interface DeliverNoteMapper {
     DeliverNote selectById(Long id);
 
     /**
+     * 依据配送单编码查询
+     * @param deliverCode
+     * @return
+     */
+    DeliverNote selectByDeliverCode(String deliverCode);
+
+    /**
     * Description:查询配送单信息列表
     *
     * @param deliverNote

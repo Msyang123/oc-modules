@@ -21,7 +21,7 @@ public class ElemeCreateOrderRequest extends AbstractRequest {
          * 第三方平台备注
          */
         @JsonProperty("partner_remark")
-        private String partner_remark;
+        private String partnerRemark;
 
         /**
          * 回调url
@@ -33,6 +33,11 @@ public class ElemeCreateOrderRequest extends AbstractRequest {
          */
         @JsonProperty("order_type")
         private int orderType;
+        /**
+         * 门店编号
+         */
+        @JsonProperty("chain_store_code")
+        private String chainStoreCode;
         /**
          * 配送点信息
          */

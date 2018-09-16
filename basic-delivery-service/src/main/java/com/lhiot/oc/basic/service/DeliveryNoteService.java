@@ -1,14 +1,19 @@
 package com.lhiot.oc.basic.service;
 
+import com.lhiot.oc.basic.domain.DeliverFlow;
 import com.lhiot.oc.basic.domain.DeliverNote;
 import com.lhiot.oc.basic.domain.common.PagerResultObject;
+import com.lhiot.oc.basic.domain.enums.DeliveryStatus;
+import com.lhiot.oc.basic.mapper.DeliverFlowMapper;
 import com.lhiot.oc.basic.mapper.DeliverNoteMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
 * Description:配送单信息服务类
@@ -20,10 +25,12 @@ import java.util.List;
 public class DeliveryNoteService {
 
     private final DeliverNoteMapper deliverNoteMapper;
+    private final DeliverFlowMapper deliverFlowMapper;
 
     @Autowired
-    public DeliveryNoteService(DeliverNoteMapper deliverNoteMapper) {
+    public DeliveryNoteService(DeliverNoteMapper deliverNoteMapper, DeliverFlowMapper deliverFlowMapper) {
         this.deliverNoteMapper = deliverNoteMapper;
+        this.deliverFlowMapper = deliverFlowMapper;
     }
 
     /** 
@@ -35,6 +42,16 @@ public class DeliveryNoteService {
     * @date 2018/08/06 09:10:22
     */ 
     public int updateById(DeliverNote deliverNote){
+        //如果是更新状态，那么就记录流水
+        if(Objects.nonNull(deliverNote.getDeliverStatus())){
+            DeliverNote searchDeliverNote = this.selectById(deliverNote.getId());
+            DeliverFlow deliverFlow = new DeliverFlow();
+            deliverFlow.setCreateAt(new Date());
+            deliverFlow.setDeliverNoteId(searchDeliverNote.getId());
+            deliverFlow.setPreStatus(searchDeliverNote.getDeliverStatus());
+            deliverFlow.setStatus(deliverNote.getDeliverStatus());
+            deliverFlowMapper.create(deliverFlow);
+        }
         return this.deliverNoteMapper.updateById(deliverNote);
     }
 
@@ -61,6 +78,15 @@ public class DeliveryNoteService {
     public DeliverNote selectById(Long id){
         return this.deliverNoteMapper.selectById(id);
     }
+
+    /**
+     * 依据配送单编码查询
+     * @param deliverCode
+     * @return
+     */
+    public DeliverNote selectByDeliverCode(String deliverCode){
+        return this.deliverNoteMapper.selectByDeliverCode(deliverCode);
+    }
     /**
      * Description:根据id查找配送单信息
      *
@@ -84,6 +110,7 @@ public class DeliveryNoteService {
     public DeliverNote selectLastByOrderId(Long orderId){
         return this.deliverNoteMapper.selectLastByOrderId(orderId);
     }
+
 
     /** 
     * Description: 查询配送单信息总记录数
@@ -113,18 +140,19 @@ public class DeliveryNoteService {
        return PagerResultObject.of(deliverNote, total,
               this.deliverNoteMapper.pageDeliverNotes(deliverNote));
     }
-    public void createNewDeliverNote(DeliverNote deliverNote,DeliverNote.DeliverType deliverType){
-/*        DeliverNote deliverNote = new DeliverNote();
-        deliverNote.setOrderId(baseOrderInfo.getId());
-        deliverNote.setOrderCode(baseOrderInfo.getHdOrderCode());
-        deliverNote.setDeliverType(deliverType);
-        deliverNote.setStoreCode(baseOrderInfo.getStoreCode());
-        deliverNote.setRemark(baseOrderInfo.getRemark());
-        deliverNote.setDeliverStatus(DeliverNote.DeliveryStatus.UNRECEIVE);
-        deliverNote.setFee(baseOrderInfo.getDeliveryFee());*/
+    public void createNewDeliverNote(DeliverNote deliverNote){
 
-        deliverNote.setDeliverStatus(DeliverNote.DeliveryStatus.UNRECEIVE);
+        deliverNote.setDeliverStatus(DeliveryStatus.UNRECEIVE);
+        deliverNote.setCreateTime(new Date());
         deliverNoteMapper.create(deliverNote);
+
+        //记录配送状态流水
+        DeliverFlow deliverFlow = new DeliverFlow();
+        deliverFlow.setCreateAt(new Date());
+        deliverFlow.setDeliverNoteId(deliverNote.getId());
+        deliverFlow.setPreStatus(null);
+        deliverFlow.setStatus(deliverNote.getDeliverStatus());
+        deliverFlowMapper.create(deliverFlow);
     }
 
 }

@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhiot.oc.basic.mapper.DeliverBaseOrderMapper">
+
+    <!-- 数据库字段对象关系映射 -->
+    <resultMap id="BaseResultMap"
+        type="com.lhiot.oc.basic.domain.DeliverBaseOrder" >
+        <id column="id" property="id"/>
+        <result column="order_id" property="orderId" />
+        <result column="order_code" property="orderCode" />
+        <result column="apply_type" property="applyType" />
+        <result column="create_at" property="createAt" />
+        <result column="user_id" property="userId" />
+        <result column="total_amount" property="totalAmount" />
+        <result column="delivery_fee" property="deliveryFee" />
+        <result column="coupon_amount" property="couponAmount" />
+        <result column="amount_payable" property="amountPayable" />
+        <result column="receive_user" property="receiveUser" />
+        <result column="contact_phone" property="contactPhone" />
+        <result column="address" property="address" />
+        <result column="remark" property="remark" />
+        <result column="deliver_time" property="deliverTime" />
+        <result column="coordy" property="coordy" />
+        <result column="coordx" property="coordx" />
+        <result column="delivery_time" property="deliveryTime" />
+        <result column="store_code" property="storeCode" />
+        <result column="store_name" property="storeName" />
+        <result column="hd_order_code" property="hdOrderCode" />
+    </resultMap>
+
+    <!-- base查询字段  -->
+    <sql id="Base_Column_List" >
+        <trim suffixOverrides="," >
+            id,
+            order_id,
+            order_code,
+            apply_type,
+            create_at,
+            user_id,
+            total_amount,
+            delivery_fee,
+            coupon_amount,
+            amount_payable,
+            receive_user,
+            contact_phone,
+            address,
+            remark,
+            deliver_time,
+            coordy,
+            coordx,
+            delivery_time,
+            store_code,
+            store_name,
+            hd_order_code,
+        </trim>
+    </sql>
+
+    <!--新增配送订单流程-->
+    <insert id="create" parameterType="com.lhiot.oc.basic.domain.DeliverBaseOrder" useGeneratedKeys="true" keyProperty="id">
+        insert into deliver_base_order
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null ">
+                id,
+            </if>
+            <if test="orderId != null ">
+                order_id,
+            </if>
+            <if test="orderCode != null ">
+                order_code,
+            </if>
+            <if test="applyType != null ">
+                apply_type,
+            </if>
+            <if test="createAt != null ">
+                create_at,
+            </if>
+            <if test="userId != null ">
+                user_id,
+            </if>
+            <if test="totalAmount != null ">
+                total_amount,
+            </if>
+            <if test="deliveryFee != null ">
+                delivery_fee,
+            </if>
+            <if test="couponAmount != null ">
+                coupon_amount,
+            </if>
+            <if test="amountPayable != null ">
+                amount_payable,
+            </if>
+            <if test="receiveUser != null ">
+                receive_user,
+            </if>
+            <if test="contactPhone != null ">
+                contact_phone,
+            </if>
+            <if test="address != null ">
+                address,
+            </if>
+            <if test="remark != null ">
+                remark,
+            </if>
+            <if test="deliverTime != null ">
+                deliver_time,
+            </if>
+            <if test="coordy != null ">
+                coordy,
+            </if>
+            <if test="coordx != null ">
+                coordx,
+            </if>
+            <if test="deliveryTime != null ">
+                delivery_time,
+            </if>
+            <if test="storeCode != null ">
+                store_code,
+            </if>
+            <if test="storeName != null ">
+                store_name,
+            </if>
+            <if test="hdOrderCode != null ">
+                hd_order_code,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null ">
+                #{id},
+            </if>
+            <if test="orderId != null ">
+                #{orderId},
+            </if>
+            <if test="orderCode != null ">
+                #{orderCode},
+            </if>
+            <if test="applyType != null ">
+                #{applyType},
+            </if>
+            <if test="createAt != null ">
+                #{createAt},
+            </if>
+            <if test="userId != null ">
+                #{userId},
+            </if>
+            <if test="totalAmount != null ">
+                #{totalAmount},
+            </if>
+            <if test="deliveryFee != null ">
+                #{deliveryFee},
+            </if>
+            <if test="couponAmount != null ">
+                #{couponAmount},
+            </if>
+            <if test="amountPayable != null ">
+                #{amountPayable},
+            </if>
+            <if test="receiveUser != null ">
+                #{receiveUser},
+            </if>
+            <if test="contactPhone != null ">
+                #{contactPhone},
+            </if>
+            <if test="address != null ">
+                #{address},
+            </if>
+            <if test="remark != null ">
+                #{remark},
+            </if>
+            <if test="deliverTime != null ">
+                #{deliverTime},
+            </if>
+            <if test="coordy != null ">
+                #{coordy},
+            </if>
+            <if test="coordx != null ">
+                #{coordx},
+            </if>
+            <if test="deliveryTime != null ">
+                #{deliveryTime},
+            </if>
+            <if test="storeCode != null ">
+                #{storeCode},
+            </if>
+            <if test="storeName != null ">
+                #{storeName},
+            </if>
+            <if test="hdOrderCode != null ">
+                #{hdOrderCode},
+            </if>
+        </trim>
+    </insert>
+
+    <!--根据id修改配送订单流程-->
+    <update id="updateById" parameterType="com.lhiot.oc.basic.domain.DeliverBaseOrder">
+        update deliver_base_order
+        <set>
+            <if test="id != null ">
+                id = #{id},
+            </if>
+            <if test="orderId != null ">
+                order_id = #{orderId},
+            </if>
+            <if test="orderCode != null ">
+                order_code = #{orderCode},
+            </if>
+            <if test="applyType != null ">
+                apply_type = #{applyType},
+            </if>
+            <if test="createAt != null ">
+                create_at = #{createAt},
+            </if>
+            <if test="userId != null ">
+                user_id = #{userId},
+            </if>
+            <if test="totalAmount != null ">
+                total_amount = #{totalAmount},
+            </if>
+            <if test="deliveryFee != null ">
+                delivery_fee = #{deliveryFee},
+            </if>
+            <if test="couponAmount != null ">
+                coupon_amount = #{couponAmount},
+            </if>
+            <if test="amountPayable != null ">
+                amount_payable = #{amountPayable},
+            </if>
+            <if test="receiveUser != null ">
+                receive_user = #{receiveUser},
+            </if>
+            <if test="contactPhone != null ">
+                contact_phone = #{contactPhone},
+            </if>
+            <if test="address != null ">
+                address = #{address},
+            </if>
+            <if test="remark != null ">
+                remark = #{remark},
+            </if>
+            <if test="deliverTime != null ">
+                deliver_time = #{deliverTime},
+            </if>
+            <if test="coordy != null ">
+                coordy = #{coordy},
+            </if>
+            <if test="coordx != null ">
+                coordx = #{coordx},
+            </if>
+            <if test="deliveryTime != null ">
+                delivery_time = #{deliveryTime},
+            </if>
+            <if test="storeCode != null ">
+                store_code = #{storeCode},
+            </if>
+            <if test="storeName != null ">
+                store_name = #{storeName},
+            </if>
+            <if test="hdOrderCode != null ">
+                hd_order_code = #{hdOrderCode},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <!--根据ids删除配送订单流程-->
+    <delete id="deleteByIds" parameterType="java.util.List">
+        delete from deliver_base_order where id in
+        <foreach collection="list" item="item" open="("
+            separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <!-- 根据id查找配送订单流程 -->
+	<select id="selectById" resultMap="BaseResultMap"
+		parameterType="long"> select <include refid="Base_Column_List" />
+		from deliver_base_order where id = #{id}
+	</select>
+
+    <select id="selectByHdOrderCode" resultMap="BaseResultMap"
+            parameterType="String"> select <include refid="Base_Column_List" />
+        from deliver_base_order where hd_order_code = #{0}
+    </select>
+
+
+
+    <!-- base where条件  -->
+    <sql id="Base_Where_Condition" >
+        <where>
+            <if test="id != null ">
+                and id = #{id}
+            </if>
+            <if test="orderId != null ">
+                and order_id = #{orderId}
+            </if>
+            <if test="orderCode != null ">
+                and order_code = #{orderCode}
+            </if>
+            <if test="applyType != null ">
+                and apply_type = #{applyType}
+            </if>
+            <if test="createAt != null ">
+                and create_at = #{createAt}
+            </if>
+            <if test="userId != null ">
+                and user_id = #{userId}
+            </if>
+            <if test="totalAmount != null ">
+                and total_amount = #{totalAmount}
+            </if>
+            <if test="deliveryFee != null ">
+                and delivery_fee = #{deliveryFee}
+            </if>
+            <if test="couponAmount != null ">
+                and coupon_amount = #{couponAmount}
+            </if>
+            <if test="amountPayable != null ">
+                and amount_payable = #{amountPayable}
+            </if>
+            <if test="receiveUser != null ">
+                and receive_user = #{receiveUser}
+            </if>
+            <if test="contactPhone != null ">
+                and contact_phone = #{contactPhone}
+            </if>
+            <if test="address != null ">
+                and address = #{address}
+            </if>
+            <if test="remark != null ">
+                and remark = #{remark}
+            </if>
+            <if test="deliverTime != null ">
+                and deliver_time = #{deliverTime}
+            </if>
+            <if test="coordy != null ">
+                and coordy = #{coordy}
+            </if>
+            <if test="coordx != null ">
+                and coordx = #{coordx}
+            </if>
+            <if test="deliveryTime != null ">
+                and delivery_time = #{deliveryTime}
+            </if>
+            <if test="storeCode != null ">
+                and store_code = #{storeCode}
+            </if>
+            <if test="storeName != null ">
+                and store_name = #{storeName}
+            </if>
+            <if test="hdOrderCode != null ">
+                and hd_order_code = #{hdOrderCode}
+            </if>
+        </where>
+    </sql>
+
+
+    <!--查询配送订单流程列表-->
+     <select id="pageDeliverBaseOrders" resultMap="BaseResultMap"
+        parameterType="com.lhiot.oc.basic.domain.DeliverBaseOrder">
+	        select <include refid="Base_Column_List" />
+	        from deliver_base_order
+	        <include refid="Base_Where_Condition" />
+	        <include refid="common.pager" />
+    </select>
+
+    <!--查询配送订单流程总记录-->
+    <select id="pageDeliverBaseOrderCounts" resultType="long"
+        parameterType="com.lhiot.oc.basic.domain.DeliverBaseOrder">
+            select count(1)
+            from deliver_base_order
+            <include refid="Base_Where_Condition" />
+    </select>
+
+</mapper>

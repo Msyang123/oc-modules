@@ -54,6 +54,7 @@ public class DeliveryFeeApi {
     @ApiOperation("通用配送费计算接口")
     @ApiImplicitParam(paramType = "body", name = "deliverFeeParam", dataType = "DeliverFeeParam", required = true, value = "配送费计算传入参数")
     public ResponseEntity<Tips> queryDeliverFee(DeliverFeeParam deliverFeeParam){
+        //查询送货门店
         ResponseEntity<Store> storeResponseEntity = baseDataServiceFeign.findStoresId(deliverFeeParam.getStoreId(),deliverFeeParam.getApplicationType());
         if(Objects.isNull(storeResponseEntity)||!storeResponseEntity.getStatusCode().is2xxSuccessful()){
             return ResponseEntity.badRequest().body(Tips.of(-1,"查询门店信息失败"));
@@ -120,7 +121,7 @@ public class DeliveryFeeApi {
             log.info("高峰时段加2元");
             fee += 200;
         }
-        log.info("------最终蜂鸟配送费：{}",fee);
+        log.info("------最终配送费：{}",fee);
         return ResponseEntity.ok(Tips.of(0,String.valueOf(fee)));
     }
 }
