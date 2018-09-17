@@ -1,8 +1,8 @@
 package com.lhiot.oc.basic.api;
 
 import com.leon.microx.util.Converter;
-import com.leon.microx.util.ImmutableMap;
 import com.leon.microx.util.Jackson;
+import com.leon.microx.util.Maps;
 import com.lhiot.oc.basic.domain.DeliverTimeItem;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -79,8 +79,8 @@ public class SystemTimeApi {
                 tomorrowTimeList.add(deliverTimeItem);
             }
         }
-        timeResult.put("today", ImmutableMap.of("value",todayTimeList,"date", Converter.format(current,"MM-dd")));
-        timeResult.put("tomorrow", ImmutableMap.of("value",tomorrowTimeList,"date", Converter.format(calendarOfTomorrow.getTime(),"MM-dd")));
+        timeResult.put("today", Maps.of("value",todayTimeList,"date", Converter.format(current,"MM-dd")));
+        timeResult.put("tomorrow", Maps.of("value",tomorrowTimeList,"date", Converter.format(calendarOfTomorrow.getTime(),"MM-dd")));
 
         return ResponseEntity.ok(Jackson.json(timeResult));
     }

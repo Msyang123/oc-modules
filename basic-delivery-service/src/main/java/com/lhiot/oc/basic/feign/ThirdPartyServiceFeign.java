@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @Component
-@FeignClient("3rd-party-services")
+@FeignClient("thirdparty-service-v1-0")
 public interface ThirdPartyServiceFeign {
 
     //添加达达配送订单 默认腾讯坐标系不需要转换

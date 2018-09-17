@@ -48,8 +48,7 @@ public class DadaDeliveryService implements IDelivery {
         log.info("订单达达配送：{}", deliverBaseOrder);
 
         OrderParam orderParam=new OrderParam();
-        //TODO 此处可以放入配置文件
-        orderParam.setCallback("http://172.16.10.203:8211/thirdparty-service-v1-0/delivery/dada/callback");
+        //orderParam.setCallback("http://172.16.10.203:8211/thirdparty-service-v1-0/delivery/dada/callback");
         orderParam.setCargoNum(deliverBaseOrder.getGoodsCount());//默认一个商品
         orderParam.setCargoPrice(deliverBaseOrder.getTotalAmount());
         orderParam.setCargoWeight(deliverBaseOrder.getCargoWeight());
@@ -103,6 +102,7 @@ public class DadaDeliveryService implements IDelivery {
         deliverNote.setRemark(deliverBaseOrder.getRemark());
         deliverNote.setFee(Calculator.toInt(Calculator.mul(dadaOrderAddResult.getResult().getDeliverFee(),100.0)));
         deliverNote.setDistance(dadaOrderAddResult.getResult().getDistance());
+        deliverNote.setDeliverCode(deliverBaseOrder.getHdOrderCode());//配送单单号
         //创建配送单
         deliveryNoteService.createNewDeliverNote(deliverNote);
 
@@ -132,7 +132,7 @@ public class DadaDeliveryService implements IDelivery {
     public Tips cancel(String hdOrderCode, int cancelReasonId, String cancelReason) {
         ResponseEntity<String> cancelResult= thirdPartyServiceFeign.cancel(hdOrderCode,cancelReasonId,cancelReason);
        if(cancelResult.getStatusCode().is2xxSuccessful()){
-           //此处不耦合订单业务
+           //TODO 修改数据库中记录
            DeliverNote deliverNote=new DeliverNote();
            deliverNote.setFailureCause(cancelReason);
            deliverNote.setCancelTime(new Date());
@@ -208,7 +208,7 @@ public class DadaDeliveryService implements IDelivery {
      * @param hdOrderCode 订单信息
      * @Description: 查询达达订单详情
      * @return: java.lang.String
-     * @Author: Limiaojun
+     * @Author: yj
      * @Date: 2018/7/19
      */
     public String detail(String hdOrderCode) {

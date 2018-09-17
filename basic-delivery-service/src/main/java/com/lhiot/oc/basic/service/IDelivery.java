@@ -35,6 +35,12 @@ public interface IDelivery {
     Tips cancel(String hdOrderCode, int cancelReasonId, String cancelReason);
 
     /**
+     * 取消配送订单原因列表
+     * @return
+     */
+    String cancelOrderReasons();
+
+    /**
      * 查询配送平台订单信息
      * @param hdOrderCode
      * @return

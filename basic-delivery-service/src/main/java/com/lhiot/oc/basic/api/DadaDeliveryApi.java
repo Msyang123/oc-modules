@@ -27,7 +27,7 @@ import java.util.Objects;
 
 @Slf4j
 @RestController
-@Api("达达配送api")
+@Api(description ="达达配送api")
 @RequestMapping("/dada-delivery")
 public class DadaDeliveryApi {
 

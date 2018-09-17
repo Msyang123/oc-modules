@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,7 +27,7 @@ import java.util.Objects;
 
 @Slf4j
 @RestController
-@Api("配送运费api")
+@Api(description ="配送运费api")
 @RequestMapping("/delivery-fee")
 public class DeliveryFeeApi {
 
@@ -53,7 +54,7 @@ public class DeliveryFeeApi {
     @PostMapping("/query")
     @ApiOperation("通用配送费计算接口")
     @ApiImplicitParam(paramType = "body", name = "deliverFeeParam", dataType = "DeliverFeeParam", required = true, value = "配送费计算传入参数")
-    public ResponseEntity<Tips> queryDeliverFee(DeliverFeeParam deliverFeeParam){
+    public ResponseEntity<Tips> queryDeliverFee(@RequestBody DeliverFeeParam deliverFeeParam){
         //查询送货门店
         ResponseEntity<Store> storeResponseEntity = baseDataServiceFeign.findStoresId(deliverFeeParam.getStoreId(),deliverFeeParam.getApplicationType());
         if(Objects.isNull(storeResponseEntity)||!storeResponseEntity.getStatusCode().is2xxSuccessful()){
@@ -70,7 +71,7 @@ public class DeliveryFeeApi {
 
         //如果金额超过38元，免配送费
         if(deliverFeeParam.getOrderFee()>=3800){
-            fee-=fee-430;
+            fee-=430;
         }
 
         if(Calculator.ltOrEq(weight,5.00)){
@@ -111,13 +112,15 @@ public class DeliveryFeeApi {
 
         log.info("配送时间{}",deliverTimeItem);
 
-        Date  current=new Date();
-        String today = Converter.format(current,"yyyy-MM-dd");
+        String today = Converter.format(new Date(),"yyyy-MM-dd");
+        Date deliverTimeBegin = Converter.date(today+" "+deliverTimeItem.getStartTime().split(" ")[1],"yyyy-MM-dd HH:mm:ss");
+        Date deliverTimeEnd = Converter.date(today+" "+deliverTimeItem.getEndTime().split(" ")[1],"yyyy-MM-dd HH:mm:ss");
 
-        Date rushHourBegin = Converter.date(today+" 11:00:00","yyyy-MM-dd HH:mm:ss");
-        Date rushHourEnd = Converter.date(today+" 13:00:00","yyyy-MM-dd HH:mm:ss");
+        Date rushHourBegin = Converter.date(today+" "+"11:00:00","yyyy-MM-dd HH:mm:ss");
+        Date rushHourEnd = Converter.date(today+" "+"13:00:00","yyyy-MM-dd HH:mm:ss");
 
-        if(current.after(rushHourBegin)&&current.before(rushHourEnd)){
+        if((deliverTimeBegin.after(rushHourBegin)&&deliverTimeBegin.before(rushHourEnd))||
+                (deliverTimeEnd.after(rushHourBegin)&&deliverTimeEnd.before(rushHourEnd))){
             log.info("高峰时段加2元");
             fee += 200;
         }
