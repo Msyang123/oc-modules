@@ -54,23 +54,23 @@ public class FengniaoDeliveryService implements IDelivery{
 
 		ElemeCreateOrderRequest.ElemeCreateRequestData elemeCreateRequestData = new ElemeCreateOrderRequest.ElemeCreateRequestData();
 
-		ResponseEntity<Store> storeResponseEntity = baseDataServiceFeign.findStoreByCode(deliverBaseOrder.getOrderCode(),deliverBaseOrder.getApplyType());
+		ResponseEntity<Store> storeResponseEntity = baseDataServiceFeign.findStoreByCode(deliverBaseOrder.getStoreCode(),deliverBaseOrder.getApplyType());
 		if(Objects.isNull(storeResponseEntity)||storeResponseEntity.getStatusCode().isError()){
 			return Tips.of(-1,"远程查询门店信息失败");
 		}
 		//获取到门店基础信息
 		Store store = storeResponseEntity.getBody();
 		//距离换算
-		BigDecimal distance = Distance.getDistance(store.getStorePosition().getStoreCoordx(),store.getStorePosition().getStoreCoordy(),
-				deliverBaseOrder.getCoordx(),deliverBaseOrder.getCoordy());
+		BigDecimal distance = Distance.getDistance(store.getStorePosition().getLat(),store.getStorePosition().getLng(),
+				deliverBaseOrder.getLat(),deliverBaseOrder.getLng());
 
 		//设置门店编码
 		elemeCreateRequestData.setChainStoreCode(store.getStoreCode());
 		//配送地址信息
 		ElemeCreateOrderRequest.TransportInfo transportInfo = new ElemeCreateOrderRequest.TransportInfo();
 		transportInfo.setAddress(store.getStoreAddress());
-		transportInfo.setLatitude(store.getStorePosition().getStoreCoordx());
-		transportInfo.setLongitude(store.getStorePosition().getStoreCoordy());
+		transportInfo.setLatitude(store.getStorePosition().getLat());
+		transportInfo.setLongitude(store.getStorePosition().getLng());
 		transportInfo.setName(store.getStoreName());
 		transportInfo.setRemark("");
 		transportInfo.setTel(store.getStorePhone());
@@ -86,8 +86,8 @@ public class FengniaoDeliveryService implements IDelivery{
 		receiverInfo.setAddress(deliverBaseOrder.getAddress());
 		receiverInfo.setCityCode("0731");
 		receiverInfo.setCityName("长沙市");
-		receiverInfo.setLatitude(new BigDecimal(deliverBaseOrder.getCoordx()));
-		receiverInfo.setLongitude(new BigDecimal(deliverBaseOrder.getCoordy()));
+		receiverInfo.setLatitude(new BigDecimal(deliverBaseOrder.getLat()));
+		receiverInfo.setLongitude(new BigDecimal(deliverBaseOrder.getLng()));
 		receiverInfo.setName(deliverBaseOrder.getReceiveUser());
 		//如果转换 门店位置和收货人位置都转换
 		if(Objects.equals(deliverNeedConver,DeliverNeedConver.YES)){

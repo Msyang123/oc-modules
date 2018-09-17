@@ -20,8 +20,8 @@
         <result column="address" property="address" />
         <result column="remark" property="remark" />
         <result column="deliver_time" property="deliverTime" />
-        <result column="coordy" property="coordy" />
-        <result column="coordx" property="coordx" />
+        <result column="lng" property="lng" />
+        <result column="lat" property="lat" />
         <result column="delivery_time" property="deliveryTime" />
         <result column="store_code" property="storeCode" />
         <result column="store_name" property="storeName" />
@@ -46,8 +46,8 @@
             address,
             remark,
             deliver_time,
-            coordy,
-            coordx,
+            lng,
+            lat,
             delivery_time,
             store_code,
             store_name,
@@ -104,11 +104,11 @@
             <if test="deliverTime != null ">
                 deliver_time,
             </if>
-            <if test="coordy != null ">
-                coordy,
+            <if test="lng != null ">
+                lng,
             </if>
-            <if test="coordx != null ">
-                coordx,
+            <if test="lat != null ">
+                lat,
             </if>
             <if test="deliveryTime != null ">
                 delivery_time,
@@ -169,11 +169,11 @@
             <if test="deliverTime != null ">
                 #{deliverTime},
             </if>
-            <if test="coordy != null ">
-                #{coordy},
+            <if test="lng != null ">
+                #{lng},
             </if>
-            <if test="coordx != null ">
-                #{coordx},
+            <if test="lat != null ">
+                #{lat},
             </if>
             <if test="deliveryTime != null ">
                 #{deliveryTime},
@@ -239,11 +239,11 @@
             <if test="deliverTime != null ">
                 deliver_time = #{deliverTime},
             </if>
-            <if test="coordy != null ">
-                coordy = #{coordy},
+            <if test="lng != null ">
+                lng = #{lng},
             </if>
-            <if test="coordx != null ">
-                coordx = #{coordx},
+            <if test="lat != null ">
+                lat = #{lat},
             </if>
             <if test="deliveryTime != null ">
                 delivery_time = #{deliveryTime},
@@ -332,11 +332,11 @@
             <if test="deliverTime != null ">
                 and deliver_time = #{deliverTime}
             </if>
-            <if test="coordy != null ">
-                and coordy = #{coordy}
+            <if test="lng != null ">
+                and lng = #{lng}
             </if>
-            <if test="coordx != null ">
-                and coordx = #{coordx}
+            <if test="lat != null ">
+                and lat = #{lat}
             </if>
             <if test="deliveryTime != null ">
                 and delivery_time = #{deliveryTime}

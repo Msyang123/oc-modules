@@ -99,8 +99,8 @@ public class DadaDeliveryApi {
 
         Store store=storeResponseEntity.getBody();
         //距离换算
-        BigDecimal distance = Distance.getDistance(store.getStorePosition().getStoreCoordx(),store.getStorePosition().getStoreCoordy(),
-                deliverBaseOrder.getCoordx(),deliverBaseOrder.getCoordy());
+        BigDecimal distance = Distance.getDistance(store.getStorePosition().getLat(),store.getStorePosition().getLng(),
+                deliverBaseOrder.getLat(),deliverBaseOrder.getLng());
         if(Calculator.gt(distance.doubleValue(),5.00)){
             log.error("超过配送范围！{}",distance);
             return ResponseEntity.badRequest().body(Tips.of(-1,"超过配送范围！"));

@@ -63,7 +63,7 @@ public class DeliveryFeeApi {
 
         Store store=storeResponseEntity.getBody();
         //距离换算
-        BigDecimal distance = Distance.getDistance(store.getStorePosition().getStoreCoordx(),store.getStorePosition().getStoreCoordy(),deliverFeeParam.getTargetCoordx(),deliverFeeParam.getTargetCoordy());
+        BigDecimal distance = Distance.getDistance(store.getStorePosition().getLat(),store.getStorePosition().getLat(),deliverFeeParam.getTargetLat(),deliverFeeParam.getTargetLng());
 
         log.info("门店到配送终点距离：{}",distance);
         int fee=430;//配送费(分)

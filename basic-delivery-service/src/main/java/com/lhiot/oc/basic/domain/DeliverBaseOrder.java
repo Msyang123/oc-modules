@@ -133,16 +133,16 @@ public class DeliverBaseOrder extends PagerRequestObject {
     /**
     *经度
     */
-    @JsonProperty("coordy")
+    @JsonProperty("lng")
     @ApiModelProperty(value = "经度", dataType = "Double")
-    private Double coordy;
+    private Double lng;
 
     /**
     *纬度
     */
-    @JsonProperty("coordx")
+    @JsonProperty("lat")
     @ApiModelProperty(value = "纬度", dataType = "Double")
-    private Double coordx;
+    private Double lat;
 
     /**
     *配送时间

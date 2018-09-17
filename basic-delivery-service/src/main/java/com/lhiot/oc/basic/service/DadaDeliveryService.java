@@ -54,8 +54,8 @@ public class DadaDeliveryService implements IDelivery {
         orderParam.setCargoWeight(deliverBaseOrder.getCargoWeight());
         orderParam.setCityCode("0731");
         orderParam.setInfo(deliverBaseOrder.getRemark());
-        orderParam.setLat(deliverBaseOrder.getCoordx());
-        orderParam.setLng(deliverBaseOrder.getCoordy());
+        orderParam.setLat(deliverBaseOrder.getLat());
+        orderParam.setLng(deliverBaseOrder.getLng());
         orderParam.setOriginId(deliverBaseOrder.getHdOrderCode());
         orderParam.setOriginMark("lhiot");
         orderParam.setOriginMarkNo(deliverBaseOrder.getApplyType().name());
