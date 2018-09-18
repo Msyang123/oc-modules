@@ -4,6 +4,7 @@ import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.Calculator;
 import com.leon.microx.util.Converter;
 import com.leon.microx.util.Jackson;
+import com.leon.microx.util.Maps;
 import com.lhiot.oc.basic.domain.DeliverFeeParam;
 import com.lhiot.oc.basic.domain.DeliverTimeItem;
 import com.lhiot.oc.basic.feign.BaseDataServiceFeign;
@@ -15,20 +16,17 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.Objects;
+import java.util.*;
 
 
 @Slf4j
 @RestController
-@Api("配送运费api")
-@RequestMapping("/delivery-fee")
-public class DeliveryFeeApi {
+@Api(description ="配送公共api")
+@RequestMapping("/delivery")
+public class DeliveryCommonApi {
 
     /**
      * 配送费计算
@@ -46,14 +44,15 @@ public class DeliveryFeeApi {
      */
     private final BaseDataServiceFeign baseDataServiceFeign;
     @Autowired
-    public DeliveryFeeApi(BaseDataServiceFeign baseDataServiceFeign){
+    public DeliveryCommonApi(BaseDataServiceFeign baseDataServiceFeign){
 
         this.baseDataServiceFeign = baseDataServiceFeign;
     }
-    @PostMapping("/query")
+    @PostMapping("/query-fee")
     @ApiOperation("通用配送费计算接口")
     @ApiImplicitParam(paramType = "body", name = "deliverFeeParam", dataType = "DeliverFeeParam", required = true, value = "配送费计算传入参数")
-    public ResponseEntity<Tips> queryDeliverFee(DeliverFeeParam deliverFeeParam){
+    public ResponseEntity<Tips> queryDeliverFee(@RequestBody DeliverFeeParam deliverFeeParam){
+        //查询送货门店
         ResponseEntity<Store> storeResponseEntity = baseDataServiceFeign.findStoresId(deliverFeeParam.getStoreId(),deliverFeeParam.getApplicationType());
         if(Objects.isNull(storeResponseEntity)||!storeResponseEntity.getStatusCode().is2xxSuccessful()){
             return ResponseEntity.badRequest().body(Tips.of(-1,"查询门店信息失败"));
@@ -61,7 +60,7 @@ public class DeliveryFeeApi {
 
         Store store=storeResponseEntity.getBody();
         //距离换算
-        BigDecimal distance = Distance.getDistance(store.getStorePosition().getStoreCoordx(),store.getStorePosition().getStoreCoordy(),deliverFeeParam.getTargetCoordx(),deliverFeeParam.getTargetCoordy());
+        BigDecimal distance = Distance.getDistance(store.getStorePosition().getLat(),store.getStorePosition().getLat(),deliverFeeParam.getTargetLat(),deliverFeeParam.getTargetLng());
 
         log.info("门店到配送终点距离：{}",distance);
         int fee=430;//配送费(分)
@@ -69,7 +68,7 @@ public class DeliveryFeeApi {
 
         //如果金额超过38元，免配送费
         if(deliverFeeParam.getOrderFee()>=3800){
-            fee-=fee-430;
+            fee-=430;
         }
 
         if(Calculator.ltOrEq(weight,5.00)){
@@ -110,17 +109,75 @@ public class DeliveryFeeApi {
 
         log.info("配送时间{}",deliverTimeItem);
 
-        Date  current=new Date();
-        String today = Converter.format(current,"yyyy-MM-dd");
+        String today = Converter.format(new Date(),"yyyy-MM-dd");
+        Date deliverTimeBegin = Converter.date(today+" "+deliverTimeItem.getStartTime().split(" ")[1],"yyyy-MM-dd HH:mm:ss");
+        Date deliverTimeEnd = Converter.date(today+" "+deliverTimeItem.getEndTime().split(" ")[1],"yyyy-MM-dd HH:mm:ss");
 
-        Date rushHourBegin = Converter.date(today+" 11:00:00","yyyy-MM-dd HH:mm:ss");
-        Date rushHourEnd = Converter.date(today+" 13:00:00","yyyy-MM-dd HH:mm:ss");
+        Date rushHourBegin = Converter.date(today+" "+"11:00:00","yyyy-MM-dd HH:mm:ss");
+        Date rushHourEnd = Converter.date(today+" "+"13:00:00","yyyy-MM-dd HH:mm:ss");
 
-        if(current.after(rushHourBegin)&&current.before(rushHourEnd)){
+        if((deliverTimeBegin.after(rushHourBegin)&&deliverTimeBegin.before(rushHourEnd))||
+                (deliverTimeEnd.after(rushHourBegin)&&deliverTimeEnd.before(rushHourEnd))){
             log.info("高峰时段加2元");
             fee += 200;
         }
-        log.info("------最终蜂鸟配送费：{}",fee);
+        log.info("------最终配送费：{}",fee);
         return ResponseEntity.ok(Tips.of(0,String.valueOf(fee)));
+    }
+
+    @GetMapping("/time-list")
+    @ApiOperation(value = "获取订单配送时间列表")
+    public ResponseEntity<String> getDeliverTime(){
+        Map<String,Map> timeResult=new HashMap<>();
+        Date  current=new Date();
+        String today = Converter.format(current,"yyyy-MM-dd");
+        Calendar calendarOfTomorrow = Calendar.getInstance();
+        calendarOfTomorrow.add(Calendar.DATE,1);
+        String tomorrow = Converter.format(calendarOfTomorrow.getTime(),"yyyy-MM-dd");
+
+        Date tonightBegin = Converter.date(today+" 21:31:00","yyyy-MM-dd HH:mm:ss");
+
+        Date tonightEnd = Converter.date(tomorrow+" 08:29:59","yyyy-MM-dd HH:mm:ss");
+
+        Date end = Converter.date(tomorrow+" 21:30:01","yyyy-MM-dd HH:mm:ss");
+
+        Calendar calendar = Calendar.getInstance();
+        String nextStartTime=null;
+        String startTime=null;
+        List<DeliverTimeItem> todayTimeList=new ArrayList<>();
+        List<DeliverTimeItem> tomorrowTimeList=new ArrayList<>();
+        boolean firstLable=true;
+        while (true){
+            startTime= Converter.format(calendar.getTime(),"yyyy-MM-dd HH")+":30:00";
+            //每次加一个小时
+            calendar.add(Calendar.HOUR_OF_DAY,1);
+
+            //今天晚上9:30-明天早上8:30 不配送
+            if(calendar.getTime().after(tonightBegin)&&calendar.getTime().before(tonightEnd)){
+                continue;
+            }
+            //结束时间
+            if(calendar.getTime().after(end)){
+                break;
+            }
+
+            nextStartTime= Converter.format(calendar.getTime(),"yyyy-MM-dd HH")+":30:00";
+
+
+            DeliverTimeItem deliverTimeItem = new DeliverTimeItem(
+                    firstLable?"立即配送":(Converter.format(Converter.date(startTime,"yyyy-MM-dd HH:mm:ss"),"HH:mm")+
+                            "-"+
+                            Converter.format(Converter.date(nextStartTime,"yyyy-MM-dd HH:mm:ss"),"HH:mm")), startTime, nextStartTime);
+            firstLable = false;
+            if(calendar.getTime().before(tonightBegin)){
+                todayTimeList.add(deliverTimeItem);
+            }else{
+                tomorrowTimeList.add(deliverTimeItem);
+            }
+        }
+        timeResult.put("today", Maps.of("value",todayTimeList,"date", Converter.format(current,"MM-dd")));
+        timeResult.put("tomorrow", Maps.of("value",tomorrowTimeList,"date", Converter.format(calendarOfTomorrow.getTime(),"MM-dd")));
+
+        return ResponseEntity.ok(Jackson.json(timeResult));
     }
 }

@@ -13,8 +13,5 @@ public class ElemeQueryOrderRequest extends AbstractRequest {
     @ToString
     public static class ElemeQueryRequestData extends AbstractRequestData{
 
-/*        @JsonProperty("partner_order_code")
-        private String partnerOrderCode;*/
-
     }
 }

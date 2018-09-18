@@ -12,14 +12,19 @@ import com.lhiot.oc.basic.domain.BaseOrderInfo;
 import com.lhiot.oc.basic.domain.OrderAssortment;
 import com.lhiot.oc.basic.domain.OrderProduct;
 import com.lhiot.oc.basic.domain.common.PagerResultObject;
-import com.lhiot.oc.basic.domain.enums.*;
+import com.lhiot.oc.basic.domain.enums.HdStatus;
+import com.lhiot.oc.basic.domain.enums.OrderStatus;
+import com.lhiot.oc.basic.domain.enums.PublishExchange;
+import com.lhiot.oc.basic.domain.enums.ReceivingWay;
 import com.lhiot.oc.basic.domain.inparam.CreateOrderParam;
 import com.lhiot.oc.basic.domain.inparam.QueryParam;
 import com.lhiot.oc.basic.domain.inparam.ReturnOrderParam;
 import com.lhiot.oc.basic.feign.BaseServiceFeign;
 import com.lhiot.oc.basic.feign.BaseUserServerFeign;
 import com.lhiot.oc.basic.feign.ThirdPartyServiceFeign;
-import com.lhiot.oc.basic.feign.domain.*;
+import com.lhiot.oc.basic.feign.domain.Assortment;
+import com.lhiot.oc.basic.feign.domain.ProductsStandard;
+import com.lhiot.oc.basic.feign.domain.StoreInfo;
 import com.lhiot.oc.basic.service.BaseOrderService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -76,9 +81,7 @@ public class BaseOrderApi {
 
     }
 
-    /**
-     * start****************************************海鼎调货处理
-     ******************************************************/
+    /*** start****************************************海鼎调货处理******************************************************/
     @ApiOperation("海鼎订单调货")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "query", name = "storeId", value = "调货目标门店", dataType = "Long", required = true),
@@ -612,4 +615,39 @@ public class BaseOrderApi {
     }
     /************************************************************************************************************/
 
+    @ApiOperation("修改订单为配送中")
+    @PutMapping("/transfering/{orderId}")
+    public ResponseEntity transfering(@PathVariable("orderId") Long orderId){
+        BaseOrderInfo searchBaseOrderInfo = baseOrderService.findOrderById(orderId);
+        if(Objects.isNull(searchBaseOrderInfo)){
+            return ResponseEntity.badRequest().body("未找到订单");
+        }
+
+        BaseOrderInfo baseOrderInfo=new BaseOrderInfo();
+        baseOrderInfo.setStatus(OrderStatus.DISPATCHING);
+        baseOrderInfo.setId(orderId);
+        baseOrderService.updateOrderStatusById(baseOrderInfo);
+        return ResponseEntity.ok().build();
+    }
+
+    @ApiOperation("修改订单为已收货")
+    @PutMapping("/received/{orderId}")
+    public ResponseEntity received(@PathVariable("orderId") Long orderId){
+        BaseOrderInfo searchBaseOrderInfo = baseOrderService.findOrderById(orderId);
+        if(Objects.isNull(searchBaseOrderInfo)){
+            return ResponseEntity.badRequest().body("未找到订单");
+        }
+
+        BaseOrderInfo baseOrderInfo=new BaseOrderInfo();
+        baseOrderInfo.setStatus(OrderStatus.RECEIVED);
+        baseOrderInfo.setId(orderId);
+        baseOrderService.updateOrderStatusById(baseOrderInfo);
+        return ResponseEntity.ok().build();
+    }
+
+    @ApiOperation("依据海鼎订单编码查询订单信息")
+    @GetMapping("/by-hd-order-code/{hdOrderCode}")
+    public ResponseEntity findByHdCode(@PathVariable("hdOrderCode") String hdOrderCode){
+       return ResponseEntity.ok(baseOrderService.findByHdCode(hdOrderCode));
+    }
 }

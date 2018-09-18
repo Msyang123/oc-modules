@@ -34,16 +34,16 @@ public class StorePosition extends PagerRequestObject {
     /**
     *坐标位置（经度）
     */
-    @JsonProperty("storeCoordy")
+    @JsonProperty("lng")
     @ApiModelProperty(value = "坐标位置（经度）", dataType = "Double")
-    private Double storeCoordy;
+    private Double lng;
 
     /**
     *坐标位置（纬度）
     */
-    @JsonProperty("storeCoordx")
+    @JsonProperty("lat")
     @ApiModelProperty(value = "坐标位置（纬度）", dataType = "Double")
-    private Double storeCoordx;
+    private Double lat;
 
     /**
     *应用类型

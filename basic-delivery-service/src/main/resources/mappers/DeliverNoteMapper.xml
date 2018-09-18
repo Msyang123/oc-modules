@@ -221,6 +221,12 @@
 		parameterType="long"> select <include refid="Base_Column_List" />
 		from deliver_note where id = #{id}
 	</select>
+    <!--依据配送单编码查询-->
+    <select id="selectByDeliverCode" resultMap="BaseResultMap"
+            parameterType="String"> select <include refid="Base_Column_List" />
+        from deliver_note where deliver_code = #{0}
+    </select>
+
 
     <!-- 根据id查找配送单信息 -->
     <select id="selectByOrderId" resultMap="BaseResultMap"

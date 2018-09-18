@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhiot.oc.basic.mapper.DeliverFlowMapper">
+
+    <!-- 数据库字段对象关系映射 -->
+    <resultMap id="BaseResultMap"
+        type="com.lhiot.oc.basic.domain.DeliverFlow" >
+        <id column="id" property="id"/>
+        <result column="deliver_note_id" property="deliverNoteId" />
+        <result column="status" property="status" />
+        <result column="pre_status" property="preStatus" />
+        <result column="create_at" property="createAt" />
+    </resultMap>
+
+    <!-- base查询字段  -->
+    <sql id="Base_Column_List" >
+        <trim suffixOverrides="," >
+            id,
+            deliver_note_id,
+            status,
+            pre_status,
+            create_at,
+        </trim>
+    </sql>
+
+    <!--新增配送状态流转记录-->
+    <insert id="create" parameterType="com.lhiot.oc.basic.domain.DeliverFlow" useGeneratedKeys="true" keyProperty="id">
+        insert into deliver_flow
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null ">
+                id,
+            </if>
+            <if test="deliverNoteId != null ">
+                deliver_note_id,
+            </if>
+            <if test="status != null ">
+                status,
+            </if>
+            <if test="preStatus != null ">
+                pre_status,
+            </if>
+            <if test="createAt != null ">
+                create_at,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null ">
+                #{id},
+            </if>
+            <if test="deliverNoteId != null ">
+                #{deliverNoteId},
+            </if>
+            <if test="status != null ">
+                #{status},
+            </if>
+            <if test="preStatus != null ">
+                #{preStatus},
+            </if>
+            <if test="createAt != null ">
+                #{createAt},
+            </if>
+        </trim>
+    </insert>
+
+    <!--根据id修改配送状态流转记录-->
+    <update id="updateById" parameterType="com.lhiot.oc.basic.domain.DeliverFlow">
+        update deliver_flow
+        <set>
+            <if test="id != null ">
+                id = #{id},
+            </if>
+            <if test="deliverNoteId != null ">
+                deliver_note_id = #{deliverNoteId},
+            </if>
+            <if test="status != null ">
+                status = #{status},
+            </if>
+            <if test="preStatus != null ">
+                pre_status = #{preStatus},
+            </if>
+            <if test="createAt != null ">
+                create_at = #{createAt},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <!--根据ids删除配送状态流转记录-->
+    <delete id="deleteByIds" parameterType="java.util.List">
+        delete from deliver_flow where id in
+        <foreach collection="list" item="item" open="("
+            separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <!-- 根据id查找配送状态流转记录 -->
+	<select id="selectById" resultMap="BaseResultMap"
+		parameterType="long"> select <include refid="Base_Column_List" />
+		from deliver_flow where id = #{id}
+	</select>
+
+
+    <!-- base where条件  -->
+    <sql id="Base_Where_Condition" >
+        <where>
+            <if test="id != null ">
+                and id = #{id}
+            </if>
+            <if test="deliverNoteId != null ">
+                and deliver_note_id = #{deliverNoteId}
+            </if>
+            <if test="status != null ">
+                and status = #{status}
+            </if>
+            <if test="preStatus != null ">
+                and pre_status = #{preStatus}
+            </if>
+            <if test="createAt != null ">
+                and create_at = #{createAt}
+            </if>
+        </where>
+    </sql>
+
+
+    <!--查询配送状态流转记录列表-->
+     <select id="pageDeliverFlows" resultMap="BaseResultMap"
+        parameterType="com.lhiot.oc.basic.domain.DeliverFlow">
+	        select <include refid="Base_Column_List" />
+	        from deliver_flow
+	        <include refid="Base_Where_Condition" />
+	        <include refid="common.pager" />
+    </select>
+
+    <!--查询配送状态流转记录总记录-->
+    <select id="pageDeliverFlowCounts" resultType="long"
+        parameterType="com.lhiot.oc.basic.domain.DeliverFlow">
+            select count(1)
+            from deliver_flow
+            <include refid="Base_Where_Condition" />
+    </select>
+
+</mapper>

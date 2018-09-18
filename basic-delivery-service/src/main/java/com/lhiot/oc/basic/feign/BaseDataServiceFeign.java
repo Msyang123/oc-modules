@@ -18,4 +18,7 @@ public interface BaseDataServiceFeign {
     //查询门店信息
     @RequestMapping(value = "/stores/{storeId}", method = RequestMethod.GET)
     ResponseEntity<Store> findStoresId(@PathVariable("storeId") Long storeId, @RequestParam("applicationType") ApplicationTypeEnum applicationType);
+
+    @RequestMapping(value = "/stores/by-code/{code}", method = RequestMethod.GET)
+    ResponseEntity<Store> findStoreByCode(@PathVariable("code") String code, @RequestParam("applicationType") ApplicationTypeEnum applicationType);
 }

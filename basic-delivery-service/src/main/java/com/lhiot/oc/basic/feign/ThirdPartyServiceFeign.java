@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @Component
-@FeignClient("3rd-party-services")
+@FeignClient("thirdparty-service-v1-0")
 public interface ThirdPartyServiceFeign {
 
     //添加达达配送订单 默认腾讯坐标系不需要转换
@@ -83,4 +83,8 @@ public interface ThirdPartyServiceFeign {
     //投诉蜂鸟配送订单
     @RequestMapping(value = "/delivery/fengniao/complaint", method = RequestMethod.POST)
     ResponseEntity<String> orderComplaint(@RequestBody ElemeOrderComplaintRequest.ElemeOrderComplaintRequstData orderParam);
+
+    //蜂鸟取消原因列表
+    @RequestMapping(value = "/delivery/fengniao/cancel/reasons", method = RequestMethod.GET)
+    ResponseEntity<String> cancelFengniaoOrderReasons();
 }

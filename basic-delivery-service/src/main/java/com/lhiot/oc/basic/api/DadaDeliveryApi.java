@@ -1,14 +1,13 @@
 package com.lhiot.oc.basic.api;
 
 import com.leon.microx.support.result.Tips;
-import com.leon.microx.util.IOUtils;
-import com.leon.microx.util.Jackson;
-import com.leon.microx.util.SnowflakeId;
-import com.leon.microx.util.StringUtils;
-import com.leon.microx.util.auditing.MD5;
-import com.lhiot.oc.basic.domain.DeliverNote;
-import com.lhiot.oc.basic.feign.ThirdPartyServiceFeign;
-import com.lhiot.oc.basic.service.DeliveryNoteService;
+import com.leon.microx.util.Calculator;
+import com.lhiot.oc.basic.domain.DeliverBaseOrder;
+import com.lhiot.oc.basic.domain.enums.DeliverNeedConver;
+import com.lhiot.oc.basic.feign.BaseDataServiceFeign;
+import com.lhiot.oc.basic.feign.domain.Store;
+import com.lhiot.oc.basic.service.DadaDeliveryService;
+import com.lhiot.oc.basic.util.Distance;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -16,116 +15,85 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URLDecoder;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.math.BigDecimal;
 import java.util.Objects;
 
 @Slf4j
 @RestController
-@Api("达达配送api")
+@Api(description ="达达配送api")
 @RequestMapping("/dada-delivery")
 public class DadaDeliveryApi {
 
-    private final ThirdPartyServiceFeign thirdPartyServiceFeign;
+    private final DadaDeliveryService dadaDeliveryService;
 
-    private final SnowflakeId snowflakeId;
-
-    private final DeliveryNoteService deliveryNoteService;
+    private final BaseDataServiceFeign baseDataServiceFeign;
 
     @Autowired
-    public DadaDeliveryApi(DeliveryNoteService deliveryNoteService, ThirdPartyServiceFeign thirdPartyServiceFeign, SnowflakeId snowflakeId) {
+    public DadaDeliveryApi(DadaDeliveryService dadaDeliveryService, BaseDataServiceFeign baseDataServiceFeign) {
 
-        this.deliveryNoteService = deliveryNoteService;
-        this.thirdPartyServiceFeign = thirdPartyServiceFeign;
-        this.snowflakeId = snowflakeId;
+        this.dadaDeliveryService = dadaDeliveryService;
+        this.baseDataServiceFeign = baseDataServiceFeign;
     }
     /**
-     * 达达配送回调
+     * 达达配送回调处理api(业务接口调用)
      *
-     * @param request
+     * @param backMsg
      */
     @PostMapping("/callback")
-    @ApiOperation(value = "达达配送回调", response = String.class)
-    public ResponseEntity<?> callBack(HttpServletRequest request) {
-        log.info("达达配送回调");
-        try {
-            InputStream result = request.getInputStream();
-            // 转换成utf-8格式输出
-            BufferedReader in = new BufferedReader(new InputStreamReader(result, "UTF-8"));
-            List<String> lst = IOUtils.readLines(in);
-            IOUtils.closeQuietly(result);
-            String resultStr = StringUtils.join("", lst);
-            log.info("backOrder-jsonData:" + resultStr);
+    @ApiOperation(value = "达达配送回调处理api(业务接口调用)", response = String.class)
+    public ResponseEntity<String> callBack(@RequestBody String backMsg) {
+        log.info("backOrder-jsonData:" + backMsg);
 
-            log.info("传入JSON字符串：" + resultStr);
-
-
-        } catch (Exception e) {
-            log.info("message = " + e.getMessage());
-        }
-        return ResponseEntity.ok("");
+        Tips tips = dadaDeliveryService.callBack(backMsg);
+        return Objects.equals(tips.getCode(),"-1")?ResponseEntity.badRequest().body(tips.getMessage()):ResponseEntity.ok(tips.getMessage());
     }
 
-    @PostMapping("/cancel/reasons")
+    @GetMapping("/cancel/reasons")
     @ApiOperation(value = "达达配送取消原因列表", response = String.class)
-    public ResponseEntity<?> cancelReasons() {
-        return thirdPartyServiceFeign.cancelOrderReasons();
+    public ResponseEntity<String> cancelReasons() {
+        return ResponseEntity.ok(dadaDeliveryService.cancelOrderReasons());
     }
 
     @PostMapping("/cancel")
     @ApiOperation(value = "达达配送取消订单", response = String.class)
-    public ResponseEntity<Tips> cancel(@RequestParam("orderId") Long orderId,
+    public ResponseEntity<Tips> cancel(@RequestParam("hdOrderCode") String hdOrderCode,
                                        @RequestParam("cancelReasonId") Integer cancelReasonId,
                                        @RequestParam("cancelReason") String cancelReason) {
-        DeliverNote lastDeliverNote = deliveryNoteService.selectLastByOrderId(orderId);
 
         //向第三方取消配送
-        ResponseEntity<String> responseEntity = thirdPartyServiceFeign.cancel(lastDeliverNote.getOrderCode(),cancelReasonId,cancelReason);
+        Tips cancelResult = dadaDeliveryService.cancel(hdOrderCode,cancelReasonId,cancelReason);
 
-        if(Objects.isNull(responseEntity)||responseEntity.getStatusCodeValue()>=400){
-            return ResponseEntity.ok(Tips.of(-1,"调用第三方取消配送失败"));
+        if(Objects.equals(cancelResult.getCode(),"1")){
+            return ResponseEntity.ok(cancelResult);
         }
-        Map<String,Object> result = Jackson.map(responseEntity.getBody());
-        // 取消成功
-        if (Integer.valueOf(String.valueOf(result.get("code"))) == 0) {
-            //String currentTime = DateFormatUtil.format1(new java.util.Date());
-            //BaseOrderInfo order = baseOrderService.findOrderById(Long.valueOf(orderId));
-            // 修改状态为待发货
-//            order.set("order_status", "3");
-//            order.update();
-/*            failureCause
-            cancelTime
-            receiveTime
-            deliverStatus*/
-
-            /*DeliverNote deliverNote=new DeliverNote();
-            deliverNote.setFailureCause(cancelReason);
-            deliverNote.setCancelTime(new Date());
-            deliverNote.setDeliverStatus(DeliverNote.DeliveryStatus.FAILURE);
-            deliveryNoteService.updateById().updateNoteToFailure(request.getParameter("cancelReason"), currentTime, order.getId()+"");*/
-            return ResponseEntity.ok(Tips.of(1,"取消成功"));
-        } else {
-            // 失败
-            log.error("达达取消订单失败：{}" + result);
-            return ResponseEntity.ok(Tips.of(-1,"达达取消订单失败"));
-        }
-
+        return ResponseEntity.badRequest().body(cancelResult);
     }
 
-    @ApiOperation(value = "")
-    @GetMapping("/send")
-    public ResponseEntity sendDada(@RequestParam("hdOrderCode") String hdOrderCode) {
+    @ApiOperation(value = "发送达达配送单")
+    @PostMapping("/send/{deliverNeedConver}")
+    public ResponseEntity<Tips> sendToDada(@PathVariable("deliverNeedConver") DeliverNeedConver deliverNeedConver, @RequestBody DeliverBaseOrder deliverBaseOrder) {
+        //查询送货门店
+        ResponseEntity<Store> storeResponseEntity = baseDataServiceFeign.findStoreByCode(deliverBaseOrder.getStoreCode(),deliverBaseOrder.getApplyType());
+        if(Objects.isNull(storeResponseEntity)||!storeResponseEntity.getStatusCode().is2xxSuccessful()){
+            return ResponseEntity.badRequest().body(Tips.of(-1,"查询门店信息失败"));
+        }
+
+        Store store=storeResponseEntity.getBody();
+        //距离换算
+        BigDecimal distance = Distance.getDistance(store.getStorePosition().getLat(),store.getStorePosition().getLng(),
+                deliverBaseOrder.getLat(),deliverBaseOrder.getLng());
+        if(Calculator.gt(distance.doubleValue(),5.00)){
+            log.error("超过配送范围！{}",distance);
+            return ResponseEntity.badRequest().body(Tips.of(-1,"超过配送范围！"));
+        }
         //发送达达
-        thirdPartyServiceFeign.addOrder();
-        return ResponseEntity.ok(deliveryService.send(hdOrderCode));
+        return ResponseEntity.ok(dadaDeliveryService.send(deliverNeedConver,deliverBaseOrder));
     }
 
+    @GetMapping("/detail/{hdOrderCode}")
+    @ApiOperation(value = "达达配送第三方详细信息", response = String.class)
+    public ResponseEntity<String> detail(@PathVariable("hdOrderCode") String hdOrderCode) {
+        return ResponseEntity.ok(dadaDeliveryService.detail(hdOrderCode));
+    }
 
 }

@@ -751,9 +751,9 @@ public class BaseOrderService {
      * @param hdCode
      * @return
      */
-/*    public BaseOrderInfo findByHdCode(String hdCode){
+    public BaseOrderInfo findByHdCode(String hdCode){
         return this.findByHdCode(hdCode,false,false,false,false,false);
-    }*/
+    }
     /**
      * 根据海鼎订单code查询订单信息
      * @author write by yj

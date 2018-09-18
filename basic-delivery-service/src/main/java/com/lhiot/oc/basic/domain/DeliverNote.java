@@ -3,6 +3,8 @@ package com.lhiot.oc.basic.domain;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.lhiot.oc.basic.domain.common.PagerRequestObject;
+import com.lhiot.oc.basic.domain.enums.DeliverType;
+import com.lhiot.oc.basic.domain.enums.DeliveryStatus;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -129,39 +131,17 @@ public class DeliverNote extends PagerRequestObject {
     private DeliveryStatus deliverStatus;
 
     /**
-     *orderStore
+     *门店编码
      */
     @JsonProperty("StoreCode")
     @ApiModelProperty(value = "门店编码", dataType = "String")
     private String StoreCode;
 
     /**
-     *orderStore
+     *备注
      */
     @JsonProperty("remark")
     @ApiModelProperty(value = "备注", dataType = "String")
     private String remark;
-
-
-    //配送状态 UNRECEIVE-未接单 WAIT_GET-待取货 TRANSFERING-配送中 DONE-配送完成 FAILURE-配送失败
-    //配送方式 FENGNIAO-蜂鸟配送DADA-达达配送 OWN-自己配送
-    public enum DeliverType {
-        FENGNIAO("蜂鸟配送DADA"),
-        DADA("达达配送"),
-        OWN("自己配送");
-
-        DeliverType(String deliverType) {
-        }
-    }
-    public enum DeliveryStatus {
-        UNRECEIVE("未接单"),
-        WAIT_GET("待取货"),
-        TRANSFERING("配送中"),
-        DONE("配送完成"),
-        FAILURE("配送失败");
-
-        DeliveryStatus(String deliverType) {
-        }
-    }
 
 }
