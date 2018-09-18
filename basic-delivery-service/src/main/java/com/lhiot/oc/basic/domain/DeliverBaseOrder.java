@@ -11,6 +11,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.util.List;
+
 /**
 * Description:配送订单流程实体类
 * @author yijun
@@ -176,18 +178,17 @@ public class DeliverBaseOrder extends PagerRequestObject {
     private String hdOrderCode;
 
     /**
-     *商品数量(件)
+     *业务回调地址
      */
-    @JsonProperty("goodsCount")
-    @ApiModelProperty(value = "商品数量(件)", dataType = "Integer")
-    private Integer goodsCount = 1;
-
-
+    @JsonProperty("backUrl")
+    @ApiModelProperty(value = "业务回调地址", dataType = "String")
+    private String backUrl;
     /**
-     *商品重量(kg)
+     *配送订单商品
      */
-    @JsonProperty("cargoWeight")
-    @ApiModelProperty(value = "商品重量(kg)", dataType = "Double")
-    private Double cargoWeight = 1.0;
+    @JsonProperty("deliverOrderProductList")
+    @ApiModelProperty(value = "配送订单商品", dataType = "List")
+    private List<DeliverOrderProduct> deliverOrderProductList;
+
 
 }

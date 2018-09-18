@@ -44,25 +44,14 @@ public class FengniaoDeliveryApi {
      */
     @PostMapping("/callback")
     @ApiOperation(value = "蜂鸟回调", response = String.class)
-    public ResponseEntity<?> fnCallBack(HttpServletRequest request){
+    public ResponseEntity<?> fnCallBack(@RequestBody String backMsg){
         log.info("蜂鸟配送回调");
-        try {
-            InputStream result = request.getInputStream();
-            BufferedReader in = new BufferedReader(new InputStreamReader(result, "UTF-8"));
-            List<String> list = IOUtils.readLines(in);
-            IOUtils.closeQuietly(result);
-            String resultStr = StringUtils.join("",list );
-            log.info("callbackOrder-jsonData:" + resultStr);
-            log.info("传入JSON字符串：" + resultStr);
-            if(StringUtils.isNotBlank(resultStr)){
-                resultStr = resultStr.substring(1,resultStr.length()-1);
-            }
-            Tips tips = fengniaoDeliveryService.callBack(resultStr);
-            return Objects.equals(tips.getCode(),"-1")?ResponseEntity.badRequest().body(tips.getMessage()):ResponseEntity.ok(tips.getMessage());
-        } catch (IOException e) {
-            log.error("message {} " , e.getMessage());
-            return ResponseEntity.badRequest().body("配送回调处理失败,"+e.getMessage());
+        log.info("callbackOrder-jsonData:" + backMsg);
+        if(StringUtils.isNotBlank(backMsg)){
+            backMsg = backMsg.substring(1,backMsg.length()-1);
         }
+        Tips tips = fengniaoDeliveryService.callBack(backMsg);
+        return Objects.equals(tips.getCode(),"-1")?ResponseEntity.badRequest().body(tips.getMessage()):ResponseEntity.ok(tips.getMessage());
     }
 
 

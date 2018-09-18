@@ -109,7 +109,7 @@ public class ElemeCreateOrderRequest extends AbstractRequest {
          * 订单重量
          */
         @JsonProperty("order_weight")
-        private BigDecimal orderWeight;
+        private BigDecimal orderWeight=new BigDecimal(0);
 
         /**
          * 收货人信息

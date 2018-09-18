@@ -48,10 +48,13 @@ public class DadaDeliveryService implements IDelivery {
         log.info("订单达达配送：{}", deliverBaseOrder);
 
         OrderParam orderParam=new OrderParam();
-        //orderParam.setCallback("http://172.16.10.203:8211/thirdparty-service-v1-0/delivery/dada/callback");
-        orderParam.setCargoNum(deliverBaseOrder.getGoodsCount());//默认一个商品
+        orderParam.setCallback(deliverBaseOrder.getBackUrl());//设置业务回调地址
+        orderParam.setCargoNum(deliverBaseOrder.getDeliverOrderProductList().size());
         orderParam.setCargoPrice(deliverBaseOrder.getTotalAmount());
-        orderParam.setCargoWeight(deliverBaseOrder.getCargoWeight());
+        //重量计算 所有商品的份数*重量*基础重量
+        deliverBaseOrder.getDeliverOrderProductList().forEach(item->
+            orderParam.setCargoWeight(Calculator.sub(orderParam.getCargoWeight(),Calculator.mul(Calculator.mul(item.getProductQty(),item.getStandardQty()),item.getBaseWeight())))
+        );
         orderParam.setCityCode("0731");
         orderParam.setInfo(deliverBaseOrder.getRemark());
         orderParam.setLat(deliverBaseOrder.getLat());

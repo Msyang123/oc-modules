@@ -5,6 +5,7 @@ import com.leon.microx.util.Calculator;
 import com.leon.microx.util.Jackson;
 import com.lhiot.oc.basic.domain.DeliverBaseOrder;
 import com.lhiot.oc.basic.domain.DeliverNote;
+import com.lhiot.oc.basic.domain.DeliverOrderProduct;
 import com.lhiot.oc.basic.domain.enums.DeliverNeedConver;
 import com.lhiot.oc.basic.domain.enums.DeliverType;
 import com.lhiot.oc.basic.domain.enums.DeliveryStatus;
@@ -98,13 +99,29 @@ public class FengniaoDeliveryService implements IDelivery{
 		receiverInfo.setPrimaryPhone(deliverBaseOrder.getContactPhone());
 		elemeCreateRequestData.setReceiverInfo(receiverInfo);
 
-		elemeCreateRequestData.setGoodsCount(deliverBaseOrder.getGoodsCount());//默认一个
+		elemeCreateRequestData.setGoodsCount(deliverBaseOrder.getDeliverOrderProductList().size());
+		//重量计算 所有商品的份数*重量*基础重量
+		deliverBaseOrder.getDeliverOrderProductList().forEach(item->
+				elemeCreateRequestData.setOrderWeight(elemeCreateRequestData.getOrderWeight().add(new BigDecimal(Calculator.mul(Calculator.mul(item.getProductQty(),item.getStandardQty()),item.getBaseWeight()))))
+		);
 		elemeCreateRequestData.setIfNeedAgentPayment(0);//不需要代购
 		elemeCreateRequestData.setIfNeedInvoiced(0);//不需要发票
-		//此处不设置商品列表
-		// elemeCreateRequestData.setItemsJson();
+		//此处设置商品列表
+		ElemeCreateOrderRequest.ItemsJson[] goodsItems =new ElemeCreateOrderRequest.ItemsJson[deliverBaseOrder.getDeliverOrderProductList().size()];
+		for (int i =0;i<deliverBaseOrder.getDeliverOrderProductList().size();i++){
+			DeliverOrderProduct deliverOrderProduct = deliverBaseOrder.getDeliverOrderProductList().get(i);
+			ElemeCreateOrderRequest.ItemsJson goodsItem=new ElemeCreateOrderRequest.ItemsJson();
+			goodsItem.setName(deliverOrderProduct.getProductName());
+			goodsItem.setPrice(new BigDecimal(Calculator.div(deliverOrderProduct.getPrice(),100.0)));
+			goodsItem.setActualPrice(new BigDecimal(Calculator.div(deliverOrderProduct.getDiscountPrice(),100.0)));
+			goodsItem.setIfNeedAgentPurchase(0);
+			goodsItem.setIfNeedPackage(0);
+			goodsItem.setQuantity(deliverOrderProduct.getProductQty());
+			goodsItems[i]=goodsItem;
+		}
+		 elemeCreateRequestData.setItemsJson(goodsItems);
 
-		//elemeCreateRequestData.setNotifyUrl("http://172.16.10.203:8211/thirdparty-service-v1-0/delivery/fengniao/callback");
+		elemeCreateRequestData.setNotifyUrl(deliverBaseOrder.getBackUrl());//设置回调地址
 		elemeCreateRequestData.setOrderActualAmount(new BigDecimal(Calculator.div(deliverBaseOrder.getAmountPayable(),100.0)));//应付订单金额
 		elemeCreateRequestData.setOrderAddTime(System.currentTimeMillis());
 		elemeCreateRequestData.setOrderPaymentMethod(1);
@@ -112,7 +129,7 @@ public class FengniaoDeliveryService implements IDelivery{
 		elemeCreateRequestData.setOrderPaymentStatus(1);//已支付
 		elemeCreateRequestData.setOrderTotalAmount(new BigDecimal(Calculator.div(deliverBaseOrder.getTotalAmount(),100.0)));//订单总金额
 		elemeCreateRequestData.setOrderType(1);
-		elemeCreateRequestData.setOrderWeight(new BigDecimal(deliverBaseOrder.getCargoWeight()));
+
 		elemeCreateRequestData.setPartnerOrderCode(deliverBaseOrder.getHdOrderCode());
 
 		ResponseEntity<String> responseEntity = thirdPartyServiceFeign.addOrder(elemeCreateRequestData);

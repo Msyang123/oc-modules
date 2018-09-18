@@ -2,8 +2,6 @@ package com.lhiot.oc.basic.api;
 
 import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.Calculator;
-import com.leon.microx.util.IOUtils;
-import com.leon.microx.util.StringUtils;
 import com.lhiot.oc.basic.domain.DeliverBaseOrder;
 import com.lhiot.oc.basic.domain.enums.DeliverNeedConver;
 import com.lhiot.oc.basic.feign.BaseDataServiceFeign;
@@ -17,12 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Objects;
 
 @Slf4j
@@ -42,29 +35,17 @@ public class DadaDeliveryApi {
         this.baseDataServiceFeign = baseDataServiceFeign;
     }
     /**
-     * 达达配送回调
+     * 达达配送回调处理api(业务接口调用)
      *
-     * @param request
+     * @param backMsg
      */
     @PostMapping("/callback")
-    @ApiOperation(value = "达达配送回调", response = String.class)
-    public ResponseEntity<String> callBack(HttpServletRequest request) {
-        log.info("达达配送回调");
-        try {
-            InputStream result = request.getInputStream();
-            // 转换成utf-8格式输出
-            BufferedReader in = new BufferedReader(new InputStreamReader(result, "UTF-8"));
-            List<String> lst = IOUtils.readLines(in);
-            IOUtils.closeQuietly(result);
-            String backMsg = StringUtils.join("", lst);
-            log.info("backOrder-jsonData:" + backMsg);
+    @ApiOperation(value = "达达配送回调处理api(业务接口调用)", response = String.class)
+    public ResponseEntity<String> callBack(@RequestBody String backMsg) {
+        log.info("backOrder-jsonData:" + backMsg);
 
-            Tips tips = dadaDeliveryService.callBack(backMsg);
-            return Objects.equals(tips.getCode(),"-1")?ResponseEntity.badRequest().body(tips.getMessage()):ResponseEntity.ok(tips.getMessage());
-        } catch (Exception e) {
-            log.error("message {} " , e.getMessage());
-            return ResponseEntity.badRequest().body("配送回调处理失败,"+e.getMessage());
-        }
+        Tips tips = dadaDeliveryService.callBack(backMsg);
+        return Objects.equals(tips.getCode(),"-1")?ResponseEntity.badRequest().body(tips.getMessage()):ResponseEntity.ok(tips.getMessage());
     }
 
     @GetMapping("/cancel/reasons")

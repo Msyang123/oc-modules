@@ -1,12 +1,12 @@
 package com.lhiot.oc.basic.service;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 import com.lhiot.oc.basic.domain.DeliverBaseOrder;
 import com.lhiot.oc.basic.domain.common.PagerResultObject;
 import com.lhiot.oc.basic.mapper.DeliverBaseOrderMapper;
+import com.lhiot.oc.basic.mapper.DeliverOrderProductMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,9 +22,12 @@ public class DeliverBaseOrderService {
 
     private final DeliverBaseOrderMapper deliverBaseOrderMapper;
 
+    private final DeliverOrderProductMapper deliverOrderProductMapper;
+
     @Autowired
-    public DeliverBaseOrderService(DeliverBaseOrderMapper deliverBaseOrderMapper) {
+    public DeliverBaseOrderService(DeliverBaseOrderMapper deliverBaseOrderMapper, DeliverOrderProductMapper deliverOrderProductMapper) {
         this.deliverBaseOrderMapper = deliverBaseOrderMapper;
+        this.deliverOrderProductMapper = deliverOrderProductMapper;
     }
 
     /** 
@@ -39,6 +42,9 @@ public class DeliverBaseOrderService {
         //如果查询到，就不新增
         if(Objects.isNull(this.deliverBaseOrderMapper.selectByHdOrderCode(deliverBaseOrder.getHdOrderCode()))){
             this.deliverBaseOrderMapper.create(deliverBaseOrder);
+            //给配送订单商品设置配送订单id
+            deliverBaseOrder.getDeliverOrderProductList().forEach(item->item.setDeliverBaseOrderId(deliverBaseOrder.getId()));
+            deliverOrderProductMapper.createInBatch(deliverBaseOrder.getDeliverOrderProductList());
         }
         return 1;
     }

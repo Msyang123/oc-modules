@@ -23,5 +23,5 @@ public class OrderParam{
     private int cargoNum;
     private String originMark;//订单来源标示（该字段可以显示在达达app订单详情页面，只支持字母，最大长度为10）
     private String originMarkNo;//订单来源编号（该字段可以显示在达达app订单详情页面，支持字母和数字，最大长度为30）
-    private double cargoWeight;
+    private double cargoWeight=0.0;
 }
