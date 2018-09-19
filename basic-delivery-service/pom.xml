@@ -23,6 +23,11 @@
             <groupId>com.leon.microx.util</groupId>
             <artifactId>microx-utils</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
         <!-- microx-restful (web / swagger / openfeign) -->
         <dependency>
             <groupId>com.leon.microx</groupId>

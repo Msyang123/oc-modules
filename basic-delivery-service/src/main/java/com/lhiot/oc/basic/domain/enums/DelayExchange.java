@@ -17,8 +17,8 @@ public enum  DelayExchange {
     //ORDER_SEND_TEMPLATE_DELAY("order-delay-exchange",new DelayQueues[]{DelayQueues.SEND_TEMPLATE}),
     //PAYMENT_DELAY("payment-delay-exchange",new DelayQueues[]{DelayQueues.PAYMENT_TIEMOUT}),
 
-    SEND_HD_DELAY("send-hd-delay-exchange",new DelayQueues[]{DelayQueues.SEND_HD_DELAY_QUEUE}),//海鼎发送失败延迟重试
-    SEND_DELIVERY_DELAY("send-delivery-delay-exchange",new DelayQueues[]{DelayQueues.SEND_DELIVERY_DELAY_TIMEOUT});//发送到配送延迟队列
+    SEND_HD_DELAY("post-hd-delay-exchange",new DelayQueues[]{DelayQueues.SEND_HD_DELAY_QUEUE}),//海鼎发送失败延迟重试
+    SEND_DELIVERY_DELAY("post-delivery-delay-exchange",new DelayQueues[]{DelayQueues.SEND_DELIVERY_DELAY_TIMEOUT});//发送到配送延迟队列
     @Getter
     String exchangeName;
     @Getter
@@ -36,10 +36,10 @@ public enum  DelayExchange {
         ORDER_REFUND_TIMEOUT("order-refund-timeout","order-refund-timeout-callback"),
         //S_ORDER_TIMEOUT("small-order-timeout","small-order-timeout-callback"),
         //UN_RECEIVE_RETURN("un-receive-return","un-receive-callback"),
-        //SEND_TEMPLATE("send-template-delay","order-send-template-message"),
+        //SEND_TEMPLATE("post-template-delay","order-post-template-message"),
         //PAYMENT_TIEMOUT("order-paying-timeout","small-order-paying-callback"),
-        SEND_HD_DELAY_QUEUE("send-hd-delay-queue","order-send-hd-replay"),
-        SEND_DELIVERY_DELAY_TIMEOUT("send-delivery-delay-timeout","send-delivery-delay-timeout-callback");
+        SEND_HD_DELAY_QUEUE("post-hd-delay-queue","order-post-hd-replay"),
+        SEND_DELIVERY_DELAY_TIMEOUT("post-delivery-delay-timeout","post-delivery-delay-timeout-callback");
         //FRUIT_DOCTOR_ORDER_TIMEOUT("fruit-doctor-order-timeout","fruit-doctor-order-timeout-callback");
         //WXSMALL_SHOP_ORDER_TIMEOUT("wxsmall-shop-order-timeout","wxsmall-shop-order-timeout-callback");
         @Getter
