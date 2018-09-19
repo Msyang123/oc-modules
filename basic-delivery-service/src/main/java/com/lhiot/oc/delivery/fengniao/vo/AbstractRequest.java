@@ -1,4 +1,4 @@
-package com.lhiot.oc.basic.feign.domain;
+package com.lhiot.oc.delivery.fengniao.vo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.leon.microx.util.Jackson;
