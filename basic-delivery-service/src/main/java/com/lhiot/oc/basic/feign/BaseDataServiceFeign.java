@@ -1,6 +1,6 @@
 package com.lhiot.oc.basic.feign;
 
-import com.lhiot.oc.basic.domain.enums.ApplicationTypeEnum;
+import com.lhiot.oc.basic.domain.enums.ApplicationType;
 import com.lhiot.oc.basic.feign.domain.Store;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +17,8 @@ public interface BaseDataServiceFeign {
 
     //查询门店信息
     @RequestMapping(value = "/stores/{storeId}", method = RequestMethod.GET)
-    ResponseEntity<Store> findStoresId(@PathVariable("storeId") Long storeId, @RequestParam("applicationType") ApplicationTypeEnum applicationType);
+    ResponseEntity<Store> findStoresId(@PathVariable("storeId") Long storeId, @RequestParam("applicationType") ApplicationType applicationType);
 
     @RequestMapping(value = "/stores/by-code/{code}", method = RequestMethod.GET)
-    ResponseEntity<Store> findStoreByCode(@PathVariable("code") String code, @RequestParam("applicationType") ApplicationTypeEnum applicationType);
+    ResponseEntity<Store> findStoreByCode(@PathVariable("code") String code, @RequestParam("applicationType") ApplicationType applicationType);
 }

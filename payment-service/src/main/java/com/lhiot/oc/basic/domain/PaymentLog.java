@@ -2,7 +2,9 @@ package com.lhiot.oc.basic.domain;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.lhiot.oc.basic.domain.enums.ApplicationTypeEnum;
+import com.lhiot.oc.basic.domain.enums.ApplicationType;
+import com.lhiot.oc.basic.domain.enums.PayPlatformType;
+import com.lhiot.oc.basic.domain.enums.PayStepType;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,31 +20,36 @@ public class PaymentLog {
     @JsonProperty("id")
     private Long id;
 
-    @JsonProperty("orderId")
-    private Long orderId;
+    @JsonProperty("baseUserId")
+    private Long baseUserId;
 
     @JsonProperty("userId")
     private Long userId;
 
-    //应用类型 小程序 app等
-    @JsonProperty("appType")
-    private ApplicationTypeEnum applicationType;
+    @JsonProperty("payCode")
+    private String payCode;
 
-    //来源类型 充值 订单
+    //应用类型 小程序 app等
+    @JsonProperty("applicationType")
+    private ApplicationType applicationType;
+
+    //来源类型 充值 订单 活动
     @JsonProperty("sourceType")
     private String sourceType;
 
-    //全额支付还是混合支付
-    @JsonProperty("payType")
-    private String payType;
+    //支付平台
+    @JsonProperty("payPlatformType")
+    private PayPlatformType payPlatformType;
 
-    //支付步骤枚举字符串
+    //支付步骤枚举
     @JsonProperty("payStep")
-    private String payStep;
+    private PayStepType payStep;
 
-    @JsonProperty("payFee")
-    private Integer payFee;
+    //支付费用（分）
+    @JsonProperty("fee")
+    private Long fee;
 
+    //第三方单号
     @JsonProperty("tradeId")
     private String tradeId;
 
@@ -54,12 +61,4 @@ public class PaymentLog {
 
     @JsonProperty("bankType")
     private String bankType;
-
-    @JsonProperty("deleted")
-    private String deleted;
-
-    @JsonProperty("orderCode")
-    private String orderCode;
-
-
 }

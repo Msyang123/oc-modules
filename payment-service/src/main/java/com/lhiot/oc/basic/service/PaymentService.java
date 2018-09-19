@@ -255,7 +255,7 @@ public class PaymentService {
             paymentLog = new PaymentLog();
             paymentLog.setPayStep("sign");//支付步骤：sign-签名成功 paid-支付成功
             paymentLog.setUserId(signParam.getAttach().getUserId());
-            paymentLog.setApplicationTypeEnum(signParam.getAttach().getApplicationTypeEnum());
+            paymentLog.setApplicationType(signParam.getAttach().getApplicationType());
             paymentLog.setSourceType(signParam.getAttach().getSourceType().toString());
             paymentLog.setPayType(signParam.getPayPlatformType().toString());
             paymentLog.setPayFee(signParam.getFee());//支付金额
@@ -292,9 +292,9 @@ public class PaymentService {
             BaseUser baseUser = new BaseUser();
             baseUser.setCurrency(paymentLog.getPayFee());
             baseUser.setId(attach.getBaseuserId());
-            baseUser.setApplicationType(attach.getApplicationTypeEnum());
+            baseUser.setApplicationType(attach.getApplicationType());
 
-            if (this.updateBalance(attach.getApplicationTypeEnum().getDescription() + "-充值",baseUser)) {
+            if (this.updateBalance(attach.getApplicationType().getDescription() + "-充值",baseUser)) {
                 log.error("充值支付回调调用远程充值鲜果币失败:{}", attach);
                 return;
             }
@@ -476,7 +476,7 @@ public class PaymentService {
                     BaseUser baseUser=new BaseUser();
                     baseUser.setCurrency(refundFee);
                     baseUser.setId(paymentLog.getUserId());
-                    baseUser.setApplicationType(paymentLog.getApplicationTypeEnum());
+                    baseUser.setApplicationType(paymentLog.getApplicationType());
                     if(this.updateBalance("订单退款:"+reason,baseUser)) {
 
                         baseOrderInfo.setStatus(OrderStatus.ALREADY_RETURN);
@@ -505,13 +505,13 @@ public class PaymentService {
      */
     /*  public void sendToQueue(BaseOrderInfo baseOrderInfo) throws Exception {
         //如果是鲜果师商城的订单
-        ApplicationTypeEnum applyType = baseOrderInfo.getApplicationTypeEnum();
+        ApplicationType applyType = baseOrderInfo.getApplicationType();
         //如果发送海鼎减库存失败，则发送到队列中进行重试
         if (!baseOrderService.sendToHdReduce(baseOrderInfo)) {
             rabbit.convertAndSend(NormalExchange.SEND_TO_HD.getExchangeName(), NormalExchange.SEND_TO_HD.getQueueName(), Jackson.json(baseOrderInfo));
         }
         //如果订单为鲜果师商城的订单，则发送广播，消费端写在鲜果师用户
-      if (ApplicationTypeEnum.FRUIT_DOCTOR.equals(applyType)) {
+      if (ApplicationType.FRUIT_DOCTOR.equals(applyType)) {
         	baseOrderInfo.setOrderStatus(OrderStatus.WAIT_SEND_OUT);
             rabbit.convertAndSend(PublishExchange.FRUITDOCOTR_PAYMENT.getName(), "", Jackson.json(baseOrderInfo));
         }

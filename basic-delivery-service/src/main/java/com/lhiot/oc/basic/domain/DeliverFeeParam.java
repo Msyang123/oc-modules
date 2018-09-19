@@ -1,6 +1,6 @@
 package com.lhiot.oc.basic.domain;
 
-import com.lhiot.oc.basic.domain.enums.ApplicationTypeEnum;
+import com.lhiot.oc.basic.domain.enums.ApplicationType;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,8 +24,8 @@ public class DeliverFeeParam {
     @ApiModelProperty(notes = "订单重量(kg)",dataType = "Double")
     private Double weight;
 
-    @ApiModelProperty(notes = "应用类型",dataType = "ApplicationTypeEnum")
-    private ApplicationTypeEnum applicationType;
+    @ApiModelProperty(notes = "应用类型",dataType = "ApplicationType")
+    private ApplicationType applicationType;
 
     @ApiModelProperty(notes = "订单目标坐标位置-经度",dataType = "Double")
     private Double targetLng;

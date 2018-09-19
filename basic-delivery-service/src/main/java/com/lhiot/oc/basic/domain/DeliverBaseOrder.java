@@ -3,7 +3,7 @@ package com.lhiot.oc.basic.domain;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.lhiot.oc.basic.domain.common.PagerRequestObject;
-import com.lhiot.oc.basic.domain.enums.ApplicationTypeEnum;
+import com.lhiot.oc.basic.domain.enums.ApplicationType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -50,8 +50,8 @@ public class DeliverBaseOrder extends PagerRequestObject {
     *应用类型:APP(视食),WECHAT_MALL(微商城),S_MALL(小程序),F_MALL(鲜果师)
     */
     @JsonProperty("applyType")
-    @ApiModelProperty(value = "应用类型:APP(视食),WECHAT_MALL(微商城),S_MALL(小程序),F_MALL(鲜果师)", dataType = "ApplicationTypeEnum")
-    private ApplicationTypeEnum applyType;
+    @ApiModelProperty(value = "应用类型:APP(视食),WECHAT_MALL(微商城),S_MALL(小程序),F_MALL(鲜果师)", dataType = "ApplicationType")
+    private ApplicationType applyType;
 
     /**
     *创建时间
