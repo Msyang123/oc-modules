@@ -21,7 +21,7 @@ public class PaymentConfiguration {
      * @param properties 配置类
      * @return AliPayClient bean
      */
-    @Bean
+/*    @Bean
     @ConditionalOnMissingBean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public AlipayClient alipayClient(PaymentProperties properties) {
@@ -35,5 +35,5 @@ public class PaymentConfiguration {
                 config.getLhiot().getAliPayPublicKey(),
                 config.getSignType()
         );
-    }
+    }*/
 }

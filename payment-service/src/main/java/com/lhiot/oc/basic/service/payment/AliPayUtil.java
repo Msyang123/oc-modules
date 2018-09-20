@@ -2,6 +2,8 @@ package com.lhiot.oc.basic.service.payment;
 
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
+import com.alipay.api.AlipayConstants;
+import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.domain.AlipayTradeAppPayModel;
 import com.alipay.api.domain.AlipayTradeCancelModel;
 import com.alipay.api.domain.AlipayTradeRefundModel;
@@ -12,7 +14,6 @@ import com.alipay.api.request.AlipayTradeRefundRequest;
 import com.alipay.api.response.AlipayTradeAppPayResponse;
 import com.alipay.api.response.AlipayTradeCancelResponse;
 import com.alipay.api.response.AlipayTradeRefundResponse;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.Jackson;
 import com.leon.microx.util.StringUtils;
@@ -36,25 +37,19 @@ public class AliPayUtil {
     @Getter
     private AlipayClient alipayClient;
     @Getter
-    private PaymentProperties.AliPayConfig config;
-    @Getter
     private long orderTimeoutMs;
-    @Getter
-    private long paymentTimeoutMs;
 
-    public AliPayUtil(PaymentProperties properties, AlipayClient alipayClient) {
+    public AliPayUtil(PaymentProperties properties) {
         this.properties = properties;
-        this.alipayClient = alipayClient;
-        this.config = properties.getAliPay();
         this.orderTimeoutMs = properties.getTemporaryOrderExpirationMs();
-        this.paymentTimeoutMs = TimeUnit.MINUTES.toMillis(Long.valueOf(config.getTimeoutExpress()));
     }
 
     public Tips sign(AlipayTradeAppPayModel model) throws AlipayApiException {
 
         AlipayTradeAppPayRequest request = new AlipayTradeAppPayRequest();
         request.setBizModel(model);
-        request.setNotifyUrl(config.getNotifyUrl());
+        request.setNotifyUrl(properties.getAliPayConfig().getNotifyUrl());
+        initAlipayClientWithProp();
         AlipayTradeAppPayResponse signed=alipayClient.sdkExecute(request);
         if (Objects.nonNull(signed) && Objects.nonNull(signed.getBody())) {
             return Tips.of("1",signed.getBody());
@@ -71,7 +66,9 @@ public class AliPayUtil {
     public Tips cancel(AlipayTradeCancelModel model) throws AlipayApiException {
         AlipayTradeCancelRequest request=new AlipayTradeCancelRequest();
         request.setBizModel(model);
-        request.setNotifyUrl(config.getCancelNotifyUrl());
+        request.setNotifyUrl(properties.getAliPayConfig().getCancelNotifyUrl());
+
+        initAlipayClientWithProp();
         AlipayTradeCancelResponse signed=alipayClient.sdkExecute(request);
         if (Objects.nonNull(signed) && Objects.nonNull(signed.getBody())) {
             return Tips.of("1",signed.getBody());
@@ -82,16 +79,16 @@ public class AliPayUtil {
     /**
      * 支付宝退款
      *
-     * @param orderCode 商户订单号
+     * @param payCode 商户订单号
      * @param refundFee 退款总额(元)
      * @param reason    退款原因
      * @param refundId  退款单号（部分退款必填，如果部分退款只退一次，可以是订单号）
      * @return true or false
      * @throws Exception HTTP Request Exception
      */
-    public boolean refund(String orderCode, String refundFee, String reason, String refundId) throws Exception {
+    public boolean refund(String payCode, String refundFee, String reason, String refundId) throws Exception {
         AlipayTradeRefundModel model = new AlipayTradeRefundModel();
-        model.setOutTradeNo(orderCode); // 支付时传入的商户订单号，与trade_no必填一个
+        model.setOutTradeNo(payCode); // 支付时传入的商户订单号，与trade_no必填一个
         model.setRefundAmount(refundFee);
         if (StringUtils.isNotBlank(reason)) {
             model.setRefundReason(reason);
@@ -102,18 +99,19 @@ public class AliPayUtil {
 
         AlipayTradeRefundRequest request = new AlipayTradeRefundRequest();
         request.setBizModel(model);
+        initAlipayClientWithProp();
         AlipayTradeRefundResponse response = alipayClient.execute(request);
         return response.isSuccess();
     }
 
-    public AlipayTradeAppPayModel createAliPayTradeAppPayModel(SignParam param) throws JsonProcessingException {
+    public AlipayTradeAppPayModel createAliPayTradeAppPayModel(SignParam param){
         AlipayTradeAppPayModel model = new AlipayTradeAppPayModel();
-        model.setSellerId(config.getLhiot().getSellerId());
+        model.setSellerId(properties.getAliPayConfig().getSellerId());
         model.setBody(param.getMemo());
         model.setSubject(param.getMemo());
-        model.setPassbackParams(Jackson.json(param.getAttach()));
-        model.setOutTradeNo(param.getOrderCode());
-        model.setTimeoutExpress(""+config.getTimeoutExpress());
+        model.setPassbackParams(Jackson.json(param.getAttach()));//设置附加参数
+        model.setOutTradeNo(param.getPayCode());
+        model.setTimeoutExpress(properties.getAliPayConfig().getTimeoutExpress());//设置支付宝支付6分钟超时
         model.setProductCode("QUICK_MSECURITY_PAY");
         return model;
     }
@@ -144,7 +142,7 @@ public class AliPayUtil {
     public boolean verifySeller(Map<String, String> data) {
         boolean signVerified = false;
         try {
-            signVerified = AlipaySignature.rsaCheckV1(data, config.getLhiot().getAliPayPublicKey(), properties.getCharset(), config.getSignType());
+            signVerified = AlipaySignature.rsaCheckV1(data, properties.getAliPayConfig().getAliPayPublicKey(), properties.getCharset(), properties.getAliPayConfig().getSignType());
         } catch (AlipayApiException e) {
             log.error(e.getMessage(), e);
         }
@@ -153,12 +151,12 @@ public class AliPayUtil {
             return false;
         }
 
-        if (!Objects.equals(config.getLhiot().getSellerId(), data.get("seller_id"))) {
+        if (!Objects.equals(properties.getAliPayConfig().getSellerId(), data.get("seller_id"))) {
             log.error("*****************支付宝回调 === seller_id 检查失败. 返回failure.****************");
             return false;
         }
 
-        if (!Objects.equals(config.getLhiot().getAppId(), data.get("app_id"))) {
+        if (!Objects.equals(properties.getAliPayConfig().getAppId(), data.get("app_id"))) {
             log.error("*****************支付宝回调 === app_id 检查失败. 返回failure.****************");
             return false;
         }
@@ -168,7 +166,7 @@ public class AliPayUtil {
     /**
      * 分转元
      */
-    public static String fenToYuan(int fen) {
+    public static String fenToYuan(Long fen) {
         return BigDecimal.valueOf(fen).divide(new BigDecimal(100), 2, RoundingMode.UP).toString();
     }
 
@@ -177,6 +175,22 @@ public class AliPayUtil {
      */
     public static String yuanToFen(String yuan) {
         return new BigDecimal(yuan).multiply(new BigDecimal(100)).setScale(0, RoundingMode.DOWN).toString();
+    }
+
+    /**
+     * 依据配置初始化支付宝客户端工具类
+     * 每次配置都是远程获取配置加载
+     */
+    private void initAlipayClientWithProp(){
+        this.alipayClient = new DefaultAlipayClient(
+                properties.getAliPayConfig().getApiUrl(),
+                properties.getAliPayConfig().getAppId(),
+                properties.getAliPayConfig().getAliPayPrivateKey(),
+                AlipayConstants.FORMAT_JSON,
+                properties.getCharset(),
+                properties.getAliPayConfig().getAliPayPublicKey(),
+                properties.getAliPayConfig().getSignType()
+        );
     }
 
     /**

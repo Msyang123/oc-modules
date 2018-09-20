@@ -7,5 +7,5 @@ ${AnsiColor.BRIGHT_GREEN}
  #+#        #+#    #+#           #+#          #+#    #+#      #+#
 ########## ###    ###       ###########       ########       ###
 ${AnsiColor.BRIGHT_RED}
-Application Name: basic-payment-service
+Application Name: payment-service
 Spring Boot Version: 1.0

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.lhiot.oc.basic.domain.enums.ApplicationType;
 import com.lhiot.oc.basic.domain.enums.PayPlatformType;
 import com.lhiot.oc.basic.domain.enums.PayStepType;
+import com.lhiot.oc.basic.domain.enums.SourceType;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -35,7 +36,7 @@ public class PaymentLog {
 
     //来源类型 充值 订单 活动
     @JsonProperty("sourceType")
-    private String sourceType;
+    private SourceType sourceType;
 
     //支付平台
     @JsonProperty("payPlatformType")
@@ -61,4 +62,8 @@ public class PaymentLog {
 
     @JsonProperty("bankType")
     private String bankType;
+
+    //支付商户名称简称
+/*    @JsonProperty("paymentName")
+    private String paymentName;*/
 }

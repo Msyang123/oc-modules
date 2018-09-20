@@ -1,28 +1,27 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.lhiot.order.mapper.PaymentLogMapper">
+<mapper namespace="com.lhiot.oc.basic.mapper.PaymentLogMapper">
 
-    <insert id="insertPaymentLog" parameterType="com.lhiot.order.domain.payment.PaymentLog"
+    <insert id="insertPaymentLog" parameterType="com.lhiot.oc.basic.domain.PaymentLog"
             useGeneratedKeys="true"
             keyProperty="id">
         insert into payment_log (
-                            user_id,
-                            order_id,
-                            order_code,
-                            app_type,
-                            source_type,
-                            pay_type,
-                            pay_step,
-                            pay_fee,
-                            trade_id,
-                            sign_at,
-                            pay_at,
-                            bank_type
-                        ) VALUES (#{userId},#{orderId},#{orderCode},#{appType},
-                        #{sourceType},#{payType},#{payStep},#{payFee},#{tradeId},#{signAt},#{payAt},#{bankType})
+                base_user_id,
+                user_id,
+                pay_code,
+                application_type,
+                source_type,
+                pay_platform_type,
+                pay_step,
+                fee,
+                sign_at) VALUES (
+                  #{baseUserId},#{userId},#{payCode},#{applicationType},
+                  #{sourceType},#{payPlatformType},#{payStep},#{fee},
+                  #{signAt}
+                  )
     </insert>
 
-    <update id="updatePaymentLog" parameterType="com.lhiot.order.domain.payment.PaymentLog">
+    <update id="updatePaymentLog" parameterType="com.lhiot.oc.basic.domain.PaymentLog">
         update payment_log
         <set>
             <if test="tradeId!=null and tradeId!=''">
@@ -44,18 +43,14 @@
                 sign_at=#{signAt},
             </if>
         </set>
-        where order_id=#{orderId}
+        where pay_code=#{payCode}
     </update>
 
-    <select id="getPaymentLog" parameterType="Long" resultType="com.lhiot.order.domain.payment.PaymentLog">
-        select * from payment_log where order_id=#{0} limit 1
+    <select id="getPaymentLogByPayCode" parameterType="String" resultType="com.lhiot.oc.basic.domain.PaymentLog">
+        select * from payment_log where pay_code=#{0} limit 1
     </select>
 
-    <select id="getPaymentLogByCode" parameterType="String" resultType="com.lhiot.order.domain.payment.PaymentLog">
-        select * from payment_log where order_code=#{0} limit 1
-    </select>
-
-    <select id="getPaymentLogByOrderIdandPayStep" resultType="com.lhiot.order.domain.payment.PaymentLog" parameterType="map">
-        select * from payment_log where order_id = #{orderId} and pay_step = #{payStep}
+    <select id="getPaymentLogByPayCodeAndPayStep" resultType="com.lhiot.oc.basic.domain.PaymentLog" parameterType="map">
+        select * from payment_log where pay_code = #{payCode} and pay_step = #{payStep}
     </select>
 </mapper>

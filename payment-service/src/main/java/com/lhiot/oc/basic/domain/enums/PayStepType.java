@@ -4,7 +4,8 @@ import lombok.Getter;
 
 public enum PayStepType {
     SIGN("签名"),
-    notify("响应");
+    NOTIFY("响应"),
+    REFUND("退款");
     @Getter
     private String decription;
 

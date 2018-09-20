@@ -11,8 +11,8 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @SpringBootApplication
 @EnableDiscoveryClient
 @EnableFeignClients
-public class BasicPaymentServiceApplication {
+public class PaymentServiceApplication {
     public static void main(String[] args) {
-        SpringApplication.run(BasicPaymentServiceApplication.class, args);
+        SpringApplication.run(PaymentServiceApplication.class, args);
     }
 }

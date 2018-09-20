@@ -14,7 +14,7 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <start-class>com.lhiot.oc.basic.BasicPaymentServiceApplication</start-class>
+        <start-class>com.lhiot.oc.basic.PaymentServiceApplication</start-class>
     </properties>
 
     <dependencies>

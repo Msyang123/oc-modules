@@ -14,10 +14,9 @@ public interface PaymentLogMapper {
 
     int updatePaymentLog(PaymentLog paymentLog);
 
-    PaymentLog getPaymentLog(Long orderId);
 
-    PaymentLog getPaymentLogByCode(String orderCode);
+    PaymentLog getPaymentLogByPayCode(String payCode);
 
-    List<PaymentLog> getPaymentLogByOrderIdandPayStep(Map<String, Object> param);
+    PaymentLog getPaymentLogByPayCodeAndPayStep(Map<String, Object> param);
 
 }

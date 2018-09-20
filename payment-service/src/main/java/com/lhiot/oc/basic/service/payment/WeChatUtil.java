@@ -6,7 +6,6 @@
 */
 package com.lhiot.oc.basic.service.payment;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.Jackson;
 import com.leon.microx.util.StringUtils;
@@ -30,14 +29,13 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.net.ssl.*;
+import javax.net.ssl.SSLContext;
 import javax.servlet.http.HttpServletRequest;
-import java.io.*;
-import java.net.ConnectException;
-import java.net.URL;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.KeyStore;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -103,14 +101,13 @@ public class WeChatUtil {
 	@Autowired
 	private PaymentProperties properties;
 
-	private ObjectMapper om = new ObjectMapper();
-
 
 	public WeChatUtil(PaymentProperties properties) {
 		this.properties = properties;
 	}
 	/**
 	 * 申请退款
+	 *@param appid 前端微信应用id
 	 *
 	 * @param tradeNo
 	 *            订单号
@@ -119,16 +116,17 @@ public class WeChatUtil {
 	 * @return 微信返回的XML
 	 * @throws Exception
 	 */
-	public  boolean refund(final String tradeNo, final int totalFee){
-		return refund(tradeNo, tradeNo, totalFee, totalFee);
+	public  boolean refund(String appid,final String tradeNo, final int totalFee){
+		return refund(appid,tradeNo, tradeNo, totalFee, totalFee);
 	}
 
-	public  boolean refund(final String tradeNo, final int totalFee,final int refundFee){
-		return refund(tradeNo, tradeNo, totalFee, refundFee);
+	public  boolean refund(String appid,final String tradeNo, final int totalFee,final int refundFee){
+		return refund(appid,tradeNo, tradeNo, totalFee, refundFee);
 	}
 
 	/**
 	 * 申请退款（分多次退款）
+	 *@param  appid 前端微信应用id
 	 *
 	 * @param tradeNo
 	 *            订单号
@@ -141,30 +139,29 @@ public class WeChatUtil {
 	 * @return 微信返回的XML
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unchecked")
-	public boolean refund(final String tradeNo, final String refundNo, final int totalFee, final int refundFee){
+	public boolean refund(final String appid,final String tradeNo, final String refundNo, final int totalFee, final int refundFee){
 		String currTime = DateFormatUtil.format3(new Date());
 		String strTime = currTime.substring(8, currTime.length());
 		String nonce = strTime + Random.length(4);
 
 		SortedMap<Object, Object> packageParams = new TreeMap<Object, Object>();
-		packageParams.put("appid", properties.getWeChatOauth().getAppId());
-		packageParams.put("mch_id", properties.getWeChatPay().getLhiot().getPartnerId());
+		packageParams.put("appid", appid);
+		packageParams.put("mch_id", properties.getWeChatPayConfig().getPartnerId());
 		packageParams.put("nonce_str", nonce);
 		packageParams.put("out_trade_no", tradeNo);
 		packageParams.put("out_refund_no", refundNo);
 		packageParams.put("total_fee", totalFee);
 		packageParams.put("refund_fee", refundFee);
 		//packageParams.put("op_user_id", AppProps.get("partner_id"));
-		String sign = this.createSign(properties.getWeChatPay().getLhiot().getPartnerKey(), packageParams); // 获取签名
+		String sign = this.createSign(properties.getWeChatPayConfig().getPartnerKey(), packageParams); // 获取签名
 		packageParams.put("sign", sign);
 		String xml = this.getRequestXml(packageParams); // 获取请求微信的XML
 		HttpPost httpPost = new HttpPost(REFUND_URL);
 		try {
-			InputStream in= properties.getWeChatPay().getLhiot().getPkcs12().getInputStream();
+			InputStream in= properties.getWeChatPayConfig().getPkcs12().getInputStream();
 			KeyStore keystore = KeyStore.getInstance("PKCS12");
-			keystore.load(in, properties.getWeChatPay().getLhiot().getPartnerId().toCharArray());
-			SSLContext sslContext = SSLContexts.custom().loadKeyMaterial(keystore, properties.getWeChatPay().getLhiot().getPartnerId().toCharArray()).build();
+			keystore.load(in, properties.getWeChatPayConfig().getPartnerId().toCharArray());
+			SSLContext sslContext = SSLContexts.custom().loadKeyMaterial(keystore, properties.getWeChatPayConfig().getPartnerId().toCharArray()).build();
 			SSLConnectionSocketFactory sslConnection = new SSLConnectionSocketFactory(sslContext,
 					new String[]{"TLSv1", "TLSv1.1", "TLSv1.2"}, null,
 					SSLConnectionSocketFactory.getDefaultHostnameVerifier()
@@ -203,20 +200,21 @@ public class WeChatUtil {
 
 	/**
 	 * 撤销微信支付
-	 * @param orderId
+	* @param appid 微信应用appid
+	 * @param payCode
 	 * @return
 	 */
-	public boolean cancel(final String orderId){
+	public boolean cancel(final String appid,final String payCode){
 		String currTime = DateFormatUtil.format3(new Date());
 		String strTime = currTime.substring(8, currTime.length());
 		String nonce = strTime + Random.length(4);
 
 		SortedMap<Object, Object> packageParams = new TreeMap<Object, Object>();
-		packageParams.put("appid", properties.getWeChatOauth().getAppId());
-		packageParams.put("mch_id", properties.getWeChatPay().getLhiot().getPartnerId());
+		packageParams.put("appid", appid);
+		packageParams.put("mch_id", properties.getWeChatPayConfig().getPartnerId());
 		packageParams.put("nonce_str", nonce);
-		packageParams.put("out_trade_no", orderId);
-		String sign = this.createSign(properties.getWeChatPay().getLhiot().getPartnerKey(), packageParams); // 获取签名
+		packageParams.put("out_trade_no", payCode);
+		String sign = this.createSign(properties.getWeChatPayConfig().getPartnerKey(), packageParams); // 获取签名
 		packageParams.put("sign", sign);
 		String xml = this.getRequestXml(packageParams); // 获取请求微信的XML
 		HttpPost httpPost = new HttpPost(CLOSEORDER_URL);
@@ -276,18 +274,6 @@ public class WeChatUtil {
 		in.close();
 		return xReader;
 	}
-
-
-	/**
-	 * 获取预支付ID
-	 *
-	 * @param packageParams
-	 * @return
-	 */
-/*	public  String sendWeChatGetPrepayId(final SortedMap<Object, Object> packageParams) {
-		String xml = this.getRequestXml(packageParams);
-		return this.sendWeChatGetPrepayId(xml);
-	}*/
 
 	/**
 	 * 获取预支付ID
@@ -410,77 +396,11 @@ public class WeChatUtil {
 	}
 
 	/**
-	 * 发送https请求
-	 *
-	 * @param requestUrl
-	 *            请求地址
-	 * @param requestMethod
-	 *            请求方式（GET、POST）
-	 * @param outputStr
-	 *            提交的数据
-	 * @return 返回微信服务器响应的JSON信息
-	 */
-	/*public  String httpsRequest(final String requestUrl, final String requestMethod, final String outputStr) {
-		try {
-			TrustManager[] tm = { new X509TrustManager() {
-				public X509Certificate[] getAcceptedIssuers() {
-					return null;
-				}
-
-				public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-				}
-
-				public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-				}
-			} };
-			SSLContext sslContext = SSLContext.getInstance("SSL", "SunJSSE");
-			sslContext.init(null, tm, new java.security.SecureRandom());
-			SSLSocketFactory ssf = sslContext.getSocketFactory();
-			URL url = new URL(requestUrl);
-			HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-			conn.setSSLSocketFactory(ssf);
-			conn.setDoOutput(true);
-			conn.setDoInput(true);
-			conn.setUseCaches(false);
-			// 设置请求方式（GET/POST）
-			conn.setRequestMethod(requestMethod);
-			conn.setRequestProperty("content-type", "application/x-www-form-urlencoded");
-			// 当outputStr不为null时向输出流写数据
-			if (null != outputStr) {
-				OutputStream outputStream = conn.getOutputStream();
-				// 注意编码格式
-				outputStream.write(outputStr.getBytes("UTF-8"));
-				outputStream.close();
-			}
-			// 从输入流读取返回内容
-			InputStream inputStream = conn.getInputStream();
-			InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "utf-8");
-			BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-			String str = null;
-			StringBuffer buffer = new StringBuffer();
-			while ((str = bufferedReader.readLine()) != null) {
-				buffer.append(str);
-			}
-			// 释放资源
-			bufferedReader.close();
-			inputStreamReader.close();
-			inputStream.close();
-			conn.disconnect();
-			return buffer.toString();
-		} catch (ConnectException ce) {
-			log.error("连接超时：{}", ce);
-		} catch (Exception e) {
-			log.error("https请求异常：{}", e);
-		}
-		return null;
-	}*/
-
-	/**
 	 * 微信支付签名
 	 *
 	 * @return String
 	 */
-	public Tips wxCreateSign(String ipAddress, String openid, int fee, String userAgent,
+	public Tips wxCreateSign(String ipAddress, String openid,String appid, Long fee, String userAgent,
 							 String payCode, String body, String attach, WeChatUtil weChatUtil){
 		if (StringUtils.isEmpty(openid)) {
 			return Tips.of("-1","用户信息为空！");
@@ -494,11 +414,11 @@ public class WeChatUtil {
 		String nonce = strTime + Random.length(4);
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date());
-		cal.add(Calendar.MINUTE, weChatUtil.getProperties().getWeChatPay().getTimeoutExpress());// 设置6分钟过期
+		cal.add(Calendar.MINUTE, weChatUtil.getProperties().getWeChatPayConfig().getTimeoutExpress());// 设置6分钟过期
 		String timeExpire = DateFormatUtil.format3(cal.getTime());
 		SortedMap<Object, Object> packageParams = new TreeMap<Object, Object>();
-		packageParams.put("appid", weChatUtil.getProperties().getWeChatOauth().getAppId());
-		packageParams.put("mch_id", weChatUtil.getProperties().getWeChatPay().getLhiot().getPartnerId());
+		packageParams.put("appid", appid);
+		packageParams.put("mch_id", weChatUtil.getProperties().getWeChatPayConfig().getPartnerId());
 		packageParams.put("nonce_str", nonce);// 随机串
 		packageParams.put("body", body);// 商品描述
 		packageParams.put("attach", attach);//自定义附加数据
@@ -506,10 +426,10 @@ public class WeChatUtil {
 		packageParams.put("total_fee", fee);// 微信支付金额单位为（分）
 		packageParams.put("time_expire", timeExpire);
 		packageParams.put("spbill_create_ip", ipAddress);// 订单生成的机器ip
-		packageParams.put("notify_url", weChatUtil.getProperties().getWeChatPay().getNotifyUrl());// 支付完成后微信发给该链接信息，可以判断会员是否支付成功，改变订单状态等。
+		packageParams.put("notify_url", weChatUtil.getProperties().getWeChatPayConfig().getNotifyUrl());// 支付完成后微信发给该链接信息，可以判断会员是否支付成功，改变订单状态等。
 		packageParams.put("trade_type", "JSAPI");
 		packageParams.put("openid", openid);
-		String sign = weChatUtil.createSign(weChatUtil.getProperties().getWeChatPay().getLhiot().getPartnerKey(), packageParams); // 获取签名
+		String sign = weChatUtil.createSign(weChatUtil.getProperties().getWeChatPayConfig().getPartnerKey(), packageParams); // 获取签名
 		packageParams.put("sign", sign);
 		log.info("=================获取预支付ID===============");
 		String xml = weChatUtil.getRequestXml(packageParams); // 获取请求微信的XML
@@ -519,7 +439,7 @@ public class WeChatUtil {
 		}
 		log.info("=================微信预支付成功，响应到JSAPI完成微信支付===============");
 		SortedMap<Object, Object> finalpackage = new TreeMap<Object, Object>();
-		finalpackage.put("appId", weChatUtil.getProperties().getWeChatOauth().getAppId());
+		finalpackage.put("appId", appid);
 		String timestamp = Long.toString(System.currentTimeMillis() / 1000);
 		finalpackage.put("timeStamp", timestamp);
 		finalpackage.put("nonceStr", nonce);
@@ -528,11 +448,11 @@ public class WeChatUtil {
 		finalpackage.put("signType", "MD5");
 
 		Map<String, String> signMap = new HashMap();
-		signMap.put("appid", weChatUtil.getProperties().getWeChatOauth().getAppId());
+		signMap.put("appid", appid);
 		signMap.put("timeStamp", timestamp);
 		signMap.put("nonceStr", nonce);
 		signMap.put("packageValue", packages);
-		signMap.put("sign", weChatUtil.createSign(weChatUtil.getProperties().getWeChatPay().getLhiot().getPartnerKey(), finalpackage));
+		signMap.put("sign", weChatUtil.createSign(weChatUtil.getProperties().getWeChatPayConfig().getPartnerKey(), finalpackage));
 		signMap.put("orderId", payCode);
 		char agent = userAgent.charAt(userAgent.indexOf("MicroMessager") + 15);
 		signMap.put("agent", new String(new char[]{agent}));
@@ -587,7 +507,7 @@ public class WeChatUtil {
 		}
 		return (int) ((random * num));
 	}*/
-	
+
 /*	public String getTempSignkey(){
 		SortedMap<Object, Object> postParamMap = new TreeMap<Object, Object>();
 		//商户号	mch_id	是	1305638280	String(32)	微信支付分配的微信商户号
