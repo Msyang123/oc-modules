@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhiot.oc.basic.mapper.PaymentRefundMapper">
+
+    <!-- 数据库字段对象关系映射 -->
+    <resultMap id="BaseResultMap"
+        type="com.lhiot.oc.basic.domain.PaymentRefund" >
+        <id column="id" property="id"/>
+        <result column="payment_log_id" property="paymentLogId" />
+        <result column="create_time" property="createTime" />
+        <result column="refund_memo" property="refundMemo" />
+    </resultMap>
+
+    <!-- base查询字段  -->
+    <sql id="Base_Column_List" >
+        <trim suffixOverrides="," >
+            id,
+            payment_log_id,
+            create_time,
+            refund_memo,
+        </trim>
+    </sql>
+
+    <!--新增支付退款记录-->
+    <insert id="create" parameterType="com.lhiot.oc.basic.domain.PaymentRefund" useGeneratedKeys="true" keyProperty="id">
+        insert into payment_refund
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null ">
+                id,
+            </if>
+            <if test="paymentLogId != null ">
+                payment_log_id,
+            </if>
+            <if test="createTime != null ">
+                create_time,
+            </if>
+            <if test="refundMemo != null ">
+                refund_memo,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null ">
+                #{id},
+            </if>
+            <if test="paymentLogId != null ">
+                #{paymentLogId},
+            </if>
+            <if test="createTime != null ">
+                #{createTime},
+            </if>
+            <if test="refundMemo != null ">
+                #{refundMemo},
+            </if>
+        </trim>
+    </insert>
+
+    <!--根据id修改支付退款记录-->
+    <update id="updateById" parameterType="com.lhiot.oc.basic.domain.PaymentRefund">
+        update payment_refund
+        <set>
+            <if test="id != null ">
+                id = #{id},
+            </if>
+            <if test="paymentLogId != null ">
+                payment_log_id = #{paymentLogId},
+            </if>
+            <if test="createTime != null ">
+                create_time = #{createTime},
+            </if>
+            <if test="refundMemo != null ">
+                refund_memo = #{refundMemo},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <!--根据ids删除支付退款记录-->
+    <delete id="deleteByIds" parameterType="java.util.List">
+        delete from payment_refund where id in
+        <foreach collection="list" item="item" open="("
+            separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <!-- 根据id查找支付退款记录 -->
+	<select id="selectById" resultMap="BaseResultMap"
+		parameterType="long"> select <include refid="Base_Column_List" />
+		from payment_refund where id = #{id}
+	</select>
+
+
+    <!-- base where条件  -->
+    <sql id="Base_Where_Condition" >
+        <where>
+            <if test="id != null ">
+                and id = #{id}
+            </if>
+            <if test="paymentLogId != null ">
+                and payment_log_id = #{paymentLogId}
+            </if>
+            <if test="createTime != null ">
+                and create_time = #{createTime}
+            </if>
+            <if test="refundMemo != null ">
+                and refund_memo = #{refundMemo}
+            </if>
+        </where>
+    </sql>
+
+
+    <!--查询支付退款记录列表-->
+     <select id="pagePaymentRefunds" resultMap="BaseResultMap"
+        parameterType="com.lhiot.oc.basic.domain.PaymentRefund">
+	        select <include refid="Base_Column_List" />
+	        from payment_refund
+	        <include refid="Base_Where_Condition" />
+	        <include refid="common.pager" />
+    </select>
+
+    <!--查询支付退款记录总记录-->
+    <select id="pagePaymentRefundCounts" resultType="long"
+        parameterType="com.lhiot.oc.basic.domain.PaymentRefund">
+            select count(1)
+            from payment_refund
+            <include refid="Base_Where_Condition" />
+    </select>
+
+</mapper>

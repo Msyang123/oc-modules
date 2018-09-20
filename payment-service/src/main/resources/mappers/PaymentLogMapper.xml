@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhiot.oc.basic.mapper.PaymentLogMapper">
+
+    <insert id="insertPaymentLog" parameterType="com.lhiot.oc.basic.domain.PaymentLog"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        insert into payment_log (
+                base_user_id,
+                user_id,
+                pay_code,
+                application_type,
+                source_type,
+                pay_platform_type,
+                pay_step,
+                fee,
+                sign_at) VALUES (
+                  #{baseUserId},#{userId},#{payCode},#{applicationType},
+                  #{sourceType},#{payPlatformType},#{payStep},#{fee},
+                  #{signAt}
+                  )
+    </insert>
+
+    <update id="updatePaymentLog" parameterType="com.lhiot.oc.basic.domain.PaymentLog">
+        update payment_log
+        <set>
+            <if test="tradeId!=null and tradeId!=''">
+                trade_id=#{tradeId},
+            </if>
+            <if test="payFee!=null and payFee!=0">
+                pay_fee=#{payFee},
+            </if>
+            <if test="bankType!=null and bankType!=''">
+                bank_type=#{bankType},
+            </if>
+            <if test="payStep!=null and payStep!=''">
+                pay_step=#{payStep},
+            </if>
+            <if test="payAt!=null">
+                pay_at=#{payAt},
+            </if>
+            <if test="signAt!=null">
+                sign_at=#{signAt},
+            </if>
+        </set>
+        where pay_code=#{payCode}
+    </update>
+
+    <select id="getPaymentLogByPayCode" parameterType="String" resultType="com.lhiot.oc.basic.domain.PaymentLog">
+        select * from payment_log where pay_code=#{0} limit 1
+    </select>
+
+    <select id="getPaymentLogByPayCodeAndPayStep" resultType="com.lhiot.oc.basic.domain.PaymentLog" parameterType="map">
+        select * from payment_log where pay_code = #{payCode} and pay_step = #{payStep}
+    </select>
+</mapper>

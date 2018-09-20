@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhiot.oc.basic.mapper.PaymentFlowMapper">
+
+    <!-- 数据库字段对象关系映射 -->
+    <resultMap id="BaseResultMap"
+        type="com.lhiot.oc.basic.domain.PaymentFlow" >
+        <id column="id" property="id"/>
+        <result column="payment_log_id" property="paymentLogId" />
+        <result column="status" property="status" />
+        <result column="pre_status" property="preStatus" />
+        <result column="create_at" property="createAt" />
+    </resultMap>
+
+    <!-- base查询字段  -->
+    <sql id="Base_Column_List" >
+        <trim suffixOverrides="," >
+            id,
+            payment_log_id,
+            status,
+            pre_status,
+            create_at,
+        </trim>
+    </sql>
+
+    <!--新增支付状态流转记录-->
+    <insert id="create" parameterType="com.lhiot.oc.basic.domain.PaymentFlow" useGeneratedKeys="true" keyProperty="id">
+        insert into payment_flow
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="paymentLogId != null ">
+                payment_log_id,
+            </if>
+            <if test="status != null ">
+                status,
+            </if>
+            <if test="preStatus != null ">
+                pre_status,
+            </if>
+            <if test="createAt != null ">
+                create_at,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="paymentLogId != null ">
+                #{paymentLogId},
+            </if>
+            <if test="status != null ">
+                #{status},
+            </if>
+            <if test="preStatus != null ">
+                #{preStatus},
+            </if>
+            <if test="createAt != null ">
+                #{createAt},
+            </if>
+        </trim>
+    </insert>
+
+    <!--根据id修改支付状态流转记录-->
+    <update id="updateById" parameterType="com.lhiot.oc.basic.domain.PaymentFlow">
+        update payment_flow
+        <set>
+            <if test="paymentLogId != null ">
+                payment_log_id = #{paymentLogId},
+            </if>
+            <if test="status != null ">
+                status = #{status},
+            </if>
+            <if test="preStatus != null ">
+                pre_status = #{preStatus},
+            </if>
+            <if test="createAt != null ">
+                create_at = #{createAt},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <!--根据ids删除支付状态流转记录-->
+    <delete id="deleteByIds" parameterType="java.util.List">
+        delete from payment_flow where id in
+        <foreach collection="list" item="item" open="("
+            separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <!-- 根据id查找支付状态流转记录 -->
+	<select id="selectById" resultMap="BaseResultMap"
+		parameterType="long"> select <include refid="Base_Column_List" />
+		from payment_flow where id = #{id}
+	</select>
+
+
+    <!-- base where条件  -->
+    <sql id="Base_Where_Condition" >
+        <where>
+            <if test="id != null ">
+                and id = #{id}
+            </if>
+            <if test="paymentLogId != null ">
+                and payment_log_id = #{paymentLogId}
+            </if>
+            <if test="status != null ">
+                and status = #{status}
+            </if>
+            <if test="preStatus != null ">
+                and pre_status = #{preStatus}
+            </if>
+            <if test="createAt != null ">
+                and create_at = #{createAt}
+            </if>
+        </where>
+    </sql>
+
+
+    <!--查询支付状态流转记录列表-->
+     <select id="pagePaymentFlows" resultMap="BaseResultMap"
+        parameterType="com.lhiot.oc.basic.domain.PaymentFlow">
+	        select <include refid="Base_Column_List" />
+	        from payment_flow
+	        <include refid="Base_Where_Condition" />
+	        <include refid="common.pager" />
+    </select>
+
+    <!--查询支付状态流转记录总记录-->
+    <select id="pagePaymentFlowCounts" resultType="long"
+        parameterType="com.lhiot.oc.basic.domain.PaymentFlow">
+            select count(1)
+            from payment_flow
+            <include refid="Base_Where_Condition" />
+    </select>
+
+</mapper>

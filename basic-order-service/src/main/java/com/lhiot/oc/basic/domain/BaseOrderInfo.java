@@ -24,7 +24,7 @@ public class BaseOrderInfo extends PagerRequestObject {
     private Long id;
     private String code;
     private Long userId;
-    private ApplicationTypeEnum applicationType;
+    private ApplicationType applicationType;
     private OrderType orderType;
     private Long storeId;
     private String storeCode;

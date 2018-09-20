@@ -2,7 +2,7 @@ package com.lhiot.oc.basic.feign.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.lhiot.oc.basic.domain.common.PagerRequestObject;
-import com.lhiot.oc.basic.domain.enums.ApplicationTypeEnum;
+import com.lhiot.oc.basic.domain.enums.ApplicationType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -49,8 +49,8 @@ public class StorePosition extends PagerRequestObject {
     *应用类型
     */
     @JsonProperty("applicationType")
-    @ApiModelProperty(value = "应用类型", dataType = "ApplicationTypeEnum")
-    private ApplicationTypeEnum applicationType;
+    @ApiModelProperty(value = "应用类型", dataType = "ApplicationType")
+    private ApplicationType applicationType;
 
     /**
     *门店编号

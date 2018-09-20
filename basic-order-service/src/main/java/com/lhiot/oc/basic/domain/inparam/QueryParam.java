@@ -1,7 +1,7 @@
 package com.lhiot.oc.basic.domain.inparam;
 
 import com.lhiot.oc.basic.domain.common.PagerRequestObject;
-import com.lhiot.oc.basic.domain.enums.ApplicationTypeEnum;
+import com.lhiot.oc.basic.domain.enums.ApplicationType;
 import com.lhiot.oc.basic.domain.enums.HdStatus;
 import com.lhiot.oc.basic.domain.enums.OrderStatus;
 import io.swagger.annotations.ApiModel;
@@ -53,5 +53,5 @@ public class QueryParam extends PagerRequestObject {
     private String[] userIdList;
 
     @ApiModelProperty("应用类型")
-    private ApplicationTypeEnum applyType;
+    private ApplicationType applyType;
 }
