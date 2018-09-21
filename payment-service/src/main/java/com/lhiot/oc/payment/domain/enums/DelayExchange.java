@@ -1,4 +1,4 @@
-package com.lhiot.oc.delivery.domain.enums;
+package com.lhiot.oc.payment.domain.enums;
 
 import lombok.Getter;
 
@@ -13,12 +13,12 @@ public enum  DelayExchange {
     ORDER_FINISHED_DELAY("order--finished-delay-exchange",new DelayQueues[]{DelayQueues.ORDER_FINISHED_TIMEOUT}),//订单自动完成
     ORDER_NOTICE_DELAY("order-notice-delay-exchange",new DelayQueues[]{DelayQueues.ORDER_NOTICE_TIMEOUT}),//门店自提订单48小时超时发送短信
     ORDER_REFUND_DELAY("order-refund-delay-exchange",new DelayQueues[]{DelayQueues.ORDER_REFUND_TIMEOUT}),//门店自提订单72小时退货
-    //DIS_DELIVERY_DELAY("dis-delivery-delay-exchange",new DelayQueues[]{DelayQueues.UN_RECEIVE_RETURN}),
+    //DIS_payment_DELAY("dis-payment-delay-exchange",new DelayQueues[]{DelayQueues.UN_RECEIVE_RETURN}),
     //ORDER_SEND_TEMPLATE_DELAY("order-delay-exchange",new DelayQueues[]{DelayQueues.SEND_TEMPLATE}),
     //PAYMENT_DELAY("payment-delay-exchange",new DelayQueues[]{DelayQueues.PAYMENT_TIEMOUT}),
 
     SEND_HD_DELAY("send-hd-delay-exchange",new DelayQueues[]{DelayQueues.SEND_HD_DELAY_QUEUE}),//海鼎发送失败延迟重试
-    SEND_DELIVERY_DELAY("send-delivery-delay-exchange",new DelayQueues[]{DelayQueues.SEND_DELIVERY_DELAY_TIMEOUT});//发送到配送延迟队列
+    SEND_payment_DELAY("send-payment-delay-exchange",new DelayQueues[]{DelayQueues.SEND_payment_DELAY_TIMEOUT});//发送到配送延迟队列
     @Getter
     String exchangeName;
     @Getter
@@ -39,7 +39,7 @@ public enum  DelayExchange {
         //SEND_TEMPLATE("send-template-delay","order-send-template-message"),
         //PAYMENT_TIEMOUT("order-paying-timeout","small-order-paying-callback"),
         SEND_HD_DELAY_QUEUE("send-hd-delay-queue","order-send-hd-replay"),
-        SEND_DELIVERY_DELAY_TIMEOUT("send-delivery-delay-timeout","send-delivery-delay-timeout-callback");
+        SEND_payment_DELAY_TIMEOUT("send-payment-delay-timeout","send-payment-delay-timeout-callback");
         //FRUIT_DOCTOR_ORDER_TIMEOUT("fruit-doctor-order-timeout","fruit-doctor-order-timeout-callback");
         //WXSMALL_SHOP_ORDER_TIMEOUT("wxsmall-shop-order-timeout","wxsmall-shop-order-timeout-callback");
         @Getter
