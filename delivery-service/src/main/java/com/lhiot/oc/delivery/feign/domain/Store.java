@@ -1,8 +1,6 @@
 package com.lhiot.oc.delivery.feign.domain;
 
 import com.lhiot.oc.delivery.domain.common.PagerRequestObject;
-import com.lhiot.oc.delivery.domain.enums.StoreStatusEnum;
-import com.lhiot.oc.delivery.domain.enums.StoreTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

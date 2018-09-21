@@ -4,7 +4,7 @@
 * http://www.sgsl.com 
 * All rights reserved. 
 */
-package com.lhiot.oc.delivery.service.payment;
+package com.lhiot.oc.payment.service.payment;
 
 import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.Jackson;
@@ -12,7 +12,7 @@ import com.leon.microx.util.StringUtils;
 import com.leon.microx.util.auditing.Random;
 import com.leon.microx.util.xml.XNode;
 import com.leon.microx.util.xml.XReader;
-import com.lhiot.oc.delivery.util.DateFormatUtil;
+import com.lhiot.oc.payment.util.DateFormatUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
