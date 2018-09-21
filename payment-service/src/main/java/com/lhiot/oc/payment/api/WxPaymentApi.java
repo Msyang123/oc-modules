@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -75,21 +76,13 @@ public class WxPaymentApi {
         }
         //依据前端传递的支付商户简称查询支付配置信息
         ResponseEntity<PaymentSign> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(signParam.getAttach().getPaymentName());
-        if(Objects.isNull(paymentSignResponseEntity)||paymentSignResponseEntity.getStatusCode().isError()){
-            return ResponseEntity.badRequest().body(Tips.of(-1,"远程查询支付配置信息失败"));
+
+        ResponseEntity fetchResult=fetchAndSetAliPayConfig(paymentSignResponseEntity);
+        if(Objects.nonNull(fetchResult)){
+            return fetchResult;
         }
-        PaymentSign paymentSign = paymentSignResponseEntity.getBody();
-        if(Objects.isNull(paymentSign)) {
-            return ResponseEntity.badRequest().body(Tips.of(-1, "未找到支付配置信息"));
-        }
-        if(!Objects.equals(paymentSign.getPayPlatformType(), PayPlatformType.WEIXIN.name())){
-            return ResponseEntity.badRequest().body(Tips.of(-1,"支付配置信息与调用接口不匹配"));
-        }
-        PaymentProperties.WeChatPayConfig weChatPayConfig = weChatUtil.getProperties().getWeChatPayConfig();
-        weChatPayConfig.setNotifyUrl(signParam.getBackUrl());//设置回调地址
-        weChatPayConfig.setPartnerId(paymentSign.getPartnerId());//设置支付商户
-        weChatPayConfig.setPartnerKey(paymentSign.getPartnerKey());
-        weChatUtil.getProperties().setWeChatPayConfig(weChatPayConfig);//覆盖原有配置文件中的信息
+        weChatUtil.getProperties().getWeChatPayConfig().setNotifyUrl(signParam.getBackUrl());//设置回调地址
+
         //签名
         Tips wxSignBackMsg = weChatUtil.wxCreateSign(
                 getRemoteAddr(request),
@@ -128,20 +121,10 @@ public class WxPaymentApi {
         Attach attach = Jackson.object(xpath.evalNode("//attach").body(), Attach.class);
         //依据前端传递的支付商户简称查询支付配置信息
         ResponseEntity<PaymentSign> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(attach.getPaymentName());
-        if(Objects.isNull(paymentSignResponseEntity)||paymentSignResponseEntity.getStatusCode().isError()){
-            return ResponseEntity.badRequest().body(Tips.of(-1,"远程查询支付配置信息失败"));
+        ResponseEntity fetchResult=fetchAndSetAliPayConfig(paymentSignResponseEntity);
+        if(Objects.nonNull(fetchResult)){
+            return fetchResult;
         }
-        PaymentSign paymentSign = paymentSignResponseEntity.getBody();
-        if(Objects.isNull(paymentSign)) {
-            return ResponseEntity.badRequest().body(Tips.of(-1, "未找到支付配置信息"));
-        }
-        if(!Objects.equals(paymentSign.getPayPlatformType(), PayPlatformType.WEIXIN.name())){
-            return ResponseEntity.badRequest().body(Tips.of(-1,"支付配置信息与调用接口不匹配"));
-        }
-        PaymentProperties.WeChatPayConfig weChatPayConfig = weChatUtil.getProperties().getWeChatPayConfig();
-        weChatPayConfig.setPartnerId(paymentSign.getPartnerId());//设置支付商户
-        weChatPayConfig.setPartnerKey(paymentSign.getPartnerKey());
-        weChatUtil.getProperties().setWeChatPayConfig(weChatPayConfig);//覆盖原有配置文件中的信息
 
         //计算签名
         String backSignResult = weChatUtil.createSign(weChatUtil.getProperties().getWeChatPayConfig().getPartnerKey(), parameters);
@@ -192,21 +175,10 @@ public class WxPaymentApi {
         //只退一次 退款单编号就是支付编号
 
         ResponseEntity<PaymentSign> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(paymentName);
-        if(Objects.isNull(paymentSignResponseEntity)||paymentSignResponseEntity.getStatusCode().isError()){
-            return ResponseEntity.badRequest().body(Tips.of(-1,"远程查询支付配置信息失败"));
+        ResponseEntity fetchResult=fetchAndSetAliPayConfig(paymentSignResponseEntity);
+        if(Objects.nonNull(fetchResult)){
+            return fetchResult;
         }
-        PaymentSign paymentSign = paymentSignResponseEntity.getBody();
-        if(Objects.isNull(paymentSign)) {
-            return ResponseEntity.badRequest().body(Tips.of(-1, "未找到支付配置信息"));
-        }
-        if(!Objects.equals(paymentSign.getPayPlatformType(), PayPlatformType.WEIXIN.name())){
-            return ResponseEntity.badRequest().body(Tips.of(-1,"支付配置信息与调用接口不匹配"));
-        }
-        PaymentProperties.WeChatPayConfig weChatPayConfig = weChatUtil.getProperties().getWeChatPayConfig();
-        weChatPayConfig.setPartnerId(paymentSign.getPartnerId());//设置支付商户
-        weChatPayConfig.setPartnerKey(paymentSign.getPartnerKey());
-        weChatPayConfig.setPkcs12(resourceLoader.getResource(paymentSign.getPkcs12Url()));//网络加载微信退款签名文件
-        weChatUtil.getProperties().setWeChatPayConfig(weChatPayConfig);//覆盖原有配置文件中的信息
         boolean refundResult = weChatUtil.refund(appid,payCode,totalFee,refundFee);//退款
         if(refundResult){
             PaymentLog paymentLog=new PaymentLog();
@@ -230,6 +202,20 @@ public class WxPaymentApi {
     public ResponseEntity<Tips> cancel(@RequestParam("paymentName") String paymentName,@RequestParam("appid") String appid,@RequestParam("payCode") String payCode) {
         //依据前端传递的支付商户简称查询支付配置信息
         ResponseEntity<PaymentSign> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(paymentName);
+
+        ResponseEntity fetchResult=fetchAndSetAliPayConfig(paymentSignResponseEntity);
+        if(Objects.nonNull(fetchResult)){
+            return fetchResult;
+        }
+        boolean result = weChatUtil.cancel(appid,payCode);
+        if(result){
+            return ResponseEntity.ok(Tips.of(1,"取消微信支付成功"));
+        }
+        return ResponseEntity.badRequest().body(Tips.of(-1,"取消微信支付失败"));
+    }
+
+    @Nullable
+    private ResponseEntity fetchAndSetAliPayConfig(ResponseEntity<PaymentSign> paymentSignResponseEntity){
         if(Objects.isNull(paymentSignResponseEntity)||paymentSignResponseEntity.getStatusCode().isError()){
             return ResponseEntity.badRequest().body(Tips.of(-1,"远程查询支付配置信息失败"));
         }
@@ -243,12 +229,8 @@ public class WxPaymentApi {
         PaymentProperties.WeChatPayConfig weChatPayConfig = weChatUtil.getProperties().getWeChatPayConfig();
         weChatPayConfig.setPartnerId(paymentSign.getPartnerId());//设置支付商户
         weChatPayConfig.setPartnerKey(paymentSign.getPartnerKey());
+        weChatPayConfig.setPkcs12(resourceLoader.getResource(paymentSign.getPkcs12Url()));//网络加载微信退款签名文件
         weChatUtil.getProperties().setWeChatPayConfig(weChatPayConfig);//覆盖原有配置文件中的信息
-
-        boolean result = weChatUtil.cancel(appid,payCode);
-        if(result){
-            return ResponseEntity.ok(Tips.of(1,"取消微信支付成功"));
-        }
-        return ResponseEntity.badRequest().body(Tips.of(-1,"取消微信支付失败"));
+        return null;
     }
 }

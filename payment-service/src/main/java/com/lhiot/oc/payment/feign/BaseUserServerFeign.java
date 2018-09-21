@@ -1,6 +1,7 @@
 package com.lhiot.oc.payment.feign;
 
 import com.lhiot.oc.payment.feign.domain.BalanceOperationParam;
+import com.lhiot.oc.payment.feign.domain.BaseUserResult;
 import com.lhiot.oc.payment.feign.domain.PaymentPasswordParam;
 import com.lhiot.oc.payment.feign.domain.UserDetailResult;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -22,10 +23,18 @@ public interface BaseUserServerFeign {
 
 
 	/**
-	 * 根据id查询公共用户
+	 * 根据业务用户id查询用户
 	 */
     @RequestMapping(value="/users/user-id/{userId}",method = RequestMethod.GET)
-    ResponseEntity<UserDetailResult> findBaseUserById(@PathVariable("userId") Long userId);
+    ResponseEntity<UserDetailResult> findUserById(@PathVariable("userId") Long userId);
+
+	/**
+	 * 依据基础用户id查询基础用户
+	 * @param baseUserId
+	 * @return
+	 */
+	@RequestMapping(value="/users/base-user/{baseUserId}",method = RequestMethod.GET)
+	ResponseEntity<BaseUserResult> findBaseUserById(@PathVariable("baseUserId") Long baseUserId);
 
 
 	/**
