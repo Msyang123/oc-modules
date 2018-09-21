@@ -4,12 +4,13 @@ import com.lhiot.oc.delivery.domain.enums.ApplicationType;
 import com.lhiot.oc.delivery.feign.domain.Store;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-
+@Component
 @FeignClient("data-service-v1-0")
 public interface BasicDataService {
 

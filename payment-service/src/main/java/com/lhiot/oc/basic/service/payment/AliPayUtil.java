@@ -1,4 +1,4 @@
-package com.lhiot.oc.basic.service.payment;
+package com.lhiot.oc.delivery.service.payment;
 
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
@@ -17,7 +17,7 @@ import com.alipay.api.response.AlipayTradeRefundResponse;
 import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.Jackson;
 import com.leon.microx.util.StringUtils;
-import com.lhiot.oc.basic.domain.SignParam;
+import com.lhiot.oc.delivery.domain.SignParam;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 

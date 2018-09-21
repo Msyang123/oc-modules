@@ -1,11 +1,11 @@
-package com.lhiot.oc.basic.domain;
+package com.lhiot.oc.delivery.domain;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.lhiot.oc.basic.domain.enums.ApplicationType;
-import com.lhiot.oc.basic.domain.enums.PayPlatformType;
-import com.lhiot.oc.basic.domain.enums.PayStepType;
-import com.lhiot.oc.basic.domain.enums.SourceType;
+import com.lhiot.oc.delivery.domain.enums.ApplicationType;
+import com.lhiot.oc.delivery.domain.enums.PayPlatformType;
+import com.lhiot.oc.delivery.domain.enums.PayStepType;
+import com.lhiot.oc.delivery.domain.enums.SourceType;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import lombok.NoArgsConstructor;

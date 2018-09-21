@@ -4,7 +4,7 @@
 * http://www.sgsl.com 
 * All rights reserved. 
 */
-package com.lhiot.oc.basic.util;
+package com.lhiot.oc.delivery.util;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

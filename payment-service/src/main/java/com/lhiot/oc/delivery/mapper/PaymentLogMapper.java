@@ -1,9 +1,8 @@
-package com.lhiot.oc.basic.mapper;
+package com.lhiot.oc.delivery.mapper;
 
-import com.lhiot.oc.basic.domain.PaymentLog;
+import com.lhiot.oc.delivery.domain.PaymentLog;
 import org.apache.ibatis.annotations.Mapper;
 
-import java.util.List;
 import java.util.Map;
 
 @Mapper

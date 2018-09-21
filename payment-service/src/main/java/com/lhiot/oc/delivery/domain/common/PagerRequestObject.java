@@ -1,5 +1,5 @@
 
-package com.lhiot.oc.basic.domain.common;
+package com.lhiot.oc.delivery.domain.common;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
