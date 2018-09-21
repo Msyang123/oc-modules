@@ -1,6 +1,7 @@
 package com.lhiot.oc.payment.feign;
 
 import com.lhiot.oc.payment.feign.domain.BalanceOperationParam;
+import com.lhiot.oc.payment.feign.domain.PaymentPasswordParam;
 import com.lhiot.oc.payment.feign.domain.UserDetailResult;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -39,5 +40,11 @@ public interface BaseUserServerFeign {
 	 */
 	@RequestMapping(value="/users/balance/{id}",method = RequestMethod.GET)
 	ResponseEntity<Long> findFruitCurrency(@PathVariable("id") Long baseUserId);
+
+	/**
+	 * 判断是否可使用余额支付
+	 */
+	@RequestMapping(value="/users/payment-password",method = RequestMethod.PUT)
+	ResponseEntity determinePaymentPassword(@RequestBody PaymentPasswordParam param);
 
 }

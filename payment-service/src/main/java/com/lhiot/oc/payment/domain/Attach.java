@@ -30,4 +30,7 @@ public class Attach {
     @ApiModelProperty(value = "支付商户名称简称", dataType = "String")
     private String paymentName;
 
+    @ApiModelProperty(value = "鲜果币支付密码", dataType = "String")
+    private String paymentPassword;
+
 }

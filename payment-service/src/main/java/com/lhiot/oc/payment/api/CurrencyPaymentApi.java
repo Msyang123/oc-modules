@@ -10,6 +10,7 @@ import com.lhiot.oc.payment.domain.enums.SourceType;
 import com.lhiot.oc.payment.feign.BaseUserServerFeign;
 import com.lhiot.oc.payment.feign.domain.BalanceOperationParam;
 import com.lhiot.oc.payment.feign.domain.OperationStatus;
+import com.lhiot.oc.payment.feign.domain.PaymentPasswordParam;
 import com.lhiot.oc.payment.feign.domain.UserDetailResult;
 import com.lhiot.oc.payment.service.PaymentLogService;
 import io.swagger.annotations.Api;
@@ -120,6 +121,14 @@ public class CurrencyPaymentApi {
         }
         if (signParam.getFee()<=0) {
             return ResponseEntity.badRequest().body(Tips.of("-1", "支付金额不能小于0"));
+        }
+        PaymentPasswordParam paymentPasswordParam=new PaymentPasswordParam();
+        paymentPasswordParam.setPaymentPassword(signParam.getAttach().getPaymentPassword());
+        paymentPasswordParam.setUserId(signParam.getAttach().getBaseuserId());
+        ResponseEntity verificationResult = baseUserServerFeign.determinePaymentPassword(paymentPasswordParam);
+
+        if (Objects.isNull(verificationResult)||verificationResult.getStatusCode().isError()){
+            return ResponseEntity.badRequest().body(Tips.of("-1", "鲜果币支付密码不正确"));
         }
 
         BalanceOperationParam balanceOperationParam=new BalanceOperationParam();
