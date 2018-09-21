@@ -1,7 +1,7 @@
 package com.lhiot.oc.basic.mapper;
 
 import com.lhiot.oc.basic.model.BaseOrderInfo;
-import org.mapstruct.Mapper;
+import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
 /**

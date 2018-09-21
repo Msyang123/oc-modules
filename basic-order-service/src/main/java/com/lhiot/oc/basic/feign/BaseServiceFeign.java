@@ -4,6 +4,9 @@ import com.lhiot.oc.basic.model.ApplicationTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 
 /**
@@ -14,7 +17,7 @@ import org.springframework.stereotype.Component;
 @Component
 public interface BaseServiceFeign {
 
-
-    ResponseEntity storeById(Long storeId, ApplicationTypeEnum applicationTypeEnum);
+    @RequestMapping(value="/{storeId}",method = RequestMethod.GET)
+    ResponseEntity storeById(@PathVariable Long storeId, ApplicationTypeEnum applicationTypeEnum);
 
 }
