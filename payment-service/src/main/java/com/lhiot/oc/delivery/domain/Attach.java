@@ -1,7 +1,7 @@
-package com.lhiot.oc.basic.domain;
+package com.lhiot.oc.delivery.domain;
 
-import com.lhiot.oc.basic.domain.enums.ApplicationType;
-import com.lhiot.oc.basic.domain.enums.SourceType;
+import com.lhiot.oc.delivery.domain.enums.ApplicationType;
+import com.lhiot.oc.delivery.domain.enums.SourceType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

@@ -1,6 +1,6 @@
-package com.lhiot.oc.basic.mapper;
+package com.lhiot.oc.delivery.mapper;
 
-import com.lhiot.oc.basic.domain.PaymentRefund;
+import com.lhiot.oc.delivery.domain.PaymentRefund;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;

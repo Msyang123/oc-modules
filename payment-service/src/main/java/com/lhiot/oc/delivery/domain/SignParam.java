@@ -1,6 +1,6 @@
-package com.lhiot.oc.basic.domain;
+package com.lhiot.oc.delivery.domain;
 
-import com.lhiot.oc.basic.feign.domain.OperationStatus;
+import com.lhiot.oc.delivery.feign.domain.OperationStatus;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

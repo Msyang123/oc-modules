@@ -1,9 +1,9 @@
-package com.lhiot.oc.basic.domain;
+package com.lhiot.oc.delivery.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.lhiot.oc.basic.domain.common.PagerRequestObject;
-import com.lhiot.oc.basic.domain.enums.PayStepType;
+import com.lhiot.oc.delivery.domain.common.PagerRequestObject;
+import com.lhiot.oc.delivery.domain.enums.PayStepType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

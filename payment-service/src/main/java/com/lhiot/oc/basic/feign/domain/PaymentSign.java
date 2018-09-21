@@ -1,4 +1,4 @@
-package com.lhiot.oc.basic.feign.domain;
+package com.lhiot.oc.delivery.feign.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;

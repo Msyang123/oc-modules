@@ -6,7 +6,7 @@
 * @date 2017年7月17日 上午10:59:45
 * @version V1.0
 */
-package com.lhiot.oc.basic.domain.common;
+package com.lhiot.oc.delivery.domain.common;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

@@ -12,7 +12,7 @@
 
     <modules>
         <module>basic-order-service</module>
-        <module>basic-delivery-service</module>
+        <module>delivery-service</module>
         <module>payment-service</module>
     </modules>
 

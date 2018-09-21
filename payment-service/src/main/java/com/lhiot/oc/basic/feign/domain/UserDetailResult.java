@@ -1,10 +1,10 @@
-package com.lhiot.oc.basic.feign.domain;
+package com.lhiot.oc.delivery.feign.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.lhiot.oc.basic.domain.enums.ApplicationType;
+import com.lhiot.oc.delivery.domain.enums.ApplicationType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
