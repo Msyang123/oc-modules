@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.lhiot.order.mapper.TransferOrderLogMapper">
-    <insert id="create" parameterType="com.lhiot.order.domain.TransferOrderLog" useGeneratedKeys="true" keyProperty="id">
-      INSERT INTO transfer_order_log(order_id,order_code,store_id,operation_user,create_at)
-      VALUE (#{orderId},#{orderCode},#{storeId},#{operationUser},now() )
-    </insert>
-</mapper>
