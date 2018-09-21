@@ -1,4 +1,4 @@
-package com.lhiot.oc.basic;
+package com.lhiot.oc.payment;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,7 +1,7 @@
-package com.lhiot.oc.delivery.feign;
+package com.lhiot.oc.payment.feign;
 
-import com.lhiot.oc.delivery.feign.domain.BalanceOperationParam;
-import com.lhiot.oc.delivery.feign.domain.UserDetailResult;
+import com.lhiot.oc.payment.feign.domain.BalanceOperationParam;
+import com.lhiot.oc.payment.feign.domain.UserDetailResult;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;

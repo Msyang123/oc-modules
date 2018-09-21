@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.lhiot.oc.delivery.mapper.PaymentFlowMapper">
+<mapper namespace="com.lhiot.oc.payment.mapper.PaymentFlowMapper">
 
     <!-- 数据库字段对象关系映射 -->
     <resultMap id="BaseResultMap"
-        type="com.lhiot.oc.delivery.domain.PaymentFlow" >
+        type="com.lhiot.oc.payment.domain.PaymentFlow" >
         <id column="id" property="id"/>
         <result column="payment_log_id" property="paymentLogId" />
         <result column="status" property="status" />
@@ -24,7 +24,7 @@
     </sql>
 
     <!--新增支付状态流转记录-->
-    <insert id="create" parameterType="com.lhiot.oc.delivery.domain.PaymentFlow" useGeneratedKeys="true" keyProperty="id">
+    <insert id="create" parameterType="com.lhiot.oc.payment.domain.PaymentFlow" useGeneratedKeys="true" keyProperty="id">
         insert into payment_flow
         <trim prefix="(" suffix=")" suffixOverrides="," >
             <if test="paymentLogId != null ">
@@ -57,7 +57,7 @@
     </insert>
 
     <!--根据id修改支付状态流转记录-->
-    <update id="updateById" parameterType="com.lhiot.oc.delivery.domain.PaymentFlow">
+    <update id="updateById" parameterType="com.lhiot.oc.payment.domain.PaymentFlow">
         update payment_flow
         <set>
             <if test="paymentLogId != null ">
@@ -117,7 +117,7 @@
 
     <!--查询支付状态流转记录列表-->
      <select id="pagePaymentFlows" resultMap="BaseResultMap"
-        parameterType="com.lhiot.oc.delivery.domain.PaymentFlow">
+        parameterType="com.lhiot.oc.payment.domain.PaymentFlow">
 	        select <include refid="Base_Column_List" />
 	        from payment_flow
 	        <include refid="Base_Where_Condition" />
@@ -126,7 +126,7 @@
 
     <!--查询支付状态流转记录总记录-->
     <select id="pagePaymentFlowCounts" resultType="long"
-        parameterType="com.lhiot.oc.delivery.domain.PaymentFlow">
+        parameterType="com.lhiot.oc.payment.domain.PaymentFlow">
             select count(1)
             from payment_flow
             <include refid="Base_Where_Condition" />

@@ -1,4 +1,4 @@
-package com.lhiot.oc.delivery.feign.domain;
+package com.lhiot.oc.payment.feign.domain;
 
 /**
  * @Author zhangfeng created in 2018/9/12 9:24

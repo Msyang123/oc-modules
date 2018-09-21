@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.lhiot.oc.delivery.mapper.PaymentLogMapper">
+<mapper namespace="com.lhiot.oc.payment.mapper.PaymentLogMapper">
 
-    <insert id="insertPaymentLog" parameterType="com.lhiot.oc.delivery.domain.PaymentLog"
+    <insert id="insertPaymentLog" parameterType="com.lhiot.oc.payment.domain.PaymentLog"
             useGeneratedKeys="true"
             keyProperty="id">
         insert into payment_log (
@@ -21,7 +21,7 @@
                   )
     </insert>
 
-    <update id="updatePaymentLog" parameterType="com.lhiot.oc.delivery.domain.PaymentLog">
+    <update id="updatePaymentLog" parameterType="com.lhiot.oc.payment.domain.PaymentLog">
         update payment_log
         <set>
             <if test="tradeId!=null and tradeId!=''">
@@ -46,11 +46,11 @@
         where pay_code=#{payCode}
     </update>
 
-    <select id="getPaymentLogByPayCode" parameterType="String" resultType="com.lhiot.oc.delivery.domain.PaymentLog">
+    <select id="getPaymentLogByPayCode" parameterType="String" resultType="com.lhiot.oc.payment.domain.PaymentLog">
         select * from payment_log where pay_code=#{0} limit 1
     </select>
 
-    <select id="getPaymentLogByPayCodeAndPayStep" resultType="com.lhiot.oc.delivery.domain.PaymentLog" parameterType="map">
+    <select id="getPaymentLogByPayCodeAndPayStep" resultType="com.lhiot.oc.payment.domain.PaymentLog" parameterType="map">
         select * from payment_log where pay_code = #{payCode} and pay_step = #{payStep}
     </select>
 </mapper>
