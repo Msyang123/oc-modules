@@ -102,30 +102,30 @@ public class DadaDeliveryApi {
 
 
     @ApiOperation(value = "达达模拟配送接单")
-    @GetMapping("/accept/{orderId}")
-    public ResponseEntity<String> accept(@RequestParam("orderId") String orderId){
-        return ResponseEntity.ok(dadaClient.accept(orderId));
+    @GetMapping("/accept/{hdOrderCode}")
+    public ResponseEntity<String> accept(@RequestParam("hdOrderCode") String hdOrderCode){
+        return ResponseEntity.ok(dadaClient.accept(hdOrderCode));
     }
     @ApiOperation(value = "达达模拟配送取货")
-    @GetMapping("/fetch/{orderId}")
-    public ResponseEntity<String> fetch(@RequestParam("orderId") String orderId){
-        return ResponseEntity.ok(dadaClient.fetch(orderId));
+    @GetMapping("/fetch/{hdOrderCode}")
+    public ResponseEntity<String> fetch(@RequestParam("hdOrderCode") String hdOrderCode){
+        return ResponseEntity.ok(dadaClient.fetch(hdOrderCode));
     }
     @ApiOperation(value = "达达模拟配送完成")
-    @GetMapping("/finish/{orderId}")
-    public ResponseEntity<String> finish(@RequestParam("orderId") String orderId){
-        return ResponseEntity.ok(dadaClient.finish(orderId));
+    @GetMapping("/finish/{hdOrderCode}")
+    public ResponseEntity<String> finish(@RequestParam("hdOrderCode") String hdOrderCode){
+        return ResponseEntity.ok(dadaClient.finish(hdOrderCode));
     }
     @ApiOperation(value = "达达模拟配送取消")
-    @GetMapping("/cancel/{orderId}")
-    public ResponseEntity<String> cancel(@RequestParam("orderId") String orderId){
-        return ResponseEntity.ok(dadaClient.cancel(orderId));
+    @GetMapping("/cancel/{hdOrderCode}")
+    public ResponseEntity<String> cancel(@RequestParam("hdOrderCode") String hdOrderCode){
+        return ResponseEntity.ok(dadaClient.cancel(hdOrderCode));
     }
 
     @ApiOperation(value = "达达模拟配送过期")
-    @GetMapping("/expire/{orderId}")
-    public ResponseEntity<String> expire(@RequestParam("orderId") String orderId){
-        return ResponseEntity.ok(dadaClient.expire(orderId));
+    @GetMapping("/expire/{hdOrderCode}")
+    public ResponseEntity<String> expire(@RequestParam("hdOrderCode") String hdOrderCode){
+        return ResponseEntity.ok(dadaClient.expire(hdOrderCode));
     }
 
 

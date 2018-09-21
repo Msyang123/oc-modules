@@ -133,9 +133,9 @@ public class DeliverNote extends PagerRequestObject {
     /**
      *门店编码
      */
-    @JsonProperty("StoreCode")
+    @JsonProperty("storeCode")
     @ApiModelProperty(value = "门店编码", dataType = "String")
-    private String StoreCode;
+    private String storeCode;
 
     /**
      *备注

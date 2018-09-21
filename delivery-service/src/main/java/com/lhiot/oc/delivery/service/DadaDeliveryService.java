@@ -130,15 +130,17 @@ public class DadaDeliveryService implements IDelivery {
      * @Date: 2018/7/19
      */
     public Tips cancel(String hdOrderCode, int cancelReasonId, String cancelReason) {
-        String cancelResult= null;
+        DeliverNote searchDeliverNote = deliveryNoteService.selectByDeliverCode(hdOrderCode);
+        if(Objects.isNull(searchDeliverNote)){
+            return Tips.of(-1,"未找到配送单信息");
+        }
         try {
-            cancelResult = dadaClient.cancel(hdOrderCode,cancelReasonId,cancelReason);
+            String cancelResult = dadaClient.cancel(hdOrderCode,cancelReasonId,cancelReason);
             log.info("达达配送取消配送订单{}",cancelResult);
-            DeliverNote deliverNote=new DeliverNote();
-            deliverNote.setFailureCause(cancelReason);
-            deliverNote.setCancelTime(new Date());
-            deliverNote.setDeliverStatus(DeliveryStatus.FAILURE);
-            deliveryNoteService.updateById(deliverNote);
+            searchDeliverNote.setFailureCause(cancelReason);
+            searchDeliverNote.setCancelTime(new Date());
+            searchDeliverNote.setDeliverStatus(DeliveryStatus.FAILURE);
+            deliveryNoteService.updateById(searchDeliverNote);
             return Tips.of(1, "取消成功");
         } catch (IOException e) {
             log.error("达达配送取消配送订单失败{}",e);

@@ -197,10 +197,10 @@
                 deliver_status = #{deliverStatus},
             </if>
             <if test="storeCode != null ">
-                #{storeCode},
+                store_code = #{storeCode},
             </if>
             <if test="remark != null ">
-                #{remark},
+                remark = #{remark},
             </if>
         </set>
         where id=#{id}

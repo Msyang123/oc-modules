@@ -40,7 +40,6 @@ public class FengNiaoDeliveryClient {
      * @return JSON String
      */
     public String deliver(ElemeCreateOrderRequest.ElemeCreateRequestData request, TokenResponse token) throws IOException {
-        request.setNotifyUrl(this.properties.getBackUrl());
         return this.send(new ElemeCreateOrderRequest(), request, FengNiaoServerApi.ORDER_CREATE, token);
     }
 
