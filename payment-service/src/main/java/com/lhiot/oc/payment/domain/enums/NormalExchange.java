@@ -1,4 +1,4 @@
-package com.lhiot.oc.delivery.domain.enums;
+package com.lhiot.oc.payment.domain.enums;
 
 import lombok.Getter;
 
