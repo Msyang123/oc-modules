@@ -21,6 +21,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
@@ -56,23 +57,12 @@ public class AliPaymentApi {
         }
         //依据前端传递的支付商户简称查询支付配置信息
         ResponseEntity<PaymentSign> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(signParam.getAttach().getPaymentName());
-        if(Objects.isNull(paymentSignResponseEntity)||paymentSignResponseEntity.getStatusCode().isError()){
-            return ResponseEntity.badRequest().body(Tips.of(-1,"远程查询支付配置信息失败"));
+
+        ResponseEntity fetchResult=fetchAndSetAliPayConfig(paymentSignResponseEntity);
+        if(Objects.nonNull(fetchResult)){
+            return fetchResult;
         }
-        PaymentSign paymentSign = paymentSignResponseEntity.getBody();
-        if(Objects.isNull(paymentSign)) {
-            return ResponseEntity.badRequest().body(Tips.of(-1, "未找到支付配置信息"));
-        }
-        if(!Objects.equals(paymentSign.getPayPlatformType(), PayPlatformType.ALIPAY.name())){
-            return ResponseEntity.badRequest().body(Tips.of(-1,"支付配置信息与调用接口不匹配"));
-        }
-        PaymentProperties.AliPayConfig aliPayConfig = aliPayUtil.getProperties().getAliPayConfig();
-        aliPayConfig.setNotifyUrl(signParam.getBackUrl());//设置回调地址
-        aliPayConfig.setAppId(paymentSign.getPartnerId());//设置支付商户
-        aliPayConfig.setAliPayPublicKey(paymentSign.getPartnerKey());//设置公钥
-        aliPayConfig.setAliPayPrivateKey(paymentSign.getPrivateKey());//设置私钥
-        aliPayConfig.setSellerId(paymentSign.getAliSellerId());//设置支付销售账户
-        aliPayUtil.getProperties().setAliPayConfig(aliPayConfig);//覆盖原有配置文件中的信息
+        aliPayUtil.getProperties().getAliPayConfig().setNotifyUrl(signParam.getBackUrl());//设置回调地址
 
         AlipayTradeAppPayModel model = aliPayUtil.createAliPayTradeAppPayModel(signParam);
         model.setTotalAmount(AliPayUtil.fenToYuan(signParam.getFee()));//转换成元
@@ -102,22 +92,10 @@ public class AliPaymentApi {
 
         //依据前端传递的支付商户简称查询支付配置信息
         ResponseEntity<PaymentSign> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(attach.getPaymentName());
-        if(Objects.isNull(paymentSignResponseEntity)||paymentSignResponseEntity.getStatusCode().isError()){
-            return ResponseEntity.badRequest().body(Tips.of(-1,"远程查询支付配置信息失败"));
+        ResponseEntity fetchResult=fetchAndSetAliPayConfig(paymentSignResponseEntity);
+        if(Objects.nonNull(fetchResult)){
+            return fetchResult;
         }
-        PaymentSign paymentSign = paymentSignResponseEntity.getBody();
-        if(Objects.isNull(paymentSign)) {
-            return ResponseEntity.badRequest().body(Tips.of(-1, "未找到支付配置信息"));
-        }
-        if(!Objects.equals(paymentSign.getPayPlatformType(), PayPlatformType.ALIPAY.name())){
-            return ResponseEntity.badRequest().body(Tips.of(-1,"支付配置信息与调用接口不匹配"));
-        }
-        PaymentProperties.AliPayConfig aliPayConfig = aliPayUtil.getProperties().getAliPayConfig();
-        aliPayConfig.setAppId(paymentSign.getPartnerId());//设置支付商户
-        aliPayConfig.setAliPayPublicKey(paymentSign.getPartnerKey());//设置公钥
-        aliPayConfig.setAliPayPrivateKey(paymentSign.getPrivateKey());//设置私钥
-        aliPayConfig.setSellerId(paymentSign.getAliSellerId());//设置支付销售账户
-        aliPayUtil.getProperties().setAliPayConfig(aliPayConfig);//覆盖原有配置文件中的信息
 
         //计算签名
         if (aliPayUtil.verifySeller(params)) {
@@ -152,28 +130,15 @@ public class AliPaymentApi {
 
     @ApiOperation(value = "撤销支付宝支付")
     @PutMapping("/cancel/{payCode}")
-    public ResponseEntity<Tips> cancel(@PathVariable("payCode") String payCode,@RequestParam("paymentName") String paymentName,
-                                       @RequestParam("refundMemo") String refundMemo) throws AlipayApiException {
+    public ResponseEntity<Tips> cancel(@PathVariable("payCode") String payCode,@RequestParam("paymentName") String paymentName) throws AlipayApiException {
         log.info("========撤销支付宝支付成功，后台回调=======");
 
         //依据前端传递的支付商户简称查询支付配置信息
         ResponseEntity<PaymentSign> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(paymentName);
-        if(Objects.isNull(paymentSignResponseEntity)||paymentSignResponseEntity.getStatusCode().isError()){
-            return ResponseEntity.badRequest().body(Tips.of(-1,"远程查询支付配置信息失败"));
+        ResponseEntity fetchResult=fetchAndSetAliPayConfig(paymentSignResponseEntity);
+        if(Objects.nonNull(fetchResult)){
+            return fetchResult;
         }
-        PaymentSign paymentSign = paymentSignResponseEntity.getBody();
-        if(Objects.isNull(paymentSign)) {
-            return ResponseEntity.badRequest().body(Tips.of(-1, "未找到支付配置信息"));
-        }
-        if(!Objects.equals(paymentSign.getPayPlatformType(), PayPlatformType.ALIPAY.name())){
-            return ResponseEntity.badRequest().body(Tips.of(-1,"支付配置信息与调用接口不匹配"));
-        }
-        PaymentProperties.AliPayConfig aliPayConfig = aliPayUtil.getProperties().getAliPayConfig();
-        aliPayConfig.setAppId(paymentSign.getPartnerId());//设置支付商户
-        aliPayConfig.setAliPayPublicKey(paymentSign.getPartnerKey());//设置公钥
-        aliPayConfig.setAliPayPrivateKey(paymentSign.getPrivateKey());//设置私钥
-        aliPayConfig.setSellerId(paymentSign.getAliSellerId());//设置支付销售账户
-        aliPayUtil.getProperties().setAliPayConfig(aliPayConfig);//覆盖原有配置文件中的信息
 
         AlipayTradeCancelModel model=new AlipayTradeCancelModel();
         model.setOutTradeNo(payCode);
@@ -202,6 +167,31 @@ public class AliPaymentApi {
         //只退一次 退款单编号就是支付编号
 
         ResponseEntity<PaymentSign> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(paymentName);
+
+        ResponseEntity fetchResult=fetchAndSetAliPayConfig(paymentSignResponseEntity);
+        if(Objects.nonNull(fetchResult)){
+            return fetchResult;
+        }
+        boolean refundResult = aliPayUtil.refund(payCode,aliPayUtil.fenToYuan(refundFee),refundMemo,payCode);//退款
+        if(refundResult){
+            PaymentLog paymentLog=new PaymentLog();
+            paymentLog.setPayCode(payCode);
+            paymentLog.setPayStep(PayStepType.REFUND);//支付步骤
+            //记录日志
+            paymentLogService.updatePaymentLog(paymentLog,refundMemo);
+            return ResponseEntity.ok(Tips.of(1,"退款成功"));
+        }
+
+        return ResponseEntity.ok(Tips.of(-1,"退款失败"));
+    }
+
+    /**
+     * 获取并设置支付宝配置信息
+     * @param paymentSignResponseEntity
+     * @return
+     */
+    @Nullable
+    private ResponseEntity fetchAndSetAliPayConfig(ResponseEntity<PaymentSign> paymentSignResponseEntity){
         if(Objects.isNull(paymentSignResponseEntity)||paymentSignResponseEntity.getStatusCode().isError()){
             return ResponseEntity.badRequest().body(Tips.of(-1,"远程查询支付配置信息失败"));
         }
@@ -218,17 +208,6 @@ public class AliPaymentApi {
         aliPayConfig.setAliPayPrivateKey(paymentSign.getPrivateKey());//设置私钥
         aliPayConfig.setSellerId(paymentSign.getAliSellerId());//设置支付销售账户
         aliPayUtil.getProperties().setAliPayConfig(aliPayConfig);//覆盖原有配置文件中的信息
-        boolean refundResult = aliPayUtil.refund(payCode,aliPayUtil.fenToYuan(refundFee),refundMemo,payCode);//退款
-        if(refundResult){
-            PaymentLog paymentLog=new PaymentLog();
-            paymentLog.setPayCode(payCode);
-            paymentLog.setPayStep(PayStepType.REFUND);//支付步骤
-            //记录日志
-            paymentLogService.updatePaymentLog(paymentLog,refundMemo);
-            return ResponseEntity.ok(Tips.of(1,"退款成功"));
-        }
-
-        return ResponseEntity.ok(Tips.of(-1,"退款失败"));
+        return null;
     }
-
 }

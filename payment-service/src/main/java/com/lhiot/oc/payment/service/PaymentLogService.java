@@ -10,6 +10,7 @@ import com.lhiot.oc.payment.domain.enums.PayPlatformType;
 import com.lhiot.oc.payment.domain.enums.PayStepType;
 import com.lhiot.oc.payment.domain.enums.SourceType;
 import com.lhiot.oc.payment.feign.BaseUserServerFeign;
+import com.lhiot.oc.payment.feign.domain.BaseUserResult;
 import com.lhiot.oc.payment.feign.domain.UserDetailResult;
 import com.lhiot.oc.payment.mapper.PaymentFlowMapper;
 import com.lhiot.oc.payment.mapper.PaymentLogMapper;
@@ -157,7 +158,7 @@ public class PaymentLogService {
             if (Objects.isNull(signParam.getAttach().getBaseuserId())) {
                 return Tips.of("-1", "充值基础用户信息不能为空");
             }
-            ResponseEntity<UserDetailResult> baseUser = baseUserServerFeign.findBaseUserById(signParam.getAttach().getBaseuserId());
+            ResponseEntity<BaseUserResult> baseUser = baseUserServerFeign.findBaseUserById(signParam.getAttach().getBaseuserId());
             if(Objects.isNull(baseUser)||baseUser.getStatusCode().isError()){
                 return Tips.of("-1", "充值基础用户不存在");
             }
