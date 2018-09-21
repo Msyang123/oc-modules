@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 
-@FeignClient("payment-order-service-v1-0")
+@FeignClient("order-service-v1-0")
 @Component
 public interface OrderService {
 
