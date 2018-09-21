@@ -57,9 +57,12 @@ public class AliPaymentApi {
         //依据前端传递的支付商户简称查询支付配置信息
         ResponseEntity<PaymentSign> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(signParam.getAttach().getPaymentName());
         if(Objects.isNull(paymentSignResponseEntity)||paymentSignResponseEntity.getStatusCode().isError()){
-            return ResponseEntity.badRequest().body(Tips.of(-1,"未找到支付配置信息"));
+            return ResponseEntity.badRequest().body(Tips.of(-1,"远程查询支付配置信息失败"));
         }
         PaymentSign paymentSign = paymentSignResponseEntity.getBody();
+        if(Objects.isNull(paymentSign)) {
+            return ResponseEntity.badRequest().body(Tips.of(-1, "未找到支付配置信息"));
+        }
         if(!Objects.equals(paymentSign.getPayPlatformType(), PayPlatformType.ALIPAY.name())){
             return ResponseEntity.badRequest().body(Tips.of(-1,"支付配置信息与调用接口不匹配"));
         }
@@ -68,6 +71,7 @@ public class AliPaymentApi {
         aliPayConfig.setAppId(paymentSign.getPartnerId());//设置支付商户
         aliPayConfig.setAliPayPublicKey(paymentSign.getPartnerKey());//设置公钥
         aliPayConfig.setAliPayPrivateKey(paymentSign.getPrivateKey());//设置私钥
+        aliPayConfig.setSellerId(paymentSign.getAliSellerId());//设置支付销售账户
         aliPayUtil.getProperties().setAliPayConfig(aliPayConfig);//覆盖原有配置文件中的信息
 
         AlipayTradeAppPayModel model = aliPayUtil.createAliPayTradeAppPayModel(signParam);
@@ -99,9 +103,12 @@ public class AliPaymentApi {
         //依据前端传递的支付商户简称查询支付配置信息
         ResponseEntity<PaymentSign> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(attach.getPaymentName());
         if(Objects.isNull(paymentSignResponseEntity)||paymentSignResponseEntity.getStatusCode().isError()){
-            return ResponseEntity.badRequest().body(Tips.of(-1,"未找到支付配置信息"));
+            return ResponseEntity.badRequest().body(Tips.of(-1,"远程查询支付配置信息失败"));
         }
         PaymentSign paymentSign = paymentSignResponseEntity.getBody();
+        if(Objects.isNull(paymentSign)) {
+            return ResponseEntity.badRequest().body(Tips.of(-1, "未找到支付配置信息"));
+        }
         if(!Objects.equals(paymentSign.getPayPlatformType(), PayPlatformType.ALIPAY.name())){
             return ResponseEntity.badRequest().body(Tips.of(-1,"支付配置信息与调用接口不匹配"));
         }
@@ -109,6 +116,7 @@ public class AliPaymentApi {
         aliPayConfig.setAppId(paymentSign.getPartnerId());//设置支付商户
         aliPayConfig.setAliPayPublicKey(paymentSign.getPartnerKey());//设置公钥
         aliPayConfig.setAliPayPrivateKey(paymentSign.getPrivateKey());//设置私钥
+        aliPayConfig.setSellerId(paymentSign.getAliSellerId());//设置支付销售账户
         aliPayUtil.getProperties().setAliPayConfig(aliPayConfig);//覆盖原有配置文件中的信息
 
         //计算签名
@@ -151,9 +159,12 @@ public class AliPaymentApi {
         //依据前端传递的支付商户简称查询支付配置信息
         ResponseEntity<PaymentSign> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(paymentName);
         if(Objects.isNull(paymentSignResponseEntity)||paymentSignResponseEntity.getStatusCode().isError()){
-            return ResponseEntity.badRequest().body(Tips.of(-1,"未找到支付配置信息"));
+            return ResponseEntity.badRequest().body(Tips.of(-1,"远程查询支付配置信息失败"));
         }
         PaymentSign paymentSign = paymentSignResponseEntity.getBody();
+        if(Objects.isNull(paymentSign)) {
+            return ResponseEntity.badRequest().body(Tips.of(-1, "未找到支付配置信息"));
+        }
         if(!Objects.equals(paymentSign.getPayPlatformType(), PayPlatformType.ALIPAY.name())){
             return ResponseEntity.badRequest().body(Tips.of(-1,"支付配置信息与调用接口不匹配"));
         }
@@ -161,6 +172,7 @@ public class AliPaymentApi {
         aliPayConfig.setAppId(paymentSign.getPartnerId());//设置支付商户
         aliPayConfig.setAliPayPublicKey(paymentSign.getPartnerKey());//设置公钥
         aliPayConfig.setAliPayPrivateKey(paymentSign.getPrivateKey());//设置私钥
+        aliPayConfig.setSellerId(paymentSign.getAliSellerId());//设置支付销售账户
         aliPayUtil.getProperties().setAliPayConfig(aliPayConfig);//覆盖原有配置文件中的信息
 
         AlipayTradeCancelModel model=new AlipayTradeCancelModel();
@@ -191,9 +203,12 @@ public class AliPaymentApi {
 
         ResponseEntity<PaymentSign> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(paymentName);
         if(Objects.isNull(paymentSignResponseEntity)||paymentSignResponseEntity.getStatusCode().isError()){
-            return ResponseEntity.badRequest().body(Tips.of(-1,"未找到支付配置信息"));
+            return ResponseEntity.badRequest().body(Tips.of(-1,"远程查询支付配置信息失败"));
         }
         PaymentSign paymentSign = paymentSignResponseEntity.getBody();
+        if(Objects.isNull(paymentSign)) {
+            return ResponseEntity.badRequest().body(Tips.of(-1, "未找到支付配置信息"));
+        }
         if(!Objects.equals(paymentSign.getPayPlatformType(), PayPlatformType.ALIPAY.name())){
             return ResponseEntity.badRequest().body(Tips.of(-1,"支付配置信息与调用接口不匹配"));
         }
@@ -201,6 +216,7 @@ public class AliPaymentApi {
         aliPayConfig.setAppId(paymentSign.getPartnerId());//设置支付商户
         aliPayConfig.setAliPayPublicKey(paymentSign.getPartnerKey());//设置公钥
         aliPayConfig.setAliPayPrivateKey(paymentSign.getPrivateKey());//设置私钥
+        aliPayConfig.setSellerId(paymentSign.getAliSellerId());//设置支付销售账户
         aliPayUtil.getProperties().setAliPayConfig(aliPayConfig);//覆盖原有配置文件中的信息
         boolean refundResult = aliPayUtil.refund(payCode,aliPayUtil.fenToYuan(refundFee),refundMemo,payCode);//退款
         if(refundResult){

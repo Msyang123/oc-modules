@@ -76,9 +76,12 @@ public class WxPaymentApi {
         //依据前端传递的支付商户简称查询支付配置信息
         ResponseEntity<PaymentSign> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(signParam.getAttach().getPaymentName());
         if(Objects.isNull(paymentSignResponseEntity)||paymentSignResponseEntity.getStatusCode().isError()){
-            return ResponseEntity.badRequest().body(Tips.of(-1,"未找到支付配置信息"));
+            return ResponseEntity.badRequest().body(Tips.of(-1,"远程查询支付配置信息失败"));
         }
         PaymentSign paymentSign = paymentSignResponseEntity.getBody();
+        if(Objects.isNull(paymentSign)) {
+            return ResponseEntity.badRequest().body(Tips.of(-1, "未找到支付配置信息"));
+        }
         if(!Objects.equals(paymentSign.getPayPlatformType(), PayPlatformType.WEIXIN.name())){
             return ResponseEntity.badRequest().body(Tips.of(-1,"支付配置信息与调用接口不匹配"));
         }
@@ -126,9 +129,12 @@ public class WxPaymentApi {
         //依据前端传递的支付商户简称查询支付配置信息
         ResponseEntity<PaymentSign> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(attach.getPaymentName());
         if(Objects.isNull(paymentSignResponseEntity)||paymentSignResponseEntity.getStatusCode().isError()){
-            return ResponseEntity.badRequest().body(Tips.of(-1,"未找到支付配置信息"));
+            return ResponseEntity.badRequest().body(Tips.of(-1,"远程查询支付配置信息失败"));
         }
         PaymentSign paymentSign = paymentSignResponseEntity.getBody();
+        if(Objects.isNull(paymentSign)) {
+            return ResponseEntity.badRequest().body(Tips.of(-1, "未找到支付配置信息"));
+        }
         if(!Objects.equals(paymentSign.getPayPlatformType(), PayPlatformType.WEIXIN.name())){
             return ResponseEntity.badRequest().body(Tips.of(-1,"支付配置信息与调用接口不匹配"));
         }
@@ -187,9 +193,12 @@ public class WxPaymentApi {
 
         ResponseEntity<PaymentSign> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(paymentName);
         if(Objects.isNull(paymentSignResponseEntity)||paymentSignResponseEntity.getStatusCode().isError()){
-            return ResponseEntity.badRequest().body(Tips.of(-1,"未找到支付配置信息"));
+            return ResponseEntity.badRequest().body(Tips.of(-1,"远程查询支付配置信息失败"));
         }
         PaymentSign paymentSign = paymentSignResponseEntity.getBody();
+        if(Objects.isNull(paymentSign)) {
+            return ResponseEntity.badRequest().body(Tips.of(-1, "未找到支付配置信息"));
+        }
         if(!Objects.equals(paymentSign.getPayPlatformType(), PayPlatformType.WEIXIN.name())){
             return ResponseEntity.badRequest().body(Tips.of(-1,"支付配置信息与调用接口不匹配"));
         }
@@ -213,12 +222,33 @@ public class WxPaymentApi {
 
     @ApiOperation("取消微信支付处理")
     @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "query", name = "paymentName", value = "支付商户名称简称", required = true, dataType = "String"),
             @ApiImplicitParam(paramType = "query", name = "appid", value = "微信应用appid", required = true, dataType = "String"),
             @ApiImplicitParam(paramType = "query", name = "payCode", value = "支付code", required = true, dataType = "String")
     })
     @PutMapping("/cancel")
-    public ResponseEntity<Tips> cancel(@RequestParam("appid") String appid,@RequestParam("payCode") String payCode) {
-        weChatUtil.cancel(appid,payCode);
-        return ResponseEntity.ok(Tips.of(1,"取消微信支付成功"));
+    public ResponseEntity<Tips> cancel(@RequestParam("paymentName") String paymentName,@RequestParam("appid") String appid,@RequestParam("payCode") String payCode) {
+        //依据前端传递的支付商户简称查询支付配置信息
+        ResponseEntity<PaymentSign> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(paymentName);
+        if(Objects.isNull(paymentSignResponseEntity)||paymentSignResponseEntity.getStatusCode().isError()){
+            return ResponseEntity.badRequest().body(Tips.of(-1,"远程查询支付配置信息失败"));
+        }
+        PaymentSign paymentSign = paymentSignResponseEntity.getBody();
+        if(Objects.isNull(paymentSign)) {
+            return ResponseEntity.badRequest().body(Tips.of(-1, "未找到支付配置信息"));
+        }
+        if(!Objects.equals(paymentSign.getPayPlatformType(), PayPlatformType.WEIXIN.name())){
+            return ResponseEntity.badRequest().body(Tips.of(-1,"支付配置信息与调用接口不匹配"));
+        }
+        PaymentProperties.WeChatPayConfig weChatPayConfig = weChatUtil.getProperties().getWeChatPayConfig();
+        weChatPayConfig.setPartnerId(paymentSign.getPartnerId());//设置支付商户
+        weChatPayConfig.setPartnerKey(paymentSign.getPartnerKey());
+        weChatUtil.getProperties().setWeChatPayConfig(weChatPayConfig);//覆盖原有配置文件中的信息
+
+        boolean result = weChatUtil.cancel(appid,payCode);
+        if(result){
+            return ResponseEntity.ok(Tips.of(1,"取消微信支付成功"));
+        }
+        return ResponseEntity.badRequest().body(Tips.of(-1,"取消微信支付失败"));
     }
 }

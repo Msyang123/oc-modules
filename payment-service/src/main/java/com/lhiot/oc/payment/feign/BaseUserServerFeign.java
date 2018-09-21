@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * 用户中心基础服务
  * Created by yj
  */
-@FeignClient("base-user-service-v1-0-0")
+@FeignClient("basic-user-service-v1-0")
 @Component
 public interface BaseUserServerFeign {
 
