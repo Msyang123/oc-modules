@@ -1,4 +1,4 @@
-package com.lhiot.oc.delivery.feign.domain;
+package com.lhiot.oc.basic.model;
 
 import lombok.Data;
 
