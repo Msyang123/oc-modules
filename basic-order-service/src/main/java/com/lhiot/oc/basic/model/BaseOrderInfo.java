@@ -21,7 +21,7 @@ public class BaseOrderInfo{
     private Long id;
     private String code;
     private Long userId;
-    private ApplicationTypeEnum applicationType;
+    private ApplicationType applicationType;
     private ReceivingWay receivingWay;
     private Integer totalAmount;
     private Integer amountPayable;

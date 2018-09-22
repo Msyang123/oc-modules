@@ -1,4 +1,4 @@
-package com.lhiot.oc.basic.model;
+/*package com.lhiot.oc.basic.model;
 
 import lombok.Data;
 
@@ -15,4 +15,4 @@ public class StoreInfo {
     //纬度
     private String storeCoordx;
 
-}
+}*/
