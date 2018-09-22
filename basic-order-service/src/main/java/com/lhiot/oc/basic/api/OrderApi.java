@@ -4,8 +4,11 @@ import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.BeanUtils;
 import com.leon.microx.util.StringUtils;
 import com.lhiot.oc.basic.feign.BaseServiceFeign;
-import com.lhiot.oc.basic.model.StoreInfo;
-import com.lhiot.oc.basic.model.*;
+import com.lhiot.oc.basic.model.Store;
+import com.lhiot.oc.basic.model.CreateOrderParam;
+import com.lhiot.oc.basic.model.OrderDetailResult;
+import com.lhiot.oc.basic.model.OrderProductParam;
+import com.lhiot.oc.basic.model.OrderStore;
 import com.lhiot.oc.basic.service.OrderService;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -49,7 +52,7 @@ public class OrderApi {
         }
 
         //判断门店是否存在
-        ResponseEntity<StoreInfo> storeResponse = baseServiceFeign.storeById(orderParam.getStoreId(),orderParam.getApplicationType());
+        ResponseEntity<Store> storeResponse = baseServiceFeign.findStoreById(orderParam.getStoreId(),orderParam.getApplicationType());
         if (Objects.isNull(storeResponse) || !storeResponse.getStatusCode().is2xxSuccessful() || Objects.isNull(storeResponse.getBody())) {
             return ResponseEntity.badRequest().body("查询门店信息失败");
         }
@@ -64,8 +67,9 @@ public class OrderApi {
         List<String> shelfIdList = orderParam.getOrderProducts().parallelStream()
                 .map(OrderProductParam::getShelfId).map(String::valueOf).collect(Collectors.toList());
 
+        Store store = storeResponse.getBody();
         baseServiceFeign.findProductByProductIdList(StringUtils.arrayToDelimitedString(shelfIdList.toArray(),","));
-        StoreInfo store = storeResponse.getBody();
+//        StoreInfo store = storeResponse.getBody();
         OrderStore orderStore = new OrderStore();
         BeanUtils.of(orderStore).populate(store);
 
