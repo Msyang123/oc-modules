@@ -5,7 +5,7 @@ import lombok.Getter;
 /**
  * 应用类型
  */
-public enum ApplicationTypeEnum {
+public enum ApplicationType {
     APP("视食"),
     WECHAT_MALL("微商城"),
     S_MALL("小程序"),
@@ -14,7 +14,7 @@ public enum ApplicationTypeEnum {
     @Getter
     private String description;
 
-    ApplicationTypeEnum(String description) {
+    ApplicationType(String description) {
         this.description = description;
     }
 }

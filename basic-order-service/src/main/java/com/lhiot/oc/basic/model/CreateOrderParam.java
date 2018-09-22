@@ -13,7 +13,7 @@ import java.util.List;
 public class CreateOrderParam {
 
     private Long userId;
-    private ApplicationTypeEnum applicationType;
+    private ApplicationType applicationType;
     private Long storeId;
     private ReceivingWay receivingWay;
     private Integer couponAmount = 0;

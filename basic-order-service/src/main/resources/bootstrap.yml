@@ -1,5 +1,5 @@
 server:
-  port: 8221
+  port: 8111
 spring:
   application:
     name: base-order-service-v1-0
