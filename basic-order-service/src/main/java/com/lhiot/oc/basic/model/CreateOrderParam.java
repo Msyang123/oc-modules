@@ -1,6 +1,7 @@
 package com.lhiot.oc.basic.model;
 
 import com.leon.microx.util.BeanUtils;
+import com.lhiot.oc.basic.model.type.ApplicationType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

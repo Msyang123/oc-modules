@@ -1,7 +1,7 @@
-package com.lhiot.oc.basic.feign.domain;
+package com.lhiot.oc.basic.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.lhiot.oc.basic.model.ApplicationType;
+import com.lhiot.oc.basic.model.type.ApplicationType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

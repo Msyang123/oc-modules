@@ -2,9 +2,13 @@ package com.lhiot.oc.basic.api;
 
 import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.BeanUtils;
+import com.leon.microx.util.StringUtils;
 import com.lhiot.oc.basic.feign.BaseServiceFeign;
-import com.lhiot.oc.basic.feign.domain.Store;
-import com.lhiot.oc.basic.model.*;
+import com.lhiot.oc.basic.model.Store;
+import com.lhiot.oc.basic.model.CreateOrderParam;
+import com.lhiot.oc.basic.model.OrderDetailResult;
+import com.lhiot.oc.basic.model.OrderProductParam;
+import com.lhiot.oc.basic.model.OrderStore;
 import com.lhiot.oc.basic.service.OrderService;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -63,8 +67,9 @@ public class OrderApi {
         List<String> shelfIdList = orderParam.getOrderProducts().parallelStream()
                 .map(OrderProductParam::getShelfId).map(String::valueOf).collect(Collectors.toList());
 
-
         Store store = storeResponse.getBody();
+        baseServiceFeign.findProductByProductIdList(StringUtils.arrayToDelimitedString(shelfIdList.toArray(),","));
+//        StoreInfo store = storeResponse.getBody();
         OrderStore orderStore = new OrderStore();
         BeanUtils.of(orderStore).populate(store);
 

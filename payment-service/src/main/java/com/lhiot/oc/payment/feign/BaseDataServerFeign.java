@@ -21,7 +21,7 @@ public interface BaseDataServerFeign {
 	/**
 	 * 根据支付商户名称简称查询支付签名信息
 	 */
-    @RequestMapping(value="/payment-sign/by-name/{paymentName}",method = RequestMethod.GET)
+    @RequestMapping(value="/payment/config/by-name/{paymentName}",method = RequestMethod.GET)
     ResponseEntity<PaymentSign> findPaymentSignByPaymentName(@PathVariable("paymentName") String paymentName);
 
 }

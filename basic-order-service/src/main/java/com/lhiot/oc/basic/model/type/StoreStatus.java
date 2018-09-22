@@ -1,11 +1,11 @@
-package com.lhiot.oc.basic.feign.domain;
+package com.lhiot.oc.basic.model.type;
 
 import lombok.Getter;
 
 /**
  * 门店状态枚举
  */
-public enum StoreStatusEnum {
+public enum StoreStatus {
     ENABLED("营业"),
     DISABLED("未营业");
 
@@ -13,7 +13,7 @@ public enum StoreStatusEnum {
     @Getter
     private String  decription;
 
-    StoreStatusEnum(String decription) {
+    StoreStatus(String decription) {
         this.decription = decription;
     }
 }
