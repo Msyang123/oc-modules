@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -15,7 +15,6 @@ public class CreateOrderParam {
 
     private Long userId;
     private ApplicationType applicationType;
-    private Long storeId;
     private ReceivingWay receivingWay;
     private Integer couponAmount = 0;
     private Integer totalAmount;
@@ -32,20 +31,22 @@ public class CreateOrderParam {
     private String contactPhone;
     private String remark;
     @ApiModelProperty(notes = "提货截止时间", dataType = "String")
-    private Timestamp deliveryEndTime;
-    @ApiModelProperty(notes = "商品列表", dataType = "java.util.List")
-    private List<OrderProductParam> orderProducts;
+    private Date deliveryEndTime;
     @ApiModelProperty(notes = "配送时间 json格式如 {\"display\":\"立即配送\",\"startTime\":\"2018-08-15 11:30:00\",\"endTime\":\"2018-08-15 12:30:00\"}", dataType = "String")
     private String deliveryTime;
+    @ApiModelProperty(notes = "商品列表", dataType = "OrderProduct")
+    private List<OrderProduct> orderProducts;
+    @ApiModelProperty(notes = "门店信息", dataType = "OrderStoreParam")
+    private OrderStore orderStore;
 
     /**
      * 对象属性复制
      *
      * @return
      */
-    public BaseOrderInfo toOrderObject() {
-        BaseOrderInfo baseOrderInfo = new BaseOrderInfo();
-        BeanUtils.of(baseOrderInfo).populate(BeanUtils.of(this).toMap());
-        return baseOrderInfo;
+    public BaseOrder toOrderObject() {
+        BaseOrder baseOrder = new BaseOrder();
+        BeanUtils.of(baseOrder).populate(BeanUtils.of(this).toMap());
+        return baseOrder;
     }
 }

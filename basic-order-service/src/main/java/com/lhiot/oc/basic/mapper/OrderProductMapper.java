@@ -14,7 +14,7 @@ import java.util.Map;
 @Repository
 public interface OrderProductMapper {
 
-    OrderProduct batchInsert(List<OrderProduct> orderProducts);
+    int batchInsert(List<OrderProduct> orderProducts);
 
     List<OrderProduct> findOrderProductsByOrderId(long orderId);
 

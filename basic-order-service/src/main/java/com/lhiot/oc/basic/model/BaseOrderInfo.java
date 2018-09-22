@@ -17,7 +17,7 @@ import java.util.List;
 @Data
 @ApiModel
 @EqualsAndHashCode(callSuper = false)
-public class BaseOrderInfo{
+public class BaseOrderInfo {
 
     @ApiModelProperty(notes = "id", dataType = "int64")
     @JsonSerialize(using = ToStringSerializer.class)

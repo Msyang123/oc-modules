@@ -7,11 +7,11 @@ import lombok.Getter;
  */
 public enum StoreType {
     ORDINARY_STORE("普通门店"),
-    FLAGSHIP_STORE ("旗舰店");
+    FLAGSHIP_STORE("旗舰店");
 
 
     @Getter
-    private String  decription;
+    private String decription;
 
     StoreType(String decription) {
         this.decription = decription;

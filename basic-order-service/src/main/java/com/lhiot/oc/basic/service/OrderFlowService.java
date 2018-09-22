@@ -20,7 +20,7 @@ public class OrderFlowService {
         this.orderFlowMapper = orderFlowMapper;
     }
 
-    public int create(BaseOrderInfo searchBaseOrderInfo,BaseOrderInfo baseOrderInfo){
+    public int create(BaseOrderInfo searchBaseOrderInfo, BaseOrderInfo baseOrderInfo) {
 
         OrderFlow orderFlow = new OrderFlow();
         orderFlow.setOrderId(baseOrderInfo.getId());
@@ -31,7 +31,7 @@ public class OrderFlowService {
     }
 
     //根据订单id查询
-    public List<OrderFlow> flowByOrderId(Long orderId){
+    public List<OrderFlow> flowByOrderId(Long orderId) {
         return orderFlowMapper.flowByOrderId(orderId);
     }
 }

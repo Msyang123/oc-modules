@@ -9,8 +9,8 @@ import lombok.Data;
  * Description: 分页请求参数
  *
  * @author Limiaojun
- * @date: 2018-04-19 14:24:23
  * @version 1.0
+ * @date: 2018-04-19 14:24:23
  * @since JDK 1.8
  */
 @Data
@@ -24,7 +24,9 @@ public class PagerRequestObject {
     @ApiModelProperty(value = "当前页,默认值1")
     private Long page = DEFAULT_PAGE;
 
-    /** 传入-1可不分页 */
+    /**
+     * 传入-1可不分页
+     */
     @JsonIgnore
     @ApiModelProperty(value = "每页显示条数,默认值10")
     private Long rows = DEFAULT_ROWS;
@@ -41,7 +43,9 @@ public class PagerRequestObject {
     @ApiModelProperty(value = "开始行数(执行sql时用)", hidden = true)
     private Long startRow;
 
-    /** 分页sql获取起始行 */
+    /**
+     * 分页sql获取起始行
+     */
     public Long getStartRow() {
         return (page - 1) * rows;
     }

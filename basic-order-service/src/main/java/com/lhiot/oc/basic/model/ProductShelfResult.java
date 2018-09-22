@@ -24,27 +24,27 @@ public class ProductShelfResult {
     private String shelfImage;
     private Integer originalPrice;
     private String description;
-    @ApiModelProperty(notes = "规格Id",dataType = "Long")
+    @ApiModelProperty(notes = "规格Id", dataType = "Long")
     private Long specificationId;
-    @ApiModelProperty(notes = "规格条码",dataType = "String")
+    @ApiModelProperty(notes = "规格条码", dataType = "String")
     private String barcode;
-    @ApiModelProperty(notes = "打包单位",dataType = "String")
+    @ApiModelProperty(notes = "打包单位", dataType = "String")
     private String packagingUnit;
-    @ApiModelProperty(notes = "单个规格重量",dataType = "BigDecimal")
+    @ApiModelProperty(notes = "单个规格重量", dataType = "BigDecimal")
     private BigDecimal weight;
-    @ApiModelProperty(notes = "安全库存",dataType = "Long")
+    @ApiModelProperty(notes = "安全库存", dataType = "Long")
     private Long limitInventory;
-    @ApiModelProperty(notes = "售价",dataType = "Long")
+    @ApiModelProperty(notes = "售价", dataType = "Long")
     private Long price;
-    @ApiModelProperty(notes = "是否是库存规格：YES-是，NO-否",dataType = "InventorySpecification")
+    @ApiModelProperty(notes = "是否是库存规格：YES-是，NO-否", dataType = "InventorySpecification")
     private InventorySpecification inventorySpecification;
-    @ApiModelProperty(notes = "规格是否可用：YES-是，NO-否",dataType = "AvailableStatus")
+    @ApiModelProperty(notes = "规格是否可用：YES-是，NO-否", dataType = "AvailableStatus")
     private AvailableStatus availableStatus;
-    @ApiModelProperty(notes = "商品Id",dataType = "Long")
+    @ApiModelProperty(notes = "商品Id", dataType = "Long")
     private Long productId;
-    @ApiModelProperty(notes = "商品名称",dataType = "String")
+    @ApiModelProperty(notes = "商品名称", dataType = "String")
     private String productName;
-    @ApiModelProperty(notes = "商品主图",dataType = "String")
+    @ApiModelProperty(notes = "商品主图", dataType = "String")
     private String productImage;
     private List<ProductAttachment> attachmentList;
 }

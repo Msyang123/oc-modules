@@ -5,7 +5,7 @@ import lombok.Getter;
 /**
  * 订单状态
  */
-public enum  OrderStatus {
+public enum OrderStatus {
     WAIT_PAYMENT("待支付"),
     WAIT_SEND_OUT("待发货"),
     SEND_OUT("已发货"),

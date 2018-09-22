@@ -13,9 +13,10 @@ public enum AttachmentType {
     VIDEO("视频");
     @Getter
     private String description;
-    AttachmentType(String description){this.description = description;}
 
-
+    AttachmentType(String description) {
+        this.description = description;
+    }
 
 
 }

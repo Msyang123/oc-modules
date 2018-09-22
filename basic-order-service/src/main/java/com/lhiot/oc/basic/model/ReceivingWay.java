@@ -2,7 +2,7 @@ package com.lhiot.oc.basic.model;
 
 import lombok.Getter;
 
-public enum  ReceivingWay {
+public enum ReceivingWay {
     TO_THE_STORE("门店自提"),
     TO_THE_HOME("送货上门");
 

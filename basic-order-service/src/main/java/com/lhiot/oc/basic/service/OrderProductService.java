@@ -22,17 +22,17 @@ public class OrderProductService {
         this.orderProductMapper = orderProductMapper;
     }
 
-    public OrderProduct batchInsert(List<OrderProduct> orderProducts){
+    public int batchInsert(List<OrderProduct> orderProducts) {
         return orderProductMapper.batchInsert(orderProducts);
     }
 
-    public List<OrderProduct> findOrderProductsByOrderId(long orderId){
+    public List<OrderProduct> findOrderProductsByOrderId(long orderId) {
         return orderProductMapper.findOrderProductsByOrderId(orderId);
     }
 
     //修改订单商品状态
-    public boolean updateOrderProductByIds(Long orderId, RefundStatus refundStatus, List<String> orderProductIds){
-        Map<String,Object> param = Maps.of("orderId", orderId,
+    public boolean updateOrderProductByIds(Long orderId, RefundStatus refundStatus, List<String> orderProductIds) {
+        Map<String, Object> param = Maps.of("orderId", orderId,
                 "refundStatus", refundStatus,
                 "orderProductIds", orderProductIds);
         return orderProductMapper.updateOrderProductByIds(param) > 0;

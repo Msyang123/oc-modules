@@ -1,5 +1,6 @@
 package com.lhiot.oc.basic.mapper;
 
+import com.lhiot.oc.basic.model.BaseOrder;
 import com.lhiot.oc.basic.model.BaseOrderInfo;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
@@ -11,10 +12,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BaseOrderMapper {
 
-    BaseOrderInfo insert(BaseOrderInfo baseOrderInfo);
+    int insert(BaseOrder baseOrder);
 
     /**
      * 依据订单id修改订单状态
+     *
      * @param baseOrderInfo
      * @return
      */
@@ -22,6 +24,7 @@ public interface BaseOrderMapper {
 
     /**
      * 依据订单code修改订单状态
+     *
      * @param baseOrderInfo
      * @return
      */

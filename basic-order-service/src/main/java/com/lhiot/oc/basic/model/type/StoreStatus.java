@@ -11,7 +11,7 @@ public enum StoreStatus {
 
 
     @Getter
-    private String  decription;
+    private String decription;
 
     StoreStatus(String decription) {
         this.decription = decription;

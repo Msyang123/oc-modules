@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.lhiot.oc.basic.mapper.OrderProductMapper">
 
-    <insert id="batchInsert" parameterType="java.util.List">
+    <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="true" keyColumn="id">
         INSERT INTO order_product(order_id,specification_id,barcode,
         total_price,product_qty,specification_qty,refund_status,discount_price,
         product_name,image,total_weight,source_id,source_type)
