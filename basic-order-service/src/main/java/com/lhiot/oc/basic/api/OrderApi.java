@@ -2,6 +2,7 @@ package com.lhiot.oc.basic.api;
 
 import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.BeanUtils;
+import com.leon.microx.util.SnowflakeId;
 import com.leon.microx.util.StringUtils;
 import com.lhiot.oc.basic.feign.BaseServiceFeign;
 import com.lhiot.oc.basic.model.*;
@@ -30,10 +31,13 @@ public class OrderApi {
 
     private OrderService orderService;
     private  BaseServiceFeign baseServiceFeign;
+    private SnowflakeId snowflakeId;
+    private static final String HD_CANCEL_ORDER_SUCCESS_RESULT_STRING = "{\"success\":true}";
 
-    public OrderApi(OrderService orderService, BaseServiceFeign baseServiceFeign) {
+    public OrderApi(OrderService orderService, BaseServiceFeign baseServiceFeign, SnowflakeId snowflakeId) {
         this.orderService = orderService;
         this.baseServiceFeign = baseServiceFeign;
+        this.snowflakeId = snowflakeId;
     }
 
     @PostMapping("/create/assortment")
@@ -169,5 +173,54 @@ public class OrderApi {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.badRequest().body("更新订单状态为已收货失败");
+    }
+
+
+    /**
+     * start****************************************海鼎调货处理******************************************************/
+    @ApiOperation("海鼎订单调货")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "path", name = "orderCode", value = "调货订单编码", dataType = "String", required = true),
+            @ApiImplicitParam(paramType = "query", name = "storeId", value = "调货目标门店id", dataType = "Long", required = true),
+            @ApiImplicitParam(paramType = "query", name = "operationUser", value = "操作人", dataType = "String", required = true)
+    })
+    @PutMapping("/{orderCode}/store")
+    public ResponseEntity modifyStoreInOrder(@PathVariable("orderCode") String orderCode, @RequestParam Long storeId, @RequestParam String operationUser) {
+        BaseOrderInfo searchBaseOrderInfo = orderService.findByCode(orderCode);
+        if (!Objects.equals(OrderStatus.WAIT_SEND_OUT, searchBaseOrderInfo.getStatus()) || !Objects.equals(HdStatus.SEND_OUT, searchBaseOrderInfo.getHdStatus())) {
+            log.info("订单状态：" + searchBaseOrderInfo.getStatus() + "----海鼎状态：" + searchBaseOrderInfo.getHdStatus());
+            return ResponseEntity.badRequest().body("当前订单状态不可调货！");
+        }
+        //远程查找调货门店 不需要查询门店位置
+        ResponseEntity<Store> storeInfoResponseEntity = baseServiceFeign.findStoreById(storeId,null);
+        if (storeInfoResponseEntity == null || storeInfoResponseEntity.getStatusCode().isError()) {
+            log.info("远程查找调货门店查询失败：{}",storeId);
+            return ResponseEntity.badRequest().body( "远程查找调货门店查询失败，请重试！");
+        }
+        Store storeInfo = storeInfoResponseEntity.getBody();
+        if (storeInfo == null) {
+            log.info("远程查找调货门店查询未找到门店：{}",storeId);
+            return ResponseEntity.badRequest().body( "远程查找调货门店查询未找到门店，请重试！");
+        }
+
+        //TODO 发送海鼎取消订单 基于当前的 HdOrderCode
+        ResponseEntity<String> hdResponse = null;//thirdPartyServiceFeign.hdOrderCancel(orderInfo.getHdOrderCode(), "海鼎调货");
+        if (hdResponse == null || !Objects.equals(HD_CANCEL_ORDER_SUCCESS_RESULT_STRING, hdResponse.getBody())) {
+            log.info("海鼎取消订单编号为：" + searchBaseOrderInfo.getHdOrderCode());
+            return ResponseEntity.badRequest().body("海鼎取消订单失败，请重试！");
+        }
+
+        //TODO 发送海鼎新的门店订单信息 是否需要校验库存 待定
+        ResponseEntity hdReduceResponse =null; //thirdPartyServiceFeign.hdReduce(orderInfo);
+        if (hdReduceResponse == null || hdReduceResponse.getStatusCode().isError()) {
+            //TODO 此处需要重试或者其他方式处理
+            return ResponseEntity.badRequest().body("海鼎发送失败！");
+        }
+        //修改订单hdCode以及添加调货门店信息
+        int result =orderService.changeStore(snowflakeId.orderId(),storeInfo,operationUser,searchBaseOrderInfo.getId());
+        if(result>0){
+            return ResponseEntity.ok().body("调货成功");
+        }
+        return ResponseEntity.badRequest().body("调货失败");
     }
 }

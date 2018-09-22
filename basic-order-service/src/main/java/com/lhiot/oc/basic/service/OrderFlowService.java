@@ -25,7 +25,7 @@ public class OrderFlowService {
         OrderFlow orderFlow = new OrderFlow();
         orderFlow.setOrderId(baseOrderInfo.getId());
         orderFlow.setStatus(baseOrderInfo.getStatus());
-        orderFlow.setPreStatus(searchBaseOrderInfo.getStatus());
+        orderFlow.setPreStatus(searchBaseOrderInfo==null?null:searchBaseOrderInfo.getStatus());
         orderFlow.setCreateAt(new Timestamp(System.currentTimeMillis()));
         return orderFlowMapper.create(orderFlow);
     }
