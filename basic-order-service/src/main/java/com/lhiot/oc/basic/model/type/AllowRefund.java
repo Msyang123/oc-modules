@@ -1,4 +1,4 @@
-package com.lhiot.oc.basic.model;
+package com.lhiot.oc.basic.model.type;
 
 /**
  * @Author zhangfeng created in 2018/9/19 15:29

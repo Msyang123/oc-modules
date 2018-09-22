@@ -24,5 +24,6 @@ eureka:
       defaultZone: ${EUREKA_REPLICAS_LIST:http://172.16.10.203:1111/eureka}
 oc-modules:
   basic-order-service:
-    snowflake-id: 2
+    snowflake-id:
       worker-id: 2
+      data-center-id: 2

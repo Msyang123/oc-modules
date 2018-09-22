@@ -3,6 +3,8 @@ package com.lhiot.oc.basic.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.lhiot.oc.basic.model.type.AllowRefund;
+import com.lhiot.oc.basic.model.type.ApplicationType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -21,7 +23,7 @@ public class BaseOrderInfo{
     private Long id;
     private String code;
     private Long userId;
-    private ApplicationTypeEnum applicationType;
+    private ApplicationType applicationType;
     private ReceivingWay receivingWay;
     private Integer totalAmount;
     private Integer amountPayable;

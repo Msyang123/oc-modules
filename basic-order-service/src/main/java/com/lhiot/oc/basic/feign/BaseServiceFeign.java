@@ -1,9 +1,14 @@
 package com.lhiot.oc.basic.feign;
 
-import com.lhiot.oc.basic.model.ApplicationTypeEnum;
+import com.leon.microx.support.result.Multiple;
+import com.lhiot.oc.basic.model.type.ApplicationType;
+import com.lhiot.oc.basic.model.ProductShelfResult;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 /**
@@ -15,6 +20,9 @@ import org.springframework.stereotype.Component;
 public interface BaseServiceFeign {
 
 
-    ResponseEntity storeById(Long storeId, ApplicationTypeEnum applicationTypeEnum);
+    ResponseEntity storeById(Long storeId, ApplicationType applicationType);
+
+    @RequestMapping(value = "/products/shelf/list",method = RequestMethod.GET)
+    ResponseEntity<Multiple<ProductShelfResult>> findProductByProductIdList(@RequestParam("shelfIds") String shelfIds);
 
 }

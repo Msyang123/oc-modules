@@ -2,6 +2,7 @@ package com.lhiot.oc.basic.api;
 
 import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.BeanUtils;
+import com.leon.microx.util.StringUtils;
 import com.lhiot.oc.basic.feign.BaseServiceFeign;
 import com.lhiot.oc.basic.model.StoreInfo;
 import com.lhiot.oc.basic.model.*;
@@ -63,7 +64,7 @@ public class OrderApi {
         List<String> shelfIdList = orderParam.getOrderProducts().parallelStream()
                 .map(OrderProductParam::getShelfId).map(String::valueOf).collect(Collectors.toList());
 
-
+        baseServiceFeign.findProductByProductIdList(StringUtils.arrayToDelimitedString(shelfIdList.toArray(),","));
         StoreInfo store = storeResponse.getBody();
         OrderStore orderStore = new OrderStore();
         BeanUtils.of(orderStore).populate(store);
