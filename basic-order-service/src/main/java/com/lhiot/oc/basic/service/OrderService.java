@@ -15,10 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @Author zhangfeng created in 2018/9/19 9:19
@@ -64,6 +61,9 @@ public class OrderService {
         orderStore.setHdOrderCode(baseOrderInfo.getHdOrderCode());
         orderStore.setOrderId(baseOrderInfo.getId());
         orderStoreMapper.insert(orderStore);
+
+        //构建写order_flow库的数据
+        orderFlowService.create(null,baseOrderInfo);
 
         OrderDetailResult orderDetail = new OrderDetailResult();
         BeanUtils.of(orderDetail).populate(baseOrderInfo);
@@ -190,6 +190,36 @@ public class OrderService {
             this.orderProductService.updateOrderProductByIds(searchBaseOrderInfo.getId(),RefundStatus.REFUND,orderProductIds);
             //构建写order_flow库的数据
             orderFlowService.create(searchBaseOrderInfo,baseOrderInfo);
+        }
+        return result;
+    }
+
+    /**
+     * 门店调货
+     * @param targetStore
+     * @param operationUser
+     * @param orderId
+     * @return
+     */
+    public int changeStore(Store targetStore,String operationUser,Long orderId){
+
+        //修改订单为待收货状态
+        BaseOrderInfo baseOrderInfo=new BaseOrderInfo();
+        baseOrderInfo.setId(orderId);
+        baseOrderInfo.setHdOrderCode(snowflakeId.stringId());
+        int result = baseOrderMapper.updateHdOrderCodeById(baseOrderInfo);
+
+        if(result>0){
+            //设置调货订单门店信息
+            OrderStore orderStore=new OrderStore();
+            orderStore.setHdOrderCode(baseOrderInfo.getHdOrderCode());
+            orderStore.setOrderId(orderId);
+            orderStore.setStoreId(targetStore.getId());
+            orderStore.setStoreName(targetStore.getStoreName());
+            orderStore.setStoreCode(targetStore.getStoreCode());
+            orderStore.setOperationUser(operationUser);
+            orderStore.setCreateAt(new Date());
+            orderStoreMapper.insert(orderStore);
         }
         return result;
     }
