@@ -4,11 +4,8 @@ import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.BeanUtils;
 import com.leon.microx.util.StringUtils;
 import com.lhiot.oc.basic.feign.BaseServiceFeign;
-import com.lhiot.oc.basic.model.Store;
-import com.lhiot.oc.basic.model.CreateOrderParam;
-import com.lhiot.oc.basic.model.OrderDetailResult;
-import com.lhiot.oc.basic.model.OrderProductParam;
-import com.lhiot.oc.basic.model.OrderStore;
+import com.lhiot.oc.basic.model.*;
+import com.lhiot.oc.basic.model.type.AllowRefund;
 import com.lhiot.oc.basic.service.OrderService;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -121,7 +118,7 @@ public class OrderApi {
         if(Objects.isNull(searchBaseOrderInfo)){
             return ResponseEntity.badRequest().body("未找到订单");
         }
-        if(Objects.equals(searchBaseOrderInfo.getAllowRefund(),AllowRefund.NO)){
+        if(Objects.equals(searchBaseOrderInfo.getAllowRefund(), AllowRefund.NO)){
             return ResponseEntity.badRequest().body("订单未非允许退货订单");
         }
         //只允许待发货 已发货 退货中的订单退货
