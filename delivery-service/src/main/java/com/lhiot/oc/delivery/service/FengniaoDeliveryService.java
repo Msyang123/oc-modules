@@ -10,7 +10,6 @@ import com.lhiot.oc.delivery.domain.enums.DeliverNeedConver;
 import com.lhiot.oc.delivery.domain.enums.DeliverType;
 import com.lhiot.oc.delivery.domain.enums.DeliveryStatus;
 import com.lhiot.oc.delivery.feign.BasicDataService;
-import com.lhiot.oc.delivery.feign.OrderService;
 import com.lhiot.oc.delivery.feign.domain.Store;
 import com.lhiot.oc.delivery.fengniao.FengNiaoDeliveryClient;
 import com.lhiot.oc.delivery.fengniao.vo.*;
@@ -38,17 +37,16 @@ public class FengniaoDeliveryService implements IDelivery {
 
 	private final DeliveryNoteService deliveryNoteService;
 	private final BasicDataService basicDataService;
-    private final OrderService orderService;
+    //private final OrderService orderService;
     private final DeliverBaseOrderService deliverBaseOrderService;
 	private final FengNiaoDeliveryClient fengNiaoClient;
     private final RedissonClient redissonClient;
 
 
 	public FengniaoDeliveryService(DeliveryNoteService deliveryNoteService, BasicDataService basicDataService,
-								   OrderService orderService, DeliverBaseOrderService deliverBaseOrderService,
+								   DeliverBaseOrderService deliverBaseOrderService,
 								   FengNiaoDeliveryClient fengNiaoClient, RedissonClient redissonClient){
         this.basicDataService = basicDataService;
-        this.orderService = orderService;
 		this.fengNiaoClient = fengNiaoClient;
         this.deliveryNoteService = deliveryNoteService;
 		this.deliverBaseOrderService = deliverBaseOrderService;
@@ -283,7 +281,7 @@ public class FengniaoDeliveryService implements IDelivery {
 				deliverNote.setDeliverStatus(DeliveryStatus.TRANSFERING);
 				deliveryNoteService.updateById(deliverNote);
 				//修改订单状态为配送中
-				orderService.delivering(deliverNote.getOrderId());
+				//orderService.delivering(deliverNote.getOrderId());
 				break;
 			case 3:
 				// 已送达
@@ -292,7 +290,7 @@ public class FengniaoDeliveryService implements IDelivery {
 				deliverNote.setDeliverStatus(DeliveryStatus.DONE);
 				deliveryNoteService.updateById(deliverNote);
 				//修改订单状态为已收货
-                orderService.received(deliverNote.getOrderId());
+                //orderService.received(deliverNote.getOrderId());
 				break;
 			case 5:
 				log.error("系统拒单");
