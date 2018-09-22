@@ -11,7 +11,6 @@ import com.lhiot.oc.delivery.domain.DeliverNote;
 import com.lhiot.oc.delivery.domain.enums.DeliverNeedConver;
 import com.lhiot.oc.delivery.domain.enums.DeliverType;
 import com.lhiot.oc.delivery.domain.enums.DeliveryStatus;
-import com.lhiot.oc.delivery.feign.OrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,13 +26,12 @@ import java.util.Objects;
 public class DadaDeliveryService implements IDelivery {
 
     private final DeliveryNoteService deliveryNoteService;
-    private final OrderService orderService;
+    //private final OrderService orderService;
     private final DeliverBaseOrderService deliverBaseOrderService;
     private final DadaDeliveryClient dadaClient;
 
-    public DadaDeliveryService(DeliveryNoteService deliveryNoteService, OrderService orderService, DeliverBaseOrderService deliverBaseOrderService,DadaDeliveryClient dadaClient) {
+    public DadaDeliveryService(DeliveryNoteService deliveryNoteService,DeliverBaseOrderService deliverBaseOrderService,DadaDeliveryClient dadaClient) {
         this.deliveryNoteService = deliveryNoteService;
-        this.orderService = orderService;
         this.deliverBaseOrderService = deliverBaseOrderService;
         this.dadaClient = dadaClient;
     }
@@ -179,14 +177,14 @@ public class DadaDeliveryService implements IDelivery {
                 deliverNote.setDeliverStatus(DeliveryStatus.TRANSFERING);
                 deliveryNoteService.updateById(deliverNote);
                 //修改订单状态为配送中
-                orderService.delivering(deliverNote.getOrderId());
+                //orderService.delivering(deliverNote.getOrderId());
                 break;
             // 配送完成
             case 4:
                 deliverNote.setDeliverStatus(DeliveryStatus.DONE);
                 deliveryNoteService.updateById(deliverNote);
                 //修改订单状态为已收货
-                orderService.received(deliverNote.getOrderId());
+                //orderService.received(deliverNote.getOrderId());
                 break;
             // 已取消
             case 5:

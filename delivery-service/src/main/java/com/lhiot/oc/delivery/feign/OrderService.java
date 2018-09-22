@@ -1,3 +1,4 @@
+/*
 package com.lhiot.oc.delivery.feign;
 
 import org.springframework.cloud.openfeign.FeignClient;
@@ -21,3 +22,4 @@ public interface OrderService {
     ResponseEntity received(@PathVariable("orderId") Long orderId);
 
 }
+*/
