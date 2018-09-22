@@ -11,15 +11,16 @@ import java.math.BigDecimal;
 public class OrderProduct {
     private Long id;
     private Long orderId;
-    private Long standardId;
+    private Long specificationId;
     private String barcode;
-    private Long price;
-    private Long standardPrice;
+    private Long totalPrice;
     private Long productQty;
-    private Long standardQty;
+    private BigDecimal specificationQty;
     private RefundStatus refundStatus;
     private Long discountPrice;
     private String productName;
     private String image;
-    private BigDecimal baseWeight;
+    private BigDecimal totalWeight;
+    private Long sourceId;
+    private String sourceType;
 }

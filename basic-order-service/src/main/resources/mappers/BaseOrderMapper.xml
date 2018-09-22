@@ -7,4 +7,100 @@
         VALUE (#{code},#{applicationType},#{userId},#{totalAmount},#{deliveryAmount},#{couponAmount},#{amountPayable},#{receivingWay},#{status}
         ,#{receiveUser},#{contactPhone},#{address},#{hdStatus},#{remark},#{deliveryEndTime},#{hdOrderCode},#{deliverTime},#{allowRefund},#{createAt})
     </insert>
+
+    <update id="updateOrderStatusById" parameterType="com.lhiot.oc.basic.model.BaseOrderInfo">
+        update base_order set status = #{status}
+        where id=#{id}
+    </update>
+
+    <update id="updateOrderStatusByCode" parameterType="com.lhiot.oc.basic.model.BaseOrderInfo">
+        update base_order set status = #{status}
+        where code=#{code}
+    </update>
+
+
+    <select id="findById" parameterType="long" resultMap="BaseOrderInfo">
+        <include refid="orderInfo"></include>
+        WHERE t1.id = #{0}
+    </select>
+
+    <select id="findByCode" parameterType="String" resultMap="BaseOrderInfo">
+        <include refid="orderInfo"></include>
+        WHERE t1.code = #{0}
+    </select>
+
+
+    <sql id="orderInfo">
+        SELECT id,
+                order_code as code,
+                application_type as applicationType,
+                user_id as userId,
+                nickname,
+                total_amount as totalAmount,
+                delivery_amount as deliveryAmount,
+                coupon_amount as couponAmount,
+                amount_payable as amountPayable,
+                receiving_way as receivingWay,
+                status,
+                receive_user as receiveUser,
+                contact_phone as contactPhone,
+                address,
+                hd_status as hdStatus,
+                remark,
+                delivery_end_time as deliveryEndTime,
+                hd_stock_at as hdStockAt,
+                hd_order_code as hdOrderCode,
+                deliver_time as deliverTime,
+                allow_refund as allowRefund,
+                create_at as createAt
+        FROM base_order
+    </sql>
+
+    <resultMap id="BaseOrderInfo" type="com.lhiot.oc.basic.model.BaseOrderInfo">
+        <id column="id" javaType="Long" jdbcType="BIGINT" property="id" />
+        <result column="code" property="code" />
+        <result column="applicationType"  property="applicationType" />
+        <result column="userId"  property="userId" />
+        <result column="nickname"  property="nickname" />
+        <result column="totalAmount" property="totalAmount" />
+        <result column="deliveryAmount" property="deliveryAmount" />
+        <result column="couponAmount" property="couponAmount" />
+        <result column="amountPayable" property="amountPayable" />
+        <result column="receivingWay" property="receivingWay" />
+        <result column="status" property="status" />
+        <result column="receiveUser" property="receiveUser" />
+        <result column="contactPhone" property="contactPhone" />
+        <result column="address" property="address" />
+        <result column="hdStatus" property="hdStatus" />
+        <result column="remark" property="remark" />
+        <result column="deliveryEndTime" property="deliveryEndTime" />
+        <result column="hdStockAt" property="hdStockAt" />
+        <result column="hdOrderCode" property="hdOrderCode"/>
+        <result column="deliverTime" property="deliverTime"/>
+        <result column="allowRefund" property="allowRefund"/>
+        <result column="createAt" property="createAt"/>
+        <collection  property="orderProducts"  ofType="com.lhiot.oc.basic.model.OrderProduct">
+            <id column="opid" property="id"/>
+            <result column="orderId" property="orderId" />
+            <result column="specificationId" property="specificationId" />
+            <result column="barcode" property="barcode" />
+            <result column="totalPrice" property="totalPrice" />
+            <result column="productQty" property="productQty" />
+            <result column="specificationQty" property="specificationQty" />
+            <result column="refundStatus" property="refundStatus" />
+            <result column="discountPrice" property="discountPrice" />
+            <result column="productName" property="productName" />
+            <result column="image" property="image" />
+            <result column="totalWeight" property="totalWeight" />
+            <result column="sourceId" property="sourceId" />
+            <result column="sourceType" property="sourceType" />
+        </collection>
+        <collection property="orderFlows" ofType="com.lhiot.oc.basic.model.OrderFlow">
+            <id column="ofid" property="id"/>
+            <result column="orderId" property="orderId" />
+            <result column="flowStatus" property="status" />
+            <result column="preStatus" property="preStatus" />
+            <result column="flowCreateAt" property="createAt" />
+        </collection>
+    </resultMap>
 </mapper>

@@ -2,17 +2,22 @@ package com.lhiot.oc.basic.service;
 
 import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.BeanUtils;
+import com.leon.microx.util.Maps;
 import com.leon.microx.util.SnowflakeId;
+import com.leon.microx.util.StringUtils;
 import com.lhiot.oc.basic.mapper.BaseOrderMapper;
 import com.lhiot.oc.basic.mapper.OrderProductMapper;
 import com.lhiot.oc.basic.mapper.OrderStoreMapper;
 import com.lhiot.oc.basic.model.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -24,14 +29,16 @@ import java.util.Objects;
 public class OrderService {
 
     private BaseOrderMapper baseOrderMapper;
-    private OrderProductMapper orderProductMapper;
+    private OrderProductService orderProductService;
     private OrderStoreMapper orderStoreMapper;
+    private OrderFlowService orderFlowService;
     private SnowflakeId snowflakeId;
 
-    public OrderService(BaseOrderMapper baseOrderMapper, OrderProductMapper orderProductMapper, OrderStoreMapper orderStoreMapper, SnowflakeId snowflakeId) {
+    public OrderService(BaseOrderMapper baseOrderMapper, OrderProductService orderProductService, OrderStoreMapper orderStoreMapper, OrderFlowService orderFlowService, SnowflakeId snowflakeId) {
         this.baseOrderMapper = baseOrderMapper;
-        this.orderProductMapper = orderProductMapper;
+        this.orderProductService = orderProductService;
         this.orderStoreMapper = orderStoreMapper;
+        this.orderFlowService = orderFlowService;
         this.snowflakeId = snowflakeId;
     }
 
@@ -52,7 +59,7 @@ public class OrderService {
         for (OrderProduct orderProduct : orderProducts){
             orderProduct.setOrderId(baseOrderInfo.getId());
         }
-        orderProductMapper.batchInsert(orderProducts);
+        orderProductService.batchInsert(orderProducts);
 
         orderStore.setHdOrderCode(baseOrderInfo.getHdOrderCode());
         orderStore.setOrderId(baseOrderInfo.getId());
@@ -104,6 +111,127 @@ public class OrderService {
             return Tips.of(-1, "送货上门，地址为空");
         }
         return Tips.of(1, "校验成功");
+    }
+
+    /**
+     * 依据id修改订单状态
+     * @param baseOrderInfo
+     * @return
+     */
+    public int updateOrderStatusById(BaseOrderInfo baseOrderInfo){
+        BaseOrderInfo searchBaseOrderInfo = this.baseOrderMapper.findById(baseOrderInfo.getId());
+        if(Objects.isNull(searchBaseOrderInfo)){
+            return 0;
+        }
+        int result = this.baseOrderMapper.updateOrderStatusById(baseOrderInfo);
+        if(result>0){
+            //构建写order_flow库的数据
+            orderFlowService.create(searchBaseOrderInfo,baseOrderInfo);
+        }
+        return result;
+    }
+
+    public int updateOrderStatusByCode(BaseOrderInfo baseOrderInfo){
+        BaseOrderInfo searchBaseOrderInfo = this.baseOrderMapper.findById(baseOrderInfo.getId());
+        if(Objects.isNull(searchBaseOrderInfo)){
+            return 0;
+        }
+        int result = this.baseOrderMapper.updateOrderStatusByCode(baseOrderInfo);
+        if(result>0){
+            //构建写order_flow库的数据
+            orderFlowService.create(searchBaseOrderInfo,baseOrderInfo);
+        }
+        return result;
+    }
+
+    /**
+     * 依据订单编码退货
+     * @param orderCode
+     * @return
+     */
+    public int refundOrderByCode(String orderCode,ReturnOrderParam returnOrderParam){
+        BaseOrderInfo searchBaseOrderInfo = this.baseOrderMapper.findByCode(orderCode);
+        if(Objects.isNull(searchBaseOrderInfo)){
+            return 0;
+        }
+        BaseOrderInfo baseOrderInfo=new BaseOrderInfo();
+        baseOrderInfo.setCode(orderCode);
+        baseOrderInfo.setStatus(OrderStatus.ALREADY_RETURN);
+        //TODO 设置退款理由 baseOrderInfo.set
+        int result = this.baseOrderMapper.updateOrderStatusByCode(baseOrderInfo);
+        if(result>0){
+            //写退款订单商品标识
+            List<String> orderProductIds = Arrays.asList(StringUtils.split(returnOrderParam.getOrderProductIds(),","));
+            this.orderProductService.updateOrderProductByIds(searchBaseOrderInfo.getId(),RefundStatus.REFUND,orderProductIds);
+            //构建写order_flow库的数据
+            orderFlowService.create(searchBaseOrderInfo,baseOrderInfo);
+        }
+        return result;
+    }
+
+    /**
+     * 依据订单编码退货(已收货发起退货申请)
+     * @param orderCode
+     * @return
+     */
+    public int refundOrderApplyByCode(String orderCode,ReturnOrderParam returnOrderParam){
+        BaseOrderInfo searchBaseOrderInfo = this.baseOrderMapper.findByCode(orderCode);
+        if(Objects.isNull(searchBaseOrderInfo)){
+            return 0;
+        }
+        BaseOrderInfo baseOrderInfo=new BaseOrderInfo();
+        baseOrderInfo.setCode(orderCode);
+        baseOrderInfo.setStatus(OrderStatus.RETURNING);//设置为退货中
+        //TODO 设置退款理由 baseOrderInfo.set
+        int result = this.baseOrderMapper.updateOrderStatusByCode(baseOrderInfo);
+        if(result>0){
+            //写退款订单商品标识
+            List<String> orderProductIds = Arrays.asList(StringUtils.split(returnOrderParam.getOrderProductIds(),","));
+            this.orderProductService.updateOrderProductByIds(searchBaseOrderInfo.getId(),RefundStatus.REFUND,orderProductIds);
+            //构建写order_flow库的数据
+            orderFlowService.create(searchBaseOrderInfo,baseOrderInfo);
+        }
+        return result;
+    }
+
+
+    @Nullable
+    public BaseOrderInfo findByCode(String code,boolean needProductList,boolean needOrderFlowList){
+        BaseOrderInfo searchBaseOrderInfo = this.baseOrderMapper.findByCode(code);
+        if (Objects.isNull(searchBaseOrderInfo)){
+            return null;
+        }
+        if(needProductList){
+            searchBaseOrderInfo.setOrderProductList(this.orderProductService.findOrderProductsByOrderId(searchBaseOrderInfo.getId()));
+        }
+        if(needOrderFlowList){
+            searchBaseOrderInfo.setOrderFlowList(this.orderFlowService.flowByOrderId(searchBaseOrderInfo.getId()));
+        }
+        return searchBaseOrderInfo;
+    }
+    @Nullable
+    public BaseOrderInfo findByCode(String code){
+        return this.findByCode(code,false,false);
+    }
+
+    @Nullable
+    public BaseOrderInfo findById(Long id,boolean needProductList,boolean needOrderFlowList){
+        BaseOrderInfo searchBaseOrderInfo = this.baseOrderMapper.findById(id);
+        if (Objects.isNull(searchBaseOrderInfo)){
+            return null;
+        }
+        if(needProductList){
+            searchBaseOrderInfo.setOrderProductList(this.orderProductService.findOrderProductsByOrderId(searchBaseOrderInfo.getId()));
+        }
+        if(needOrderFlowList){
+            searchBaseOrderInfo.setOrderFlowList(this.orderFlowService.flowByOrderId(searchBaseOrderInfo.getId()));
+        }
+        return searchBaseOrderInfo;
+    }
+
+    @Nullable
+    public BaseOrderInfo findById(Long id){
+        return this.findById(id,false,false);
     }
 
 }

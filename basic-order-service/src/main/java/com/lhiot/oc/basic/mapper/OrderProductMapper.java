@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author zhangfeng created in 2018/9/19 10:51
@@ -14,4 +15,10 @@ import java.util.List;
 public interface OrderProductMapper {
 
     OrderProduct batchInsert(List<OrderProduct> orderProducts);
+
+    List<OrderProduct> findOrderProductsByOrderId(long orderId);
+
+    int updateOrderProductByIds(Map<String, Object> map);
+
+
 }

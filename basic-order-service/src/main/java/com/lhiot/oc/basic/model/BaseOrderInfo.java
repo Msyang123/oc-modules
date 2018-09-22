@@ -12,6 +12,7 @@ import lombok.EqualsAndHashCode;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @ApiModel
@@ -50,4 +51,10 @@ public class BaseOrderInfo{
     private String deliverTime;
     @ApiModelProperty(notes = "是否允许退款YES是NO否", dataType = "AllowRefund")
     private AllowRefund allowRefund = AllowRefund.YES;
+
+    @ApiModelProperty(notes = "订单商品列表", dataType = "List")
+    private List<OrderProduct> orderProductList;
+
+    @ApiModelProperty(notes = "订单状态流水列表", dataType = "List")
+    private List<OrderFlow> orderFlowList;
 }

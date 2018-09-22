@@ -1,10 +1,30 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.lhiot.oc.basic.mapper.OrderProductMapper">
-    <insert id="insert" parameterType="com.lhiot.oc.basic.model.BaseOrderInfo" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO base_order (order_code,application_type,user_id,total_amount,delivery_amount,coupon_amount,amount_payable,receiving_way,status
-        ,receive_user,contact_phone,address,hd_status,remark,delivery_end_time,hd_order_code,deliver_time,allow_refund,create_at)
-        VALUE (#{code},#{applicationType},#{userId},#{totalAmount},#{deliveryAmount},#{couponAmount},#{amountPayable},#{receivingWay},#{status}
-        ,#{receiveUser},#{contactPhone},#{address},#{hdStatus},#{remark},#{deliveryEndTime},#{hdOrderCode},#{deliverTime},#{allowRefund},#{createAt})
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO order_product(order_id,specification_id,barcode,
+        total_price,product_qty,specification_qty,refund_status,discount_price,
+        product_name,image,total_weight,source_id,source_type)
+        VALUE
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.orderId},#{item.specificationId},#{item.barcode},#{item.totalPrice},#{item.productQty},
+            #{item.specificationQty},#{item.refundStatus},#{item.discountPrice},
+            #{item.productName}, #{item.image},#{item.totalWeight},#{item.sourceId},#{item.sourceType}
+            )
+        </foreach>
     </insert>
+
+    <select id="findOrderProductsByOrderId" parameterType="Long" resultType="com.lhiot.oc.basic.model.OrderProduct">
+        select * from order_product where order_id=#{0}
+    </select>
+
+    <update id="updateOrderProductByIds" parameterType="map">
+        UPDATE order_product SET refund_status = #{refundStatus}
+        WHERE order_id = #{orderId} AND id IN
+        <foreach collection="orderProductIds" item="item" separator="," close=")" open="(">
+            #{item}
+        </foreach>
+    </update>
 </mapper>
