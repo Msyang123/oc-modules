@@ -201,12 +201,12 @@ public class OrderService {
      * @param orderId
      * @return
      */
-    public int changeStore(String hdOrderCode,Store targetStore,String operationUser,Long orderId){
+    public int changeStore(Store targetStore,String operationUser,Long orderId){
 
         //修改订单为待收货状态
         BaseOrderInfo baseOrderInfo=new BaseOrderInfo();
         baseOrderInfo.setId(orderId);
-        baseOrderInfo.setHdOrderCode(hdOrderCode);
+        baseOrderInfo.setHdOrderCode(snowflakeId.stringId());
         int result = baseOrderMapper.updateHdOrderCodeById(baseOrderInfo);
 
         if(result>0){

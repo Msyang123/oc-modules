@@ -2,7 +2,6 @@ package com.lhiot.oc.basic.api;
 
 import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.BeanUtils;
-import com.leon.microx.util.SnowflakeId;
 import com.leon.microx.util.StringUtils;
 import com.lhiot.oc.basic.feign.BaseServiceFeign;
 import com.lhiot.oc.basic.model.*;
@@ -31,13 +30,11 @@ public class OrderApi {
 
     private OrderService orderService;
     private  BaseServiceFeign baseServiceFeign;
-    private SnowflakeId snowflakeId;
     private static final String HD_CANCEL_ORDER_SUCCESS_RESULT_STRING = "{\"success\":true}";
 
-    public OrderApi(OrderService orderService, BaseServiceFeign baseServiceFeign, SnowflakeId snowflakeId) {
+    public OrderApi(OrderService orderService, BaseServiceFeign baseServiceFeign) {
         this.orderService = orderService;
         this.baseServiceFeign = baseServiceFeign;
-        this.snowflakeId = snowflakeId;
     }
 
     @PostMapping("/create/assortment")
@@ -217,7 +214,7 @@ public class OrderApi {
             return ResponseEntity.badRequest().body("海鼎发送失败！");
         }
         //修改订单hdCode以及添加调货门店信息
-        int result =orderService.changeStore(snowflakeId.orderId(),storeInfo,operationUser,searchBaseOrderInfo.getId());
+        int result =orderService.changeStore(storeInfo,operationUser,searchBaseOrderInfo.getId());
         if(result>0){
             return ResponseEntity.ok().body("调货成功");
         }
