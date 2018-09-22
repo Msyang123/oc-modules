@@ -1,11 +1,11 @@
-package com.lhiot.oc.basic.feign.domain;
+package com.lhiot.oc.basic.model.type;
 
 import lombok.Getter;
 
 /**
  * 门店类型枚举
  */
-public enum StoreTypeEnum {
+public enum StoreType {
     ORDINARY_STORE("普通门店"),
     FLAGSHIP_STORE ("旗舰店");
 
@@ -13,7 +13,7 @@ public enum StoreTypeEnum {
     @Getter
     private String  decription;
 
-    StoreTypeEnum(String decription) {
+    StoreType(String decription) {
         this.decription = decription;
     }
 }

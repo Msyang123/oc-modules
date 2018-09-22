@@ -1,9 +1,10 @@
-package com.lhiot.oc.basic.feign.domain;
+package com.lhiot.oc.basic.model;
 
+import com.lhiot.oc.basic.model.type.StoreStatus;
+import com.lhiot.oc.basic.model.type.StoreType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
@@ -64,7 +65,7 @@ public class Store{
     *门店状态(0-未开启  1-开启)
     */
     @ApiModelProperty(notes = "门店状态 ENABLED(\"营业\"),DISABLED(\"未营业\");", dataType = "StoreStatusEnum")
-    private StoreStatusEnum storeStatus;
+    private StoreStatus storeStatus;
 
     /**
     *旗舰店ID
@@ -76,7 +77,7 @@ public class Store{
     *门店类型：00-普通门店  01-旗舰店
     */
     @ApiModelProperty(notes = "门店类型：ORDINARY_STORE(\"普通门店\"),FLAGSHIP_STORE (\"旗舰店\");", dataType = "StoreTypeEnum")
-    private StoreTypeEnum storeType;
+    private StoreType storeType;
 
     /**
     *门店视频

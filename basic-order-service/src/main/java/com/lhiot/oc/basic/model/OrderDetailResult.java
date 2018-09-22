@@ -1,5 +1,7 @@
 package com.lhiot.oc.basic.model;
 
+import com.lhiot.oc.basic.model.type.AllowRefund;
+import com.lhiot.oc.basic.model.type.ApplicationType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -17,7 +19,7 @@ public class OrderDetailResult {
     private String code;
     @ApiModelProperty(notes = "用户Id",dataType = "Long")
     private Long userId;
-    @ApiModelProperty(notes = "应用类型",dataType = "ApplicationType")
+    @ApiModelProperty(notes = "应用类型",dataType = "ApplicationTypeEnum")
     private ApplicationType applicationType;
     @ApiModelProperty(notes = "提货方式",dataType = "String")
     private ReceivingWay receivingWay;
