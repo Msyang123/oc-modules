@@ -11,7 +11,7 @@ import com.lhiot.oc.payment.domain.SignParam;
 import com.lhiot.oc.payment.domain.enums.PayPlatformType;
 import com.lhiot.oc.payment.domain.enums.PayStepType;
 import com.lhiot.oc.payment.feign.BaseDataServerFeign;
-import com.lhiot.oc.payment.feign.domain.PaymentSign;
+import com.lhiot.oc.payment.feign.domain.PaymentConfig;
 import com.lhiot.oc.payment.service.PaymentLogService;
 import com.lhiot.oc.payment.service.payment.PaymentProperties;
 import com.lhiot.oc.payment.service.payment.WeChatUtil;
@@ -75,7 +75,7 @@ public class WxPaymentApi {
             return ResponseEntity.badRequest().body(backMsg);
         }
         //依据前端传递的支付商户简称查询支付配置信息
-        ResponseEntity<PaymentSign> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(signParam.getAttach().getPaymentName());
+        ResponseEntity<PaymentConfig> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(signParam.getAttach().getPaymentName());
 
         ResponseEntity fetchResult=fetchAndSetAliPayConfig(paymentSignResponseEntity);
         if(Objects.nonNull(fetchResult)){
@@ -120,7 +120,7 @@ public class WxPaymentApi {
         //获取附加参数
         Attach attach = Jackson.object(xpath.evalNode("//attach").body(), Attach.class);
         //依据前端传递的支付商户简称查询支付配置信息
-        ResponseEntity<PaymentSign> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(attach.getPaymentName());
+        ResponseEntity<PaymentConfig> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(attach.getPaymentName());
         ResponseEntity fetchResult=fetchAndSetAliPayConfig(paymentSignResponseEntity);
         if(Objects.nonNull(fetchResult)){
             return fetchResult;
@@ -174,7 +174,7 @@ public class WxPaymentApi {
                                        @RequestParam("refundMemo") String refundMemo) {
         //只退一次 退款单编号就是支付编号
 
-        ResponseEntity<PaymentSign> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(paymentName);
+        ResponseEntity<PaymentConfig> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(paymentName);
         ResponseEntity fetchResult=fetchAndSetAliPayConfig(paymentSignResponseEntity);
         if(Objects.nonNull(fetchResult)){
             return fetchResult;
@@ -201,7 +201,7 @@ public class WxPaymentApi {
     @PutMapping("/cancel")
     public ResponseEntity<Tips> cancel(@RequestParam("paymentName") String paymentName,@RequestParam("appid") String appid,@RequestParam("payCode") String payCode) {
         //依据前端传递的支付商户简称查询支付配置信息
-        ResponseEntity<PaymentSign> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(paymentName);
+        ResponseEntity<PaymentConfig> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(paymentName);
 
         ResponseEntity fetchResult=fetchAndSetAliPayConfig(paymentSignResponseEntity);
         if(Objects.nonNull(fetchResult)){
@@ -215,15 +215,15 @@ public class WxPaymentApi {
     }
 
     @Nullable
-    private ResponseEntity fetchAndSetAliPayConfig(ResponseEntity<PaymentSign> paymentSignResponseEntity){
+    private ResponseEntity fetchAndSetAliPayConfig(ResponseEntity<PaymentConfig> paymentSignResponseEntity){
         if(Objects.isNull(paymentSignResponseEntity)||paymentSignResponseEntity.getStatusCode().isError()){
             return ResponseEntity.badRequest().body(Tips.of(-1,"远程查询支付配置信息失败"));
         }
-        PaymentSign paymentSign = paymentSignResponseEntity.getBody();
+        PaymentConfig paymentSign = paymentSignResponseEntity.getBody();
         if(Objects.isNull(paymentSign)) {
             return ResponseEntity.badRequest().body(Tips.of(-1, "未找到支付配置信息"));
         }
-        if(!Objects.equals(paymentSign.getPayPlatformType(), PayPlatformType.WEIXIN.name())){
+        if(!Objects.equals(paymentSign.getPayPlatformType(), PayPlatformType.WE_CHAT.name())){
             return ResponseEntity.badRequest().body(Tips.of(-1,"支付配置信息与调用接口不匹配"));
         }
         PaymentProperties.WeChatPayConfig weChatPayConfig = weChatUtil.getProperties().getWeChatPayConfig();
