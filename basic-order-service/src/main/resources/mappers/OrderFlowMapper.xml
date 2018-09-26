@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.lhiot.oc.basic.mapper.OrderFlowMapper">
+<mapper namespace="com.lhiot.oc.order.mapper.OrderFlowMapper">
     <!--新增-->
-    <insert id="create" parameterType="com.lhiot.oc.basic.model.OrderFlow" useGeneratedKeys="true" keyProperty="id">
+    <insert id="create" parameterType="com.lhiot.oc.order.model.OrderFlow" useGeneratedKeys="true" keyProperty="id">
         insert into order_flow(order_id,status,pre_status,create_at)
         VALUES (#{orderId},#{status},#{preStatus},#{createAt})
     </insert>
 
-    <select id="flowByOrderId" parameterType="Long" resultType="com.lhiot.oc.basic.model.OrderFlow">
+    <select id="flowByOrderId" parameterType="Long" resultType="com.lhiot.oc.order.model.OrderFlow">
         SELECT id,order_id as orderId,status as status,pre_status as preStatus,create_at as createAt
         FROM order_flow
         WHERE order_id = #{0} order by id desc

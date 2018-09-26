@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.lhiot.oc.basic.mapper.OrderRefundMapper">
-    <insert id="insert" parameterType="com.lhiot.oc.basic.model.OrderRefund" useGeneratedKeys="true" keyColumn="id">
+<mapper namespace="com.lhiot.oc.order.mapper.OrderRefundMapper">
+    <insert id="insert" parameterType="com.lhiot.oc.order.model.OrderRefund" useGeneratedKeys="true" keyColumn="id">
         INSERT INTO order_refund (hd_order_code,order_id,user_id,refund_status,apply_at,dispose_at,order_product_ids,refund_type,reason)
         VALUE (#{hdOrderCode},#{orderId},#{userId},#{refundStatus},#{applyAt},#{disposeAt},#{orderProductIds},#{refundType},#{reason})
     </insert>
