@@ -40,7 +40,7 @@ public class OrderApi {
     }
 
     @PostMapping("/")
-    @ApiOperation("创建订单(套餐)--公共")
+    @ApiOperation(value = "创建订单",response = OrderDetailResult.class)
     @ApiImplicitParam(paramType = "body", name = "orderParam", dataType = "CreateOrderParam", required = true, value = "创建订单传入参数")
     @Transactional
     public ResponseEntity createOrderWithAssortment(@RequestBody CreateOrderParam orderParam) {
@@ -57,7 +57,7 @@ public class OrderApi {
         return ResponseEntity.ok(result);
     }
 
-    @ApiOperation("根据订单code查询订单详情")
+    @ApiOperation(value = "根据订单code查询订单详情",response = OrderDetailResult.class)
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "path", name = "orderCode", dataType = "String", required = true, value = "订单code"),
             @ApiImplicitParam(paramType = "query", name = "needProductList", dataType = "boolean", required = true, value = "是否需要加载商品信息"),
@@ -73,7 +73,7 @@ public class OrderApi {
         return ResponseEntity.ok(order);
     }
 
-    @ApiOperation("取消订单")
+    @ApiOperation(value = "取消订单",response = ResponseEntity.class)
     @ApiImplicitParam(paramType = "path", name = "orderCode", value = "订单Code", required = true, dataType = "String")
     @PutMapping("/{orderCode}/cancel")
     public ResponseEntity cancelOrder(@PathVariable("orderCode") String orderCode) {
@@ -95,7 +95,7 @@ public class OrderApi {
         return ResponseEntity.badRequest().body("更新订单状态为失效失败");
     }
 
-    @ApiOperation("订单退货(包括部分和全部)")
+    @ApiOperation(value = "订单退货(包括部分和全部)",response = ResponseEntity.class)
     @ApiImplicitParam(paramType = "path", name = "orderCode", value = "订单orderCode", required = true, dataType = "String")
     @PutMapping("/{orderCode}/refund")
     public ResponseEntity refundOrder(@PathVariable("orderCode") String orderCode,@NotNull @RequestBody ReturnOrderParam returnOrderParam) {
@@ -117,7 +117,7 @@ public class OrderApi {
     }
 
     @PutMapping("/{orderCode}/dispatching")
-    @ApiOperation("修改订单为配送中")
+    @ApiOperation(value = "修改订单为配送中",response = ResponseEntity.class)
     public ResponseEntity dispatching(@PathVariable("orderCode") String orderCode) {
         OrderDetailResult orderDetailResult = orderService.findByCode(orderCode);
         if (Objects.isNull(orderDetailResult)) {
@@ -137,7 +137,7 @@ public class OrderApi {
         return ResponseEntity.badRequest().body("更新订单状态为配送中失败");
     }
 
-    @ApiOperation("修改订单为已收货")
+    @ApiOperation(value = "修改订单为已收货",response = ResponseEntity.class)
     @PutMapping(value = "/{orderCode}/received")
     public ResponseEntity received(@PathVariable("orderCode") String orderCode) {
         OrderDetailResult orderDetailResult = orderService.findByCode(orderCode);
@@ -159,7 +159,7 @@ public class OrderApi {
     }
 
 
-    @ApiOperation("海鼎订单调货")
+    @ApiOperation(value = "海鼎订单调货",response = ResponseEntity.class)
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "path", name = "orderCode", value = "调货订单编码", dataType = "String", required = true),
             @ApiImplicitParam(paramType = "query", name = "storeId", value = "调货目标门店id", dataType = "Long", required = true),
@@ -176,19 +176,19 @@ public class OrderApi {
             return ResponseEntity.badRequest().body("当前订单状态不可调货！");
         }
         //远程查找调货门店 不需要查询门店位置
-        ResponseEntity<Store> storeInfoResponseEntity = baseServiceFeign.findStoreById(storeId, null);
+        ResponseEntity storeInfoResponseEntity = baseServiceFeign.findStoreById(storeId, null);
         if (storeInfoResponseEntity == null || storeInfoResponseEntity.getStatusCode().isError()) {
             log.info("远程查找调货门店查询失败：{}", storeId);
             return ResponseEntity.badRequest().body("远程查找调货门店查询失败，请重试！");
         }
-        Store storeInfo = storeInfoResponseEntity.getBody();
+        Store storeInfo = (Store) storeInfoResponseEntity.getBody();
         if (storeInfo == null) {
             log.info("远程查找调货门店查询未找到门店：{}", storeId);
             return ResponseEntity.badRequest().body("远程查找调货门店查询未找到门店，请重试！");
         }
 
         //TODO 发送海鼎取消订单 基于当前的 HdOrderCode
-        ResponseEntity<String> hdResponse = null;//thirdPartyServiceFeign.hdOrderCancel(orderInfo.getHdOrderCode(), "海鼎调货");
+        ResponseEntity hdResponse = null;//thirdPartyServiceFeign.hdOrderCancel(orderInfo.getHdOrderCode(), "海鼎调货");
         if (Objects.isNull(hdResponse) || !Objects.equals(HD_CANCEL_ORDER_SUCCESS_RESULT_STRING, hdResponse.getBody())) {
             log.info("海鼎取消订单编号为：" + searchBaseOrderInfo.getHdOrderCode());
             return ResponseEntity.badRequest().body("海鼎取消订单失败，请重试！");
