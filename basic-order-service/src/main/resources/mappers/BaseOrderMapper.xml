@@ -18,6 +18,11 @@
         where code=#{code}
     </update>
 
+    <update id="updateHdOrderCodeById" parameterType="com.lhiot.oc.basic.model.BaseOrderInfo">
+        update base_order set hd_order_code = #{hdOrderCode}
+        where id=#{id}
+    </update>
+
 
     <select id="findById" parameterType="long" resultMap="BaseOrderInfo">
         <include refid="orderInfo"></include>

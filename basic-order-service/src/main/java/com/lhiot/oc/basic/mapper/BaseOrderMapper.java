@@ -30,6 +30,13 @@ public interface BaseOrderMapper {
      */
     int updateOrderStatusByCode(BaseOrderInfo baseOrderInfo);
 
+    /**
+     * 依据订单id修改订单状态及海鼎订单编码
+     * @param baseOrderInfo
+     * @return
+     */
+    int updateHdOrderCodeById(BaseOrderInfo baseOrderInfo);
+
     BaseOrderInfo findByCode(String code);
 
     BaseOrderInfo findById(Long id);

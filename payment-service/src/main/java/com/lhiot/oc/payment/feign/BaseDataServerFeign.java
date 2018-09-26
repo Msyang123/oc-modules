@@ -1,6 +1,6 @@
 package com.lhiot.oc.payment.feign;
 
-import com.lhiot.oc.payment.feign.domain.PaymentSign;
+import com.lhiot.oc.payment.feign.domain.PaymentConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -22,6 +22,6 @@ public interface BaseDataServerFeign {
 	 * 根据支付商户名称简称查询支付签名信息
 	 */
     @RequestMapping(value="/payment/config/by-name/{paymentName}",method = RequestMethod.GET)
-    ResponseEntity<PaymentSign> findPaymentSignByPaymentName(@PathVariable("paymentName") String paymentName);
+    ResponseEntity<PaymentConfig> findPaymentSignByPaymentName(@PathVariable("paymentName") String paymentName);
 
 }

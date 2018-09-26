@@ -16,7 +16,7 @@ import lombok.ToString;
 @ToString(callSuper = true)
 @ApiModel
 @NoArgsConstructor
-public class PaymentSign{
+public class PaymentConfig{
 
     /**
     *
