@@ -2,6 +2,7 @@ package com.lhiot.oc.delivery.mapper;
 
 import com.lhiot.oc.delivery.domain.DeliverFlow;
 import org.apache.ibatis.annotations.Mapper;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ import java.util.List;
 * @date 2018/09/16
 */
 @Mapper
+@Repository
 public interface DeliverFlowMapper {
 
     /**
