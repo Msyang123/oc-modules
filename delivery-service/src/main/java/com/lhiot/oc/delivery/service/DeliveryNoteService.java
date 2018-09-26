@@ -17,8 +17,7 @@ import java.util.Objects;
 
 /**
 * Description:配送单信息服务类
-* @author zhangshu
-* @date 2018/08/06
+* @author zhangshu 2018/08/06 created
 */
 @Service
 @Transactional
@@ -35,11 +34,6 @@ public class DeliveryNoteService {
 
     /** 
     * Description:根据id修改配送单信息
-    *  
-    * @param deliverNote
-    * @return
-    * @author zhangshu
-    * @date 2018/08/06 09:10:22
     */ 
     public int updateById(DeliverNote deliverNote){
         //如果是更新状态，那么就记录流水
@@ -57,11 +51,6 @@ public class DeliveryNoteService {
 
     /** 
     * Description:根据ids删除配送单信息
-    *  
-    * @param ids
-    * @return
-    * @author zhangshu
-    * @date 2018/08/06 09:10:22
     */ 
     public int deleteByIds(String ids){
         return this.deliverNoteMapper.deleteByIds(Arrays.asList(ids.split(",")));
@@ -69,11 +58,6 @@ public class DeliveryNoteService {
     
     /** 
     * Description:根据id查找配送单信息
-    *  
-    * @param id
-    * @return
-    * @author zhangshu
-    * @date 2018/08/06 09:10:22
     */ 
     public DeliverNote selectById(Long id){
         return this.deliverNoteMapper.selectById(id);
@@ -81,19 +65,14 @@ public class DeliveryNoteService {
 
     /**
      * 依据配送单编码查询
-     * @param deliverCode
-     * @return
+     * @param deliverCode deliverCode
+     * @return DeliverNote
      */
     public DeliverNote selectByDeliverCode(String deliverCode){
         return this.deliverNoteMapper.selectByDeliverCode(deliverCode);
     }
     /**
      * Description:根据id查找配送单信息
-     *
-     * @param orderId
-     * @return
-     * @author zhangshu
-     * @date 2018/08/06 09:10:22
      */
     public List<DeliverNote> selectByOrderId(Long orderId){
         return this.deliverNoteMapper.selectByOrderId(orderId);
@@ -101,11 +80,6 @@ public class DeliveryNoteService {
 
     /**
      * Description:根据orderId查找最新配送单信息
-     *
-     * @param orderId
-     * @return
-     * @author zhangshu
-     * @date 2018/08/06 09:10:22
      */
     public DeliverNote selectLastByOrderId(Long orderId){
         return this.deliverNoteMapper.selectLastByOrderId(orderId);
@@ -114,11 +88,6 @@ public class DeliveryNoteService {
 
     /** 
     * Description: 查询配送单信息总记录数
-    *  
-    * @param deliverNote
-    * @return
-    * @author zhangshu
-    * @date 2018/08/06 09:10:22
     */  
     public long count(DeliverNote deliverNote){
         return this.deliverNoteMapper.pageDeliverNoteCounts(deliverNote);
@@ -126,11 +95,6 @@ public class DeliveryNoteService {
     
     /** 
     * Description: 查询配送单信息分页列表
-    *  
-    * @param deliverNote
-    * @return
-    * @author zhangshu
-    * @date 2018/08/06 09:10:22
     */  
     public PagerResultObject<DeliverNote> pageList(DeliverNote deliverNote) {
        long total = 0;
@@ -142,7 +106,7 @@ public class DeliveryNoteService {
     }
     public void createNewDeliverNote(DeliverNote deliverNote){
 
-        deliverNote.setDeliverStatus(DeliveryStatus.UNRECEIVE);
+        deliverNote.setDeliverStatus(DeliveryStatus.UNRECEIVED);
         deliverNote.setCreateTime(new Date());
         deliverNoteMapper.create(deliverNote);
 

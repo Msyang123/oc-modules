@@ -4,7 +4,7 @@ import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.Calculator;
 import com.leon.microx.util.StringUtils;
 import com.lhiot.oc.delivery.domain.DeliverBaseOrder;
-import com.lhiot.oc.delivery.domain.enums.DeliverNeedConver;
+import com.lhiot.oc.delivery.domain.enums.CoordinateSystem;
 import com.lhiot.oc.delivery.feign.BasicDataService;
 import com.lhiot.oc.delivery.feign.domain.Store;
 import com.lhiot.oc.delivery.service.FengniaoDeliveryService;
@@ -21,32 +21,33 @@ import java.util.Objects;
 
 @Slf4j
 @RestController
-@Api(description ="蜂鸟配送api")
+@Api(description = "蜂鸟配送api")
 @RequestMapping("/fengniao-delivery")
-public class FengniaoDeliveryApi {
+public class FengNiaoDeliveryApi {
 
     private final FengniaoDeliveryService fengniaoDeliveryService;
 
     private final BasicDataService basicDataService;
 
     @Autowired
-    public FengniaoDeliveryApi(FengniaoDeliveryService fengniaoDeliveryService, BasicDataService basicDataService) {
+    public FengNiaoDeliveryApi(FengniaoDeliveryService fengniaoDeliveryService, BasicDataService basicDataService) {
         this.basicDataService = basicDataService;
         this.fengniaoDeliveryService = fengniaoDeliveryService;
     }
+
     /**
      * 蜂鸟配送回调
      */
     @PostMapping("/callback")
     @ApiOperation(value = "蜂鸟回调", response = String.class)
-    public ResponseEntity<?> fnCallBack(@RequestBody String backMsg){
+    public ResponseEntity<?> fnCallback(@RequestBody String backMsg) {
         log.info("蜂鸟配送回调");
         log.info("callbackOrder-jsonData:" + backMsg);
-        if(StringUtils.isNotBlank(backMsg)){
-            backMsg = backMsg.substring(1,backMsg.length()-1);
+        if (StringUtils.isNotBlank(backMsg)) {
+            backMsg = backMsg.substring(1, backMsg.length() - 1);
         }
-        Tips tips = fengniaoDeliveryService.callBack(backMsg);
-        return Objects.equals(tips.getCode(),"-1")?ResponseEntity.badRequest().body(tips.getMessage()):ResponseEntity.ok(tips.getMessage());
+        Tips tips = fengniaoDeliveryService.callback(backMsg);
+        return Objects.equals(tips.getCode(), "-1") ? ResponseEntity.badRequest().body(tips.getMessage()) : ResponseEntity.ok(tips.getMessage());
     }
 
 
@@ -63,32 +64,33 @@ public class FengniaoDeliveryApi {
                                        @RequestParam("cancelReason") String cancelReason) {
 
         //向第三方取消配送
-        Tips cancelResult = fengniaoDeliveryService.cancel(hdOrderCode,cancelReasonId,cancelReason);
+        Tips cancelResult = fengniaoDeliveryService.cancel(hdOrderCode, cancelReasonId, cancelReason);
 
-        if(Objects.equals(cancelResult.getCode(),"1")){
+        if (Objects.equals(cancelResult.getCode(), "1")) {
             return ResponseEntity.ok(cancelResult);
         }
         return ResponseEntity.badRequest().body(cancelResult);
     }
 
     @ApiOperation(value = "发送蜂鸟配送单")
-    @PostMapping("/send/{deliverNeedConver}")
-    public ResponseEntity<Tips> send(@PathVariable("deliverNeedConver") DeliverNeedConver deliverNeedConver, @RequestBody DeliverBaseOrder deliverBaseOrder){
+    @PostMapping("/send/{coordinateSystem}")
+    public ResponseEntity<Tips> send(@PathVariable("coordinateSystem") CoordinateSystem coordinateSystem, @RequestBody DeliverBaseOrder deliverBaseOrder) {
         //查询送货门店
-        ResponseEntity<Store> storeResponseEntity = basicDataService.findStoreByCode(deliverBaseOrder.getStoreCode(),deliverBaseOrder.getApplyType());
-        if(Objects.isNull(storeResponseEntity)||!storeResponseEntity.getStatusCode().is2xxSuccessful()){
-            return ResponseEntity.badRequest().body(Tips.of(-1,"查询门店信息失败"));
+        ResponseEntity response = basicDataService.findStoreByCode(deliverBaseOrder.getStoreCode(), deliverBaseOrder.getApplyType());
+        if (response.getStatusCode().isError() || Objects.isNull(response.getBody())) {
+            return ResponseEntity.badRequest().body(Tips.warn("查询门店信息失败"));
         }
-        Store store=storeResponseEntity.getBody();
+        Store store = (Store) response.getBody();
         //距离换算
-        BigDecimal distance = Distance.getDistance(store.getStorePosition().getLat(),store.getStorePosition().getLng(),
-                deliverBaseOrder.getLat(),deliverBaseOrder.getLng());
-        if(Calculator.gt(distance.doubleValue(),5.00)){
-            log.error("超过配送范围！{}",distance);
-            return ResponseEntity.badRequest().body(Tips.of(-1,"超过配送范围！"));
+        BigDecimal distance = Distance.getDistance(
+                store.getStorePosition().getLat(), store.getStorePosition().getLng(), deliverBaseOrder.getLat(), deliverBaseOrder.getLng()
+        );
+        if (Calculator.gt(distance.doubleValue(), 5.00)) {
+            log.error("超过配送范围！{}", distance);
+            return ResponseEntity.badRequest().body(Tips.of(-1, "超过配送范围！"));
         }
         //发送蜂鸟配送
-        return ResponseEntity.ok(fengniaoDeliveryService.send(deliverNeedConver,deliverBaseOrder));
+        return ResponseEntity.ok(fengniaoDeliveryService.send(coordinateSystem, deliverBaseOrder));
     }
 
     @GetMapping("/detail/{hdOrderCode}")

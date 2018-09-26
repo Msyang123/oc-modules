@@ -124,10 +124,10 @@ public class DeliverNote extends PagerRequestObject {
     
 
     /**
-    *配送状态 UNRECEIVE-未接单 WAIT_GET-待取货 TRANSFERING-配送中 DONE-配送完成 FAILURE-配送失败
+    *配送状态 UNRECEIVED-未接单 WAIT_GET-待取货 DELIVERING-配送中 DONE-配送完成 FAILURE-配送失败
     */
     @JsonProperty("deliverStatus")
-    @ApiModelProperty(value = "配送状态 UNRECEIVE-未接单 WAIT_GET-待取货 TRANSFERING-配送中 DONE-配送完成 FAILURE-配送失败", dataType = "DeliveryStatus")
+    @ApiModelProperty(value = "配送状态 UNRECEIVED-未接单 WAIT_GET-待取货 DELIVERING-配送中 DONE-配送完成 FAILURE-配送失败", dataType = "DeliveryStatus")
     private DeliveryStatus deliverStatus;
 
     /**
