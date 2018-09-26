@@ -12,4 +12,6 @@ import org.springframework.stereotype.Repository;
 public interface OrderStoreMapper {
 
     int insert(OrderStore orderStore);
+
+    OrderStore findByHdOrderCode(String hdOrderCode);
 }

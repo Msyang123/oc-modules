@@ -1,13 +1,14 @@
 package com.lhiot.oc.basic.service;
 
 import com.lhiot.oc.basic.mapper.OrderFlowMapper;
-import com.lhiot.oc.basic.model.BaseOrderInfo;
 import com.lhiot.oc.basic.model.OrderFlow;
+import com.lhiot.oc.basic.model.type.OrderStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -20,13 +21,20 @@ public class OrderFlowService {
         this.orderFlowMapper = orderFlowMapper;
     }
 
-    public int create(BaseOrderInfo searchBaseOrderInfo, BaseOrderInfo baseOrderInfo) {
+    /**
+     * 记录订单状态流水
+     * @param preStatus 订单当前状态
+     * @param orderId 订单Id
+     * @param status 修改后的状态
+     * @return
+     */
+    public int create(OrderStatus preStatus, Long orderId, OrderStatus status) {
 
         OrderFlow orderFlow = new OrderFlow();
-        orderFlow.setOrderId(baseOrderInfo.getId());
-        orderFlow.setStatus(baseOrderInfo.getStatus());
-        orderFlow.setPreStatus(searchBaseOrderInfo==null?null:searchBaseOrderInfo.getStatus());
-        orderFlow.setCreateAt(new Timestamp(System.currentTimeMillis()));
+        orderFlow.setOrderId(orderId);
+        orderFlow.setStatus(status);
+        orderFlow.setPreStatus(preStatus);
+        orderFlow.setCreateAt(Date.from(Instant.now()));
         return orderFlowMapper.create(orderFlow);
     }
 

@@ -5,17 +5,23 @@ import com.leon.microx.util.BeanUtils;
 import com.leon.microx.util.Maps;
 import com.leon.microx.util.SnowflakeId;
 import com.leon.microx.util.StringUtils;
-import com.lhiot.oc.basic.mapper.BaseOrderMapper;
-import com.lhiot.oc.basic.mapper.OrderProductMapper;
-import com.lhiot.oc.basic.mapper.OrderStoreMapper;
+import com.lhiot.oc.basic.event.OrderFlowEvent;
+import com.lhiot.oc.basic.mapper.*;
 import com.lhiot.oc.basic.model.*;
+import com.lhiot.oc.basic.model.type.OrderRefundStatus;
+import com.lhiot.oc.basic.model.type.OrderStatus;
+import com.lhiot.oc.basic.model.type.ReceivingWay;
+import com.lhiot.oc.basic.model.type.RefundStatus;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.time.Instant;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -28,19 +34,21 @@ import java.util.Objects;
 public class OrderService {
 
     private BaseOrderMapper baseOrderMapper;
-    private OrderProductService orderProductService;
     private OrderProductMapper orderProductMapper;
     private OrderStoreMapper orderStoreMapper;
-    private OrderFlowService orderFlowService;
+    private OrderFlowMapper orderFlowMapper;
     private SnowflakeId snowflakeId;
+    private OrderRefundMapper orderRefundMapper;
+    private ApplicationEventPublisher publisher;
 
-    public OrderService(BaseOrderMapper baseOrderMapper, OrderProductService orderProductService, OrderProductMapper orderProductMapper, OrderStoreMapper orderStoreMapper, OrderFlowService orderFlowService, SnowflakeId snowflakeId) {
+    public OrderService(BaseOrderMapper baseOrderMapper, OrderProductMapper orderProductMapper, OrderStoreMapper orderStoreMapper, OrderFlowMapper orderFlowMapper, SnowflakeId snowflakeId, OrderRefundMapper orderRefundMapper, ApplicationEventPublisher publisher) {
         this.baseOrderMapper = baseOrderMapper;
-        this.orderProductService = orderProductService;
         this.orderProductMapper = orderProductMapper;
         this.orderStoreMapper = orderStoreMapper;
-        this.orderFlowService = orderFlowService;
+        this.orderFlowMapper = orderFlowMapper;
         this.snowflakeId = snowflakeId;
+        this.orderRefundMapper = orderRefundMapper;
+        this.publisher = publisher;
     }
 
     /**
@@ -65,9 +73,6 @@ public class OrderService {
         orderStore.setHdOrderCode(orderCode);
         orderStore.setOrderId(baseOrder.getId());
         orderStoreMapper.insert(orderStore);
-
-        //构建写order_flow库的数据
-        orderFlowService.create(null,baseOrderInfo);
 
         OrderDetailResult orderDetail = new OrderDetailResult();
         BeanUtils.of(orderDetail).populate(baseOrder);
@@ -120,112 +125,92 @@ public class OrderService {
     /**
      * 依据id修改订单状态
      *
-     * @param baseOrderInfo
+     * @param baseOrder
      * @return
      */
-    public int updateOrderStatusById(BaseOrderInfo baseOrderInfo) {
-        BaseOrderInfo searchBaseOrderInfo = this.baseOrderMapper.findById(baseOrderInfo.getId());
-        if (Objects.isNull(searchBaseOrderInfo)) {
-            return 0;
-        }
-        int result = this.baseOrderMapper.updateOrderStatusById(baseOrderInfo);
-        if (result > 0) {
-            //构建写order_flow库的数据
-            orderFlowService.create(searchBaseOrderInfo, baseOrderInfo);
-        }
-        return result;
+    public int updateOrderStatusById(BaseOrder baseOrder) {
+        return this.baseOrderMapper.updateOrderStatusById(baseOrder);
     }
 
-    public int updateOrderStatusByCode(BaseOrderInfo baseOrderInfo) {
-        BaseOrderInfo searchBaseOrderInfo = this.baseOrderMapper.findById(baseOrderInfo.getId());
-        if (Objects.isNull(searchBaseOrderInfo)) {
-            return 0;
-        }
-        int result = this.baseOrderMapper.updateOrderStatusByCode(baseOrderInfo);
-        if (result > 0) {
-            //构建写order_flow库的数据
-            orderFlowService.create(searchBaseOrderInfo, baseOrderInfo);
-        }
-        return result;
+    public int updateOrderStatusByCode(BaseOrder baseOrder) {
+        return this.baseOrderMapper.updateOrderStatusByCode(baseOrder);
     }
 
     /**
      * 依据订单编码退货
      *
-     * @param orderCode
+     * @param orderDetailResult
+     * @param returnOrderParam
      * @return
      */
-    public int refundOrderByCode(String orderCode, ReturnOrderParam returnOrderParam) {
-        BaseOrderInfo searchBaseOrderInfo = this.baseOrderMapper.findByCode(orderCode);
-        if (Objects.isNull(searchBaseOrderInfo)) {
-            return 0;
-        }
-        BaseOrderInfo baseOrderInfo = new BaseOrderInfo();
-        baseOrderInfo.setCode(orderCode);
-        baseOrderInfo.setStatus(OrderStatus.ALREADY_RETURN);
-        //TODO 设置退款理由 baseOrderInfo.set
-        int result = this.baseOrderMapper.updateOrderStatusByCode(baseOrderInfo);
-        if (result > 0) {
-            //写退款订单商品标识
-            List<String> orderProductIds = Arrays.asList(StringUtils.split(returnOrderParam.getOrderProductIds(), ","));
-            this.orderProductService.updateOrderProductByIds(searchBaseOrderInfo.getId(), RefundStatus.REFUND, orderProductIds);
-            //构建写order_flow库的数据
-            orderFlowService.create(searchBaseOrderInfo, baseOrderInfo);
-        }
-        return result;
-    }
+    public int refundOrderByCode(OrderDetailResult orderDetailResult, ReturnOrderParam returnOrderParam) {
 
-    /**
-     * 依据订单编码退货(已收货发起退货申请)
-     *
-     * @param orderCode
-     * @return
-     */
-    public int refundOrderApplyByCode(String orderCode, ReturnOrderParam returnOrderParam) {
-        BaseOrderInfo searchBaseOrderInfo = this.baseOrderMapper.findByCode(orderCode);
-        if (Objects.isNull(searchBaseOrderInfo)) {
-            return 0;
+        BaseOrder baseOrder = new BaseOrder();
+        baseOrder.setCode(orderDetailResult.getCode());
+        baseOrder.setId(orderDetailResult.getId());
+
+        OrderRefund orderRefund = new OrderRefund();
+        switch (orderDetailResult.getStatus()) {
+            case WAIT_SEND_OUT:
+                //TODO 调用海鼎取消订单
+                orderRefund.setOrderRefundStatus(OrderRefundStatus.ALREADY_RETURN);
+                baseOrder.setStatus(OrderStatus.ALREADY_RETURN);
+            case SEND_OUT:
+            case RECEIVED:
+                orderRefund.setOrderRefundStatus(OrderRefundStatus.RETURNING);
+                baseOrder.setStatus(OrderStatus.RETURNING);
+                //TODO 发起海鼎退货申请
+            default:
+                break;
         }
-        BaseOrderInfo baseOrderInfo = new BaseOrderInfo();
-        baseOrderInfo.setCode(orderCode);
-        baseOrderInfo.setStatus(OrderStatus.RETURNING);//设置为退货中
-        //TODO 设置退款理由 baseOrderInfo.set
-        int result = this.baseOrderMapper.updateOrderStatusByCode(baseOrderInfo);
+        int result = this.baseOrderMapper.updateOrderStatusByCode(baseOrder);
         if (result > 0) {
+            //记录退货表
+            BeanUtils.of(orderRefund).populate(returnOrderParam);
+            orderRefund.setHdOrderCode(orderDetailResult.getHdOrderCode());
+            orderRefund.setOrderId(orderDetailResult.getId());
+            orderRefund.setUserId(orderDetailResult.getUserId());
+            orderRefundMapper.insert(orderRefund);
             //写退款订单商品标识
             List<String> orderProductIds = Arrays.asList(StringUtils.split(returnOrderParam.getOrderProductIds(), ","));
-            this.orderProductService.updateOrderProductByIds(searchBaseOrderInfo.getId(), RefundStatus.REFUND, orderProductIds);
+            orderProductMapper.updateOrderProductByIds(Maps.of("orderId", baseOrder.getId(),
+                    "refundStatus", RefundStatus.REFUND,
+                    "orderProductIds", orderProductIds));
+
             //构建写order_flow库的数据
-            orderFlowService.create(searchBaseOrderInfo, baseOrderInfo);
+            this.publisher.publishEvent(
+                    new OrderFlowEvent(orderDetailResult.getStatus(), baseOrder.getStatus(), orderDetailResult.getId())
+            );
         }
         return result;
     }
 
     /**
      * 门店调货
+     *
      * @param targetStore
      * @param operationUser
      * @param orderId
      * @return
      */
-    public int changeStore(Store targetStore,String operationUser,Long orderId){
+    public int changeStore(Store targetStore, String operationUser, Long orderId) {
 
         //修改订单为待收货状态
-        BaseOrderInfo baseOrderInfo=new BaseOrderInfo();
+        BaseOrderInfo baseOrderInfo = new BaseOrderInfo();
         baseOrderInfo.setId(orderId);
         baseOrderInfo.setHdOrderCode(snowflakeId.stringId());
         int result = baseOrderMapper.updateHdOrderCodeById(baseOrderInfo);
 
-        if(result>0){
+        if (result > 0) {
             //设置调货订单门店信息
-            OrderStore orderStore=new OrderStore();
+            OrderStore orderStore = new OrderStore();
             orderStore.setHdOrderCode(baseOrderInfo.getHdOrderCode());
             orderStore.setOrderId(orderId);
             orderStore.setStoreId(targetStore.getId());
             orderStore.setStoreName(targetStore.getStoreName());
             orderStore.setStoreCode(targetStore.getStoreCode());
             orderStore.setOperationUser(operationUser);
-            orderStore.setCreateAt(new Date());
+            orderStore.setCreateAt(Date.from(Instant.now()));
             orderStoreMapper.insert(orderStore);
         }
         return result;
@@ -233,42 +218,44 @@ public class OrderService {
 
 
     @Nullable
-    public BaseOrderInfo findByCode(String code, boolean needProductList, boolean needOrderFlowList) {
-        BaseOrderInfo searchBaseOrderInfo = this.baseOrderMapper.findByCode(code);
+    public OrderDetailResult findByCode(String code, boolean needProductList, boolean needOrderFlowList) {
+        OrderDetailResult searchBaseOrderInfo = this.baseOrderMapper.findByCode(code);
         if (Objects.isNull(searchBaseOrderInfo)) {
             return null;
         }
+        searchBaseOrderInfo.setOrderStore(orderStoreMapper.findByHdOrderCode(searchBaseOrderInfo.getHdOrderCode()));
         if (needProductList) {
-            searchBaseOrderInfo.setOrderProductList(this.orderProductService.findOrderProductsByOrderId(searchBaseOrderInfo.getId()));
+            searchBaseOrderInfo.setOrderProductList(orderProductMapper.findOrderProductsByOrderId(searchBaseOrderInfo.getId()));
         }
         if (needOrderFlowList) {
-            searchBaseOrderInfo.setOrderFlowList(this.orderFlowService.flowByOrderId(searchBaseOrderInfo.getId()));
+            searchBaseOrderInfo.setOrderFlowList(orderFlowMapper.flowByOrderId(searchBaseOrderInfo.getId()));
         }
         return searchBaseOrderInfo;
     }
 
     @Nullable
-    public BaseOrderInfo findByCode(String code) {
+    public OrderDetailResult findByCode(String code) {
         return this.findByCode(code, false, false);
     }
 
     @Nullable
-    public BaseOrderInfo findById(Long id, boolean needProductList, boolean needOrderFlowList) {
-        BaseOrderInfo searchBaseOrderInfo = this.baseOrderMapper.findById(id);
+    public OrderDetailResult findById(Long id, boolean needProductList, boolean needOrderFlowList) {
+        OrderDetailResult searchBaseOrderInfo = this.baseOrderMapper.findById(id);
         if (Objects.isNull(searchBaseOrderInfo)) {
             return null;
         }
+        searchBaseOrderInfo.setOrderStore(orderStoreMapper.findByHdOrderCode(searchBaseOrderInfo.getHdOrderCode()));
         if (needProductList) {
-            searchBaseOrderInfo.setOrderProductList(this.orderProductService.findOrderProductsByOrderId(searchBaseOrderInfo.getId()));
+            searchBaseOrderInfo.setOrderProductList(orderProductMapper.findOrderProductsByOrderId(searchBaseOrderInfo.getId()));
         }
         if (needOrderFlowList) {
-            searchBaseOrderInfo.setOrderFlowList(this.orderFlowService.flowByOrderId(searchBaseOrderInfo.getId()));
+            searchBaseOrderInfo.setOrderFlowList(orderFlowMapper.flowByOrderId(searchBaseOrderInfo.getId()));
         }
         return searchBaseOrderInfo;
     }
 
     @Nullable
-    public BaseOrderInfo findById(Long id) {
+    public OrderDetailResult findById(Long id) {
         return this.findById(id, false, false);
     }
 

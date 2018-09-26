@@ -5,4 +5,10 @@
         INSERT INTO order_store (hd_order_code,order_id,store_id,store_name,store_code,operation_user,create_at)
         VALUE (#{hdOrderCode},#{orderId},#{storeId},#{storeName},#{storeCode},#{operationUser},#{createAt})
     </insert>
+
+    <select id="findByHdOrderCode" parameterType="String" resultType="com.lhiot.oc.basic.model.OrderStore">
+        SELECT hd_order_code,order_id,store_id,store_name,store_code
+        FROM order_store
+        WHERE hd_order_code = #{0}
+    </select>
 </mapper>

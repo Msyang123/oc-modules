@@ -3,7 +3,7 @@ package com.lhiot.oc.basic.service;
 import com.leon.microx.util.Maps;
 import com.lhiot.oc.basic.mapper.OrderProductMapper;
 import com.lhiot.oc.basic.model.OrderProduct;
-import com.lhiot.oc.basic.model.RefundStatus;
+import com.lhiot.oc.basic.model.type.RefundStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

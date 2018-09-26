@@ -2,6 +2,7 @@ package com.lhiot.oc.basic.mapper;
 
 import com.lhiot.oc.basic.model.BaseOrder;
 import com.lhiot.oc.basic.model.BaseOrderInfo;
+import com.lhiot.oc.basic.model.OrderDetailResult;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
@@ -17,18 +18,18 @@ public interface BaseOrderMapper {
     /**
      * 依据订单id修改订单状态
      *
-     * @param baseOrderInfo
+     * @param baseOrder
      * @return
      */
-    int updateOrderStatusById(BaseOrderInfo baseOrderInfo);
+    int updateOrderStatusById(BaseOrder baseOrder);
 
     /**
      * 依据订单code修改订单状态
      *
-     * @param baseOrderInfo
+     * @param baseOrder
      * @return
      */
-    int updateOrderStatusByCode(BaseOrderInfo baseOrderInfo);
+    int updateOrderStatusByCode(BaseOrder baseOrder);
 
     /**
      * 依据订单id修改订单状态及海鼎订单编码
@@ -37,7 +38,7 @@ public interface BaseOrderMapper {
      */
     int updateHdOrderCodeById(BaseOrderInfo baseOrderInfo);
 
-    BaseOrderInfo findByCode(String code);
+    OrderDetailResult findByCode(String code);
 
-    BaseOrderInfo findById(Long id);
+    OrderDetailResult findById(Long id);
 }

@@ -8,6 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
  * @Author zhangfeng created in 2018/9/19 15:12
@@ -15,6 +16,7 @@ import org.springframework.context.annotation.Bean;
 @SpringBootApplication
 @EnableDiscoveryClient
 @EnableFeignClients
+@EnableAsync
 @Data
 @ConfigurationProperties(prefix = "oc-modules.basic-order-service.snowflake-id")
 public class BaseOrderServiceApplication {

@@ -2,6 +2,8 @@ package com.lhiot.oc.basic.model;
 
 import com.lhiot.oc.basic.model.type.AllowRefund;
 import com.lhiot.oc.basic.model.type.ApplicationType;
+import com.lhiot.oc.basic.model.type.OrderStatus;
+import com.lhiot.oc.basic.model.type.ReceivingWay;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -15,6 +17,8 @@ import java.util.List;
 @Data
 @ApiModel
 public class OrderDetailResult {
+    @ApiModelProperty(notes = "订单Id",dataType = "Long")
+    private Long id;
     @ApiModelProperty(notes = "订单编码", dataType = "String")
     private String code;
     @ApiModelProperty(notes = "用户Id", dataType = "Long")
@@ -33,6 +37,8 @@ public class OrderDetailResult {
     private Integer couponAmount;
     @ApiModelProperty(notes = "海鼎状态", dataType = "HdStatus")
     private HdStatus hdStatus = HdStatus.NOT_SEND;
+    @ApiModelProperty(notes = "海鼎备货时间",dataType = "Date")
+    private Date hdStockAt;
     @ApiModelProperty(notes = "订单状态", dataType = "OrderStatus")
     private OrderStatus status = OrderStatus.WAIT_PAYMENT;
     @ApiModelProperty(notes = "收货人", dataType = "String")
@@ -53,8 +59,12 @@ public class OrderDetailResult {
     private String deliverTime;
     @ApiModelProperty(notes = "是否允许退款YES是NO否", dataType = "AllowRefund")
     private AllowRefund allowRefund = AllowRefund.YES;
+    @ApiModelProperty(notes = "订单创建时间",dataType = "Date")
+    private Date createAt;
     @ApiModelProperty(notes = "订单商品", dataType = "java.util.list")
     private List<OrderProduct> orderProductList;
     @ApiModelProperty(notes = "订单门店信息", dataType = "OrderStore")
     private OrderStore orderStore;
+    @ApiModelProperty(notes = "订单状态流水列表", dataType = "List")
+    private List<OrderFlow> orderFlowList;
 }

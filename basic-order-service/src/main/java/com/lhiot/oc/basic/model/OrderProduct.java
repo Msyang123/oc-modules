@@ -1,5 +1,6 @@
 package com.lhiot.oc.basic.model;
 
+import com.lhiot.oc.basic.model.type.RefundStatus;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
