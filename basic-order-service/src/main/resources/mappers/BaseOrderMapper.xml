@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.lhiot.oc.basic.mapper.BaseOrderMapper">
-    <insert id="insert" parameterType="com.lhiot.oc.basic.model.BaseOrderInfo" useGeneratedKeys="true" keyProperty="id">
+<mapper namespace="com.lhiot.oc.order.mapper.BaseOrderMapper">
+    <insert id="insert" parameterType="com.lhiot.oc.order.model.BaseOrder" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO base_order (order_code,application_type,user_id,total_amount,delivery_amount,coupon_amount,amount_payable,receiving_way,status
         ,receive_user,contact_phone,address,hd_status,remark,delivery_end_time,hd_order_code,deliver_time,allow_refund,create_at)
         VALUE (#{code},#{applicationType},#{userId},#{totalAmount},#{deliveryAmount},#{couponAmount},#{amountPayable},#{receivingWay},#{status}
         ,#{receiveUser},#{contactPhone},#{address},#{hdStatus},#{remark},#{deliveryEndTime},#{hdOrderCode},#{deliverTime},#{allowRefund},#{createAt})
     </insert>
 
-    <update id="updateOrderStatusById" parameterType="com.lhiot.oc.basic.model.BaseOrderInfo">
+    <update id="updateOrderStatusById" parameterType="com.lhiot.oc.order.model.BaseOrder">
         update base_order set status = #{status}
         where id=#{id}
     </update>
 
-    <update id="updateOrderStatusByCode" parameterType="com.lhiot.oc.basic.model.BaseOrderInfo">
+    <update id="updateOrderStatusByCode" parameterType="com.lhiot.oc.order.model.BaseOrder">
         update base_order set status = #{status}
-        where code=#{code}
+        where order_code=#{code}
     </update>
 
-    <update id="updateHdOrderCodeById" parameterType="com.lhiot.oc.basic.model.BaseOrderInfo">
+    <update id="updateHdOrderCodeById" parameterType="com.lhiot.oc.order.model.BaseOrder">
         update base_order set hd_order_code = #{hdOrderCode}
         where id=#{id}
     </update>
 
 
-    <select id="findById" parameterType="long" resultMap="BaseOrderInfo">
+    <select id="findById" parameterType="long" resultType="com.lhiot.oc.order.model.OrderDetailResult">
         <include refid="orderInfo"></include>
-        WHERE t1.id = #{0}
+        WHERE id = #{0}
     </select>
 
-    <select id="findByCode" parameterType="String" resultMap="BaseOrderInfo">
+    <select id="findByCode" parameterType="String" resultType="com.lhiot.oc.order.model.OrderDetailResult">
         <include refid="orderInfo"></include>
-        WHERE t1.code = #{0}
+        WHERE order_code = #{0}
     </select>
 
 
@@ -61,7 +61,7 @@
         FROM base_order
     </sql>
 
-    <resultMap id="BaseOrderInfo" type="com.lhiot.oc.basic.model.BaseOrderInfo">
+    <resultMap id="BaseOrderInfo" type="com.lhiot.oc.order.model.OrderDetailResult">
         <id column="id" javaType="Long" jdbcType="BIGINT" property="id" />
         <result column="code" property="code" />
         <result column="applicationType"  property="applicationType" />
@@ -84,7 +84,7 @@
         <result column="deliverTime" property="deliverTime"/>
         <result column="allowRefund" property="allowRefund"/>
         <result column="createAt" property="createAt"/>
-        <collection  property="orderProducts"  ofType="com.lhiot.oc.basic.model.OrderProduct">
+        <collection  property="orderProductList"  ofType="com.lhiot.oc.order.model.OrderProduct">
             <id column="opid" property="id"/>
             <result column="orderId" property="orderId" />
             <result column="specificationId" property="specificationId" />
@@ -100,7 +100,7 @@
             <result column="sourceId" property="sourceId" />
             <result column="sourceType" property="sourceType" />
         </collection>
-        <collection property="orderFlows" ofType="com.lhiot.oc.basic.model.OrderFlow">
+        <collection property="orderFlowList" ofType="com.lhiot.oc.order.model.OrderFlow">
             <id column="ofid" property="id"/>
             <result column="orderId" property="orderId" />
             <result column="flowStatus" property="status" />
