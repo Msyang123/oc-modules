@@ -23,19 +23,19 @@ public class OrderFlowService {
 
     /**
      * 记录订单状态流水
+     *
      * @param preStatus 订单当前状态
-     * @param orderId 订单Id
-     * @param status 修改后的状态
-     * @return
+     * @param orderId   订单Id
+     * @param status    修改后的状态
      */
-    public int create(OrderStatus preStatus, Long orderId, OrderStatus status) {
+    public void create(OrderStatus preStatus, Long orderId, OrderStatus status) {
 
         OrderFlow orderFlow = new OrderFlow();
         orderFlow.setOrderId(orderId);
         orderFlow.setStatus(status);
         orderFlow.setPreStatus(preStatus);
         orderFlow.setCreateAt(Date.from(Instant.now()));
-        return orderFlowMapper.create(orderFlow);
+        orderFlowMapper.create(orderFlow);
     }
 
     //根据订单id查询

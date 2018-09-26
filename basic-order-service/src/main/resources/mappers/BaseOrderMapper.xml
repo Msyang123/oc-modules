@@ -18,7 +18,7 @@
         where order_code=#{code}
     </update>
 
-    <update id="updateHdOrderCodeById" parameterType="com.lhiot.oc.basic.model.BaseOrderInfo">
+    <update id="updateHdOrderCodeById" parameterType="com.lhiot.oc.basic.model.BaseOrder">
         update base_order set hd_order_code = #{hdOrderCode}
         where id=#{id}
     </update>

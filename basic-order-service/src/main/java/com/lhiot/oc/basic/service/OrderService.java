@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * @Author zhangfeng created in 2018/9/19 9:19
+ * @author zhangfeng created in 2018/9/19 9:19
  **/
 @Service
 @Slf4j
@@ -54,8 +54,8 @@ public class OrderService {
     /**
      * 添加订单信息
      *
-     * @param param
-     * @return
+     * @param param CreateOrderParam
+     * @return OrderDetailResult
      */
     public OrderDetailResult createOrder(CreateOrderParam param) {
         BaseOrder baseOrder = param.toOrderObject();
@@ -86,7 +86,7 @@ public class OrderService {
      * 验证创建订单数据 可以是套餐 也可以是商品
      *
      * @param param 创建订单参数
-     * @return
+     * @return Tips
      */
     public Tips validationParam(CreateOrderParam param) {
         //应付金额为空或者小于零
@@ -125,8 +125,8 @@ public class OrderService {
     /**
      * 依据id修改订单状态
      *
-     * @param baseOrder
-     * @return
+     * @param baseOrder BaseOrder
+     * @return int
      */
     public int updateOrderStatusById(BaseOrder baseOrder) {
         return this.baseOrderMapper.updateOrderStatusById(baseOrder);
@@ -139,9 +139,9 @@ public class OrderService {
     /**
      * 依据订单编码退货
      *
-     * @param orderDetailResult
-     * @param returnOrderParam
-     * @return
+     * @param orderDetailResult OrderDetailResult
+     * @param returnOrderParam  ReturnOrderParam
+     * @return int
      */
     public int refundOrderByCode(OrderDetailResult orderDetailResult, ReturnOrderParam returnOrderParam) {
 
@@ -172,7 +172,7 @@ public class OrderService {
             orderRefund.setUserId(orderDetailResult.getUserId());
             orderRefundMapper.insert(orderRefund);
             //写退款订单商品标识
-            List<String> orderProductIds = Arrays.asList(StringUtils.split(returnOrderParam.getOrderProductIds(), ","));
+            List<String> orderProductIds = Arrays.asList(StringUtils.tokenizeToStringArray(returnOrderParam.getOrderProductIds(), ","));
             orderProductMapper.updateOrderProductByIds(Maps.of("orderId", baseOrder.getId(),
                     "refundStatus", RefundStatus.REFUND,
                     "orderProductIds", orderProductIds));
@@ -188,23 +188,23 @@ public class OrderService {
     /**
      * 门店调货
      *
-     * @param targetStore
-     * @param operationUser
-     * @param orderId
-     * @return
+     * @param targetStore   Store
+     * @param operationUser String
+     * @param orderId       Long
+     * @return int
      */
     public int changeStore(Store targetStore, String operationUser, Long orderId) {
 
         //修改订单为待收货状态
-        BaseOrderInfo baseOrderInfo = new BaseOrderInfo();
-        baseOrderInfo.setId(orderId);
-        baseOrderInfo.setHdOrderCode(snowflakeId.stringId());
-        int result = baseOrderMapper.updateHdOrderCodeById(baseOrderInfo);
+        BaseOrder baseOrder = new BaseOrder();
+        baseOrder.setId(orderId);
+        baseOrder.setHdOrderCode(snowflakeId.stringId());
+        int result = baseOrderMapper.updateHdOrderCodeById(baseOrder);
 
         if (result > 0) {
             //设置调货订单门店信息
             OrderStore orderStore = new OrderStore();
-            orderStore.setHdOrderCode(baseOrderInfo.getHdOrderCode());
+            orderStore.setHdOrderCode(baseOrder.getHdOrderCode());
             orderStore.setOrderId(orderId);
             orderStore.setStoreId(targetStore.getId());
             orderStore.setStoreName(targetStore.getStoreName());

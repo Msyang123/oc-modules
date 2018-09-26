@@ -3,7 +3,7 @@ package com.lhiot.oc.basic.model.type;
 import lombok.Getter;
 
 /**
- * @Author zhangfeng created in 2018/9/20 12:22
+ * @author zhangfeng created in 2018/9/20 12:22
  **/
 public enum AttachmentType {
     PRIMARY_IMAGE("商品主图"),

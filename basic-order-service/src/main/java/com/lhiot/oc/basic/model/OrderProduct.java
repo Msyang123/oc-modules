@@ -8,7 +8,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 /**
- * @Author zhangfeng created in 2018/9/19 9:20
+ * @author zhangfeng created in 2018/9/19 9:20
  **/
 @Data
 @ApiModel

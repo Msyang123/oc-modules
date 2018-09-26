@@ -6,7 +6,7 @@ import java.time.Instant;
 import java.util.Date;
 
 /**
- * @Author zhangfeng created in 2018/9/18 15:29
+ * @author zhangfeng created in 2018/9/18 15:29
  **/
 @Data
 public class OrderStore {

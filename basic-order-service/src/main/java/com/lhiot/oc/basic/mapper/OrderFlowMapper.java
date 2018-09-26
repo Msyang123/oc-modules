@@ -7,10 +7,11 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
-* 描述：订单状态流转记录表
-* @author yijun
-* @date 2018-07-21
-*/
+ * 描述：订单状态流转记录表
+ *
+ * @author yijun
+ * 2018-07-21
+ */
 @Mapper
 @Repository
 public interface OrderFlowMapper {

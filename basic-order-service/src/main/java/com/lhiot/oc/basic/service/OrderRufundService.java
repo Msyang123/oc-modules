@@ -13,7 +13,7 @@ public class OrderRufundService {
         this.orderRefundMapper = orderRefundMapper;
     }
 
-    public int create(OrderRefund orderRefund){
-       return orderRefundMapper.insert(orderRefund);
+    public int create(OrderRefund orderRefund) {
+        return orderRefundMapper.insert(orderRefund);
     }
 }

@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * @Author zhangfeng created in 2018/9/21 16:22
+ * @author zhangfeng created in 2018/9/21 16:22
  **/
 @Data
 @ApiModel
