@@ -20,5 +20,6 @@ public interface OrderProductMapper {
 
     int updateOrderProductByIds(Map<String, Object> map);
 
+    List<OrderProduct> findOrderProductsByIds(List<String> idList);
 
 }

@@ -37,4 +37,8 @@ public class OrderProductService {
                 "orderProductIds", orderProductIds);
         return orderProductMapper.updateOrderProductByIds(param) > 0;
     }
+
+    public List<OrderProduct> findOrderProductListByIds(List<String> idList){
+       return orderProductMapper.findOrderProductsByIds(idList);
+    }
 }
