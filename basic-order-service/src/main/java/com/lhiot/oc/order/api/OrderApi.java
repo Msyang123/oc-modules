@@ -255,8 +255,8 @@ public class OrderApi {
 
         HaiDingOrderParam haiDingOrderParam = new HaiDingOrderParam();
         BeanUtils.of(haiDingOrderParam).populate(searchBaseOrderInfo);
-        haiDingOrderParam.setStoreName(storeInfo.getStoreName());
-        haiDingOrderParam.setStoreCode(storeInfo.getStoreCode());
+        haiDingOrderParam.setStoreName(storeInfo.getName());
+        haiDingOrderParam.setStoreCode(storeInfo.getCode());
         haiDingOrderParam.setStoreId(storeInfo.getId());
         //TODO 发送海鼎新的门店订单信息 是否需要校验库存 待定
         ResponseEntity hdReduceResponse = haiDingService.reduce(haiDingOrderParam); //thirdPartyServiceFeign.hdReduce(orderInfo);

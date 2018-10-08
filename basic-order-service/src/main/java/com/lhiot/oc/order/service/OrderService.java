@@ -180,8 +180,8 @@ public class OrderService {
             orderStore.setHdOrderCode(baseOrder.getHdOrderCode());
             orderStore.setOrderId(orderId);
             orderStore.setStoreId(targetStore.getId());
-            orderStore.setStoreName(targetStore.getStoreName());
-            orderStore.setStoreCode(targetStore.getStoreCode());
+            orderStore.setStoreName(targetStore.getName());
+            orderStore.setStoreCode(targetStore.getCode());
             orderStore.setOperationUser(operationUser);
             orderStore.setCreateAt(Date.from(Instant.now()));
             orderStoreMapper.insert(orderStore);

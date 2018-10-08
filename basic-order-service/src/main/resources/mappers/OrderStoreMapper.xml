@@ -3,7 +3,7 @@
 <mapper namespace="com.lhiot.oc.order.mapper.OrderStoreMapper">
     <insert id="insert" parameterType="com.lhiot.oc.order.model.OrderStore" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO order_store (hd_order_code,order_id,store_id,store_name,store_code,operation_user,create_at)
-        VALUE (#{hdOrderCode},#{orderId},#{storeId},#{storeName},#{storeCode},#{operationUser},#{createAt})
+        VALUE (#{hdOrderCode},#{orderId},#{storeId},#{storeName},#{storeCode},#{operationUser},NOW())
     </insert>
 
     <select id="findByHdOrderCode" parameterType="String" resultType="com.lhiot.oc.order.model.OrderStore">
