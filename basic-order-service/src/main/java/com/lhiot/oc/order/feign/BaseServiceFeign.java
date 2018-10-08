@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestParam;
  * Created by yj
  */
 @FeignClient("basic-data-service-v1-0")
-@Component
 public interface BaseServiceFeign {
 
     @RequestMapping(value = "/stores/{storeId}", method = RequestMethod.GET)
