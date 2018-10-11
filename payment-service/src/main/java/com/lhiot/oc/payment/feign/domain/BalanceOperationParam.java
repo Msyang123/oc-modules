@@ -12,8 +12,6 @@ import lombok.Data;
 @ApiModel
 public class BalanceOperationParam {
 
-    @ApiModelProperty(notes = "基础用户ID", dataType = "Long")
-    private Long baseUserId;
     @ApiModelProperty(notes = "加减金额", dataType = "Long")
     private Long money;
     @ApiModelProperty(notes = "加减操作标识：SUBTRACT - 减，ADD-加", dataType = "OperationStatus")

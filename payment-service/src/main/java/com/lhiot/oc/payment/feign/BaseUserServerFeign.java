@@ -25,7 +25,7 @@ public interface BaseUserServerFeign {
 	/**
 	 * 根据业务用户id查询用户
 	 */
-    @RequestMapping(value="/users/user-id/{userId}",method = RequestMethod.GET)
+    @RequestMapping(value="/users/{userId}",method = RequestMethod.GET)
     ResponseEntity<UserDetailResult> findUserById(@PathVariable("userId") Long userId);
 
 	/**
@@ -33,27 +33,27 @@ public interface BaseUserServerFeign {
 	 * @param baseUserId
 	 * @return
 	 */
-	@RequestMapping(value="/users/base-user/{baseUserId}",method = RequestMethod.GET)
-	ResponseEntity<BaseUserResult> findBaseUserById(@PathVariable("baseUserId") Long baseUserId);
+/*	@RequestMapping(value="/users/base-user/{baseUserId}",method = RequestMethod.GET)
+	ResponseEntity<BaseUserResult> findBaseUserById(@PathVariable("baseUserId") Long baseUserId);*/
 
 
 	/**
 	 * 更新公共用户鲜果币
 	 */
-	@RequestMapping(value="/users/balance/operation",method = RequestMethod.PUT)
-    ResponseEntity updateCurrencyById(@RequestBody BalanceOperationParam param);
+	@RequestMapping(value="/users/{id}/balance",method = RequestMethod.PUT)
+    ResponseEntity updateCurrencyById(@PathVariable("id") long id,@RequestBody BalanceOperationParam param);
 
 
 	/**
 	 * 查询用户余额
 	 */
-	@RequestMapping(value="/users/balance/{id}",method = RequestMethod.GET)
-	ResponseEntity<Long> findFruitCurrency(@PathVariable("id") Long baseUserId);
+	@RequestMapping(value="/users/{id}/balance",method = RequestMethod.GET)
+	ResponseEntity<Long> findFruitCurrency(@PathVariable("id") Long id);
 
 	/**
 	 * 判断是否可使用余额支付
 	 */
-	@RequestMapping(value="/users/payment-password",method = RequestMethod.PUT)
-	ResponseEntity determinePaymentPassword(@RequestBody PaymentPasswordParam param);
+/*	@RequestMapping(value="/users/payment-password",method = RequestMethod.POST)
+	ResponseEntity determinePaymentPassword(@RequestBody PaymentPasswordParam param);*/
 
 }

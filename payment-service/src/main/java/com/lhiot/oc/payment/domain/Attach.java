@@ -17,8 +17,6 @@ import lombok.ToString;
  */
 public class Attach {
 
-    @ApiModelProperty(value = "baseuserId 用于充值", dataType = "Long")
-    private Long baseuserId;
     //微信用户业务用户id
     @ApiModelProperty(value = "userId", dataType = "Long")
     private Long userId;
