@@ -30,49 +30,49 @@ public class Store {
      * 门店编码
      */
     @ApiModelProperty(notes = "门店编码", dataType = "String")
-    private String storeCode;
+    private String code;
 
     /**
      * 门店名称
      */
     @ApiModelProperty(notes = "门店名称", dataType = "String")
-    private String storeName;
+    private String name;
 
     /**
      * 门店地址
      */
     @ApiModelProperty(notes = "门店地址", dataType = "String")
-    private String storeAddress;
+    private String address;
 
     /**
      * 联系方式
      */
     @ApiModelProperty(notes = "联系方式", dataType = "String")
-    private String storePhone;
+    private String phone;
 
     /**
      * 门店图片
      */
     @ApiModelProperty(notes = "门店图片", dataType = "String")
-    private String storeImage;
+    private String image;
 
     /**
      * 所属区域
      */
     @ApiModelProperty(notes = "所属区域", dataType = "String")
-    private String storeArea;
+    private String area;
 
     /**
      * 门店状态(0-未开启  1-开启)
      */
     @ApiModelProperty(notes = "门店状态 ENABLED(\"营业\"),DISABLED(\"未营业\");", dataType = "StoreStatusEnum")
-    private StoreStatus storeStatus;
+    private StoreStatus status;
 
     /**
      * 旗舰店ID
      */
     @ApiModelProperty(notes = "旗舰店ID", dataType = "Long")
-    private Long storeFlagship;
+    private Long flagship;
 
     /**
      * 门店类型：00-普通门店  01-旗舰店
@@ -90,13 +90,13 @@ public class Store {
      * 直播开始时间
      */
     @ApiModelProperty(notes = "直播开始时间", dataType = "String")
-    private String beginTime;
+    private String beginAt;
 
     /**
      * 直播结束时间
      */
     @ApiModelProperty(notes = "直播结束时间", dataType = "String")
-    private String endTime;
+    private String endAt;
 
     /**
      * 录播地址

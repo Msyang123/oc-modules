@@ -139,48 +139,21 @@ public class OrderService {
     /**
      * 依据订单编码退货
      *
-     * @param orderDetailResult OrderDetailResult
-     * @param returnOrderParam  ReturnOrderParam
+     * @param baseOrder BaseOrder
+     * @param orderRefund  OrderRefund
      * @return int
      */
-    public int refundOrderByCode(OrderDetailResult orderDetailResult, ReturnOrderParam returnOrderParam) {
+    public int refundOrderByCode(BaseOrder baseOrder, OrderRefund orderRefund) {
 
-        BaseOrder baseOrder = new BaseOrder();
-        baseOrder.setCode(orderDetailResult.getCode());
-        baseOrder.setId(orderDetailResult.getId());
-
-        OrderRefund orderRefund = new OrderRefund();
-        switch (orderDetailResult.getStatus()) {
-            case WAIT_SEND_OUT:
-                //TODO 调用海鼎取消订单
-                orderRefund.setOrderRefundStatus(OrderRefundStatus.ALREADY_RETURN);
-                baseOrder.setStatus(OrderStatus.ALREADY_RETURN);
-            case SEND_OUT:
-            case RECEIVED:
-                orderRefund.setOrderRefundStatus(OrderRefundStatus.RETURNING);
-                baseOrder.setStatus(OrderStatus.RETURNING);
-                //TODO 发起海鼎退货申请
-            default:
-                break;
-        }
         int result = this.baseOrderMapper.updateOrderStatusByCode(baseOrder);
         if (result > 0) {
             //记录退货表
-            BeanUtils.of(orderRefund).populate(returnOrderParam);
-            orderRefund.setHdOrderCode(orderDetailResult.getHdOrderCode());
-            orderRefund.setOrderId(orderDetailResult.getId());
-            orderRefund.setUserId(orderDetailResult.getUserId());
             orderRefundMapper.insert(orderRefund);
             //写退款订单商品标识
-            List<String> orderProductIds = Arrays.asList(StringUtils.tokenizeToStringArray(returnOrderParam.getOrderProductIds(), ","));
+            List<String> orderProductIds = Arrays.asList(StringUtils.tokenizeToStringArray(orderRefund.getOrderProductIds(), ","));
             orderProductMapper.updateOrderProductByIds(Maps.of("orderId", baseOrder.getId(),
                     "refundStatus", RefundStatus.REFUND,
                     "orderProductIds", orderProductIds));
-
-            //构建写order_flow库的数据
-            this.publisher.publishEvent(
-                    new OrderFlowEvent(orderDetailResult.getStatus(), baseOrder.getStatus(), orderDetailResult.getId())
-            );
         }
         return result;
     }
@@ -207,8 +180,8 @@ public class OrderService {
             orderStore.setHdOrderCode(baseOrder.getHdOrderCode());
             orderStore.setOrderId(orderId);
             orderStore.setStoreId(targetStore.getId());
-            orderStore.setStoreName(targetStore.getStoreName());
-            orderStore.setStoreCode(targetStore.getStoreCode());
+            orderStore.setStoreName(targetStore.getName());
+            orderStore.setStoreCode(targetStore.getCode());
             orderStore.setOperationUser(operationUser);
             orderStore.setCreateAt(Date.from(Instant.now()));
             orderStoreMapper.insert(orderStore);

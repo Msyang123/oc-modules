@@ -20,6 +20,15 @@
         select * from order_product where order_id=#{0}
     </select>
 
+    <select id="findOrderProductsByIds" parameterType="list" resultType="com.lhiot.oc.order.model.OrderProduct">
+        SELECT id,order_id,specification_id,barcode,total_price,product_qty,specification_qty,refund_status,discount_price,product_name
+        FROM order_product
+        WHERE id IN
+        <foreach collection="list" item="item" close=")" open=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+
     <update id="updateOrderProductByIds" parameterType="map">
         UPDATE order_product SET refund_status = #{refundStatus}
         WHERE order_id = #{orderId} AND id IN
