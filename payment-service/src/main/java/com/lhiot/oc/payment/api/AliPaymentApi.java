@@ -31,7 +31,7 @@ import java.util.Objects;
 @Slf4j
 @Api(description = "支付接口 - 支付宝")
 @RestController
-@RequestMapping("/alipay")
+@RequestMapping("/ali-pay")
 public class AliPaymentApi {
 
     private final PaymentLogService paymentLogService;
