@@ -18,6 +18,6 @@ public interface BasicDataService {
     @RequestMapping(value = "/stores/{storeId}", method = RequestMethod.GET)
     ResponseEntity<Store> findStoreById(@PathVariable("storeId") Long storeId, @RequestParam("applicationType") ApplicationType applicationType);
 
-    @RequestMapping(value = "/stores/by-code/{code}", method = RequestMethod.GET)
+    @RequestMapping(value = "/stores/code/{code}", method = RequestMethod.GET)
     ResponseEntity<Store> findStoreByCode(@PathVariable("code") String code, @RequestParam("applicationType") ApplicationType applicationType);
 }
