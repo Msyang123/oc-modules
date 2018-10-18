@@ -14,9 +14,9 @@ import com.alipay.api.request.AlipayTradeRefundRequest;
 import com.alipay.api.response.AlipayTradeAppPayResponse;
 import com.alipay.api.response.AlipayTradeCancelResponse;
 import com.alipay.api.response.AlipayTradeRefundResponse;
-import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.Jackson;
 import com.leon.microx.util.StringUtils;
+import com.leon.microx.web.result.Tips;
 import com.lhiot.oc.payment.domain.SignParam;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,6 @@ import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class AliPayUtil {
@@ -50,36 +49,37 @@ public class AliPayUtil {
         request.setBizModel(model);
         request.setNotifyUrl(properties.getAliPayConfig().getNotifyUrl());
         initAlipayClientWithProp();
-        AlipayTradeAppPayResponse signed=alipayClient.sdkExecute(request);
+        AlipayTradeAppPayResponse signed = alipayClient.sdkExecute(request);
         if (Objects.nonNull(signed) && Objects.nonNull(signed.getBody())) {
-            return Tips.of("1",signed.getBody());
+            return Tips.of("1", signed.getBody());
         }
-        return Tips.of("-1","支付宝签名失败");
+        return Tips.of("-1", "支付宝签名失败");
     }
 
     /**
      * 支付宝撤销支付
+     *
      * @param model
      * @return
      * @throws AlipayApiException
      */
     public Tips cancel(AlipayTradeCancelModel model) throws AlipayApiException {
-        AlipayTradeCancelRequest request=new AlipayTradeCancelRequest();
+        AlipayTradeCancelRequest request = new AlipayTradeCancelRequest();
         request.setBizModel(model);
         request.setNotifyUrl(properties.getAliPayConfig().getCancelNotifyUrl());
 
         initAlipayClientWithProp();
-        AlipayTradeCancelResponse signed=alipayClient.sdkExecute(request);
+        AlipayTradeCancelResponse signed = alipayClient.sdkExecute(request);
         if (Objects.nonNull(signed) && Objects.nonNull(signed.getBody())) {
-            return Tips.of("1",signed.getBody());
+            return Tips.of("1", signed.getBody());
         }
-        return Tips.of("-1","支付宝撤销失败");
+        return Tips.of("-1", "支付宝撤销失败");
     }
 
     /**
      * 支付宝退款
      *
-     * @param payCode 商户订单号
+     * @param payCode   商户订单号
      * @param refundFee 退款总额(元)
      * @param reason    退款原因
      * @param refundId  退款单号（部分退款必填，如果部分退款只退一次，可以是订单号）
@@ -104,7 +104,7 @@ public class AliPayUtil {
         return response.isSuccess();
     }
 
-    public AlipayTradeAppPayModel createAliPayTradeAppPayModel(SignParam param){
+    public AlipayTradeAppPayModel createAliPayTradeAppPayModel(SignParam param) {
         AlipayTradeAppPayModel model = new AlipayTradeAppPayModel();
         model.setSellerId(properties.getAliPayConfig().getSellerId());
         model.setBody(param.getMemo());
@@ -181,7 +181,7 @@ public class AliPayUtil {
      * 依据配置初始化支付宝客户端工具类
      * 每次配置都是远程获取配置加载
      */
-    private void initAlipayClientWithProp(){
+    private void initAlipayClientWithProp() {
         this.alipayClient = new DefaultAlipayClient(
                 properties.getAliPayConfig().getApiUrl(),
                 properties.getAliPayConfig().getAppId(),

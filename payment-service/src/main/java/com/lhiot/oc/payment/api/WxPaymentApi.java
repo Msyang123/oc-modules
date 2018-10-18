@@ -1,10 +1,10 @@
 package com.lhiot.oc.payment.api;
 
 
-import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.Jackson;
 import com.leon.microx.util.xml.XNode;
 import com.leon.microx.util.xml.XReader;
+import com.leon.microx.web.result.Tips;
 import com.lhiot.oc.payment.domain.Attach;
 import com.lhiot.oc.payment.domain.PaymentLog;
 import com.lhiot.oc.payment.domain.SignParam;
@@ -48,7 +48,7 @@ public class WxPaymentApi {
     private final ResourceLoader resourceLoader;
 
     @Autowired
-    public WxPaymentApi( PaymentProperties properties,
+    public WxPaymentApi(PaymentProperties properties,
                         PaymentLogService paymentLogService, BaseDataServerFeign dataServerFeign, ResourceLoader resourceLoader) {
         this.weChatUtil = new WeChatUtil(properties);
         this.paymentLogService = paymentLogService;
@@ -71,14 +71,14 @@ public class WxPaymentApi {
     public ResponseEntity<Tips> sign(HttpServletRequest request, @RequestBody SignParam signParam) {
         //memo:"水果熟了 - 鲜果师商城用户充值"
         Tips backMsg = paymentLogService.validateSignParam(signParam);
-        if(backMsg.getCode().equals("-1")){
+        if (backMsg.getCode().equals("-1")) {
             return ResponseEntity.badRequest().body(backMsg);
         }
         //依据前端传递的支付商户简称查询支付配置信息
         ResponseEntity<PaymentConfig> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(signParam.getAttach().getPaymentName());
 
-        ResponseEntity fetchResult=fetchAndSetAliPayConfig(paymentSignResponseEntity);
-        if(Objects.nonNull(fetchResult)){
+        ResponseEntity fetchResult = fetchAndSetAliPayConfig(paymentSignResponseEntity);
+        if (Objects.nonNull(fetchResult)) {
             return fetchResult;
         }
         weChatUtil.getProperties().getWeChatPayConfig().setNotifyUrl(signParam.getBackUrl());//设置回调地址
@@ -105,10 +105,10 @@ public class WxPaymentApi {
 
     @PostMapping("/notify")
     @ApiOperation(value = "微信支付回调", response = String.class)
-    public ResponseEntity<Tips> notify(String backMsg){
+    public ResponseEntity<Tips> notify(String backMsg) {
         log.info("========支付成功，后台回调=======");
         //XReader xpath = weChatUtil.getParametersByWeChatCallback(request);
-        XReader xpath =XReader.of(backMsg);
+        XReader xpath = XReader.of(backMsg);
         String resultCode = xpath.evalNode("//result_code").body();
         //获取签名的单号
         String payCode = xpath.evalNode("//out_trade_no").body();
@@ -121,8 +121,8 @@ public class WxPaymentApi {
         Attach attach = Jackson.object(xpath.evalNode("//attach").body(), Attach.class);
         //依据前端传递的支付商户简称查询支付配置信息
         ResponseEntity<PaymentConfig> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(attach.getPaymentName());
-        ResponseEntity fetchResult=fetchAndSetAliPayConfig(paymentSignResponseEntity);
-        if(Objects.nonNull(fetchResult)){
+        ResponseEntity fetchResult = fetchAndSetAliPayConfig(paymentSignResponseEntity);
+        if (Objects.nonNull(fetchResult)) {
             return fetchResult;
         }
 
@@ -135,14 +135,14 @@ public class WxPaymentApi {
             //幂等处理
             PaymentLog paymentLog = paymentLogService.getPaymentLogByPayCodeAndPayStep(payCode, PayStepType.NOTIFY.name());
             if (Objects.nonNull(paymentLog)) {
-                return ResponseEntity.ok(Tips.of(1,"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                return ResponseEntity.ok(Tips.of(1, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                         + "<xml><return_code><![CDATA[SUCCESS]]></return_code>"
                         + "<return_msg><![CDATA[OK]]></return_msg></xml>"));
             }
             int fee = Integer.parseInt(xpath.evalNode("//total_fee").body());
-            if(paymentLog.getFee()!=fee){
-                log.error("支付金额与回调金额不一致{},{}",fee,paymentLog);
-                return ResponseEntity.badRequest().body(Tips.of(-1,"支付金额与回调金额不一致"));
+            if (paymentLog.getFee() != fee) {
+                log.error("支付金额与回调金额不一致{},{}", fee, paymentLog);
+                return ResponseEntity.badRequest().body(Tips.of(-1, "支付金额与回调金额不一致"));
             }
 
             //获取传达的附加参数获取用户信息
@@ -156,11 +156,11 @@ public class WxPaymentApi {
             paymentLogService.updatePaymentLog(paymentLog);
             //XXXTODO 发送到队列，发送模板消息以及计算提成
             //广播订单支付成功true, "success"
-            return ResponseEntity.ok(Tips.of(1,"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+            return ResponseEntity.ok(Tips.of(1, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                     + "<xml><return_code><![CDATA[SUCCESS]]></return_code>"
                     + "<return_msg><![CDATA[OK]]></return_msg></xml>"));
         }
-        return ResponseEntity.badRequest().body(Tips.of(-1,"回调信息处理失败"));
+        return ResponseEntity.badRequest().body(Tips.of(-1, "回调信息处理失败"));
     }
 
 
@@ -175,21 +175,21 @@ public class WxPaymentApi {
         //只退一次 退款单编号就是支付编号
 
         ResponseEntity<PaymentConfig> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(paymentName);
-        ResponseEntity fetchResult=fetchAndSetAliPayConfig(paymentSignResponseEntity);
-        if(Objects.nonNull(fetchResult)){
+        ResponseEntity fetchResult = fetchAndSetAliPayConfig(paymentSignResponseEntity);
+        if (Objects.nonNull(fetchResult)) {
             return fetchResult;
         }
-        boolean refundResult = weChatUtil.refund(appid,payCode,totalFee,refundFee);//退款
-        if(refundResult){
-            PaymentLog paymentLog=new PaymentLog();
+        boolean refundResult = weChatUtil.refund(appid, payCode, totalFee, refundFee);//退款
+        if (refundResult) {
+            PaymentLog paymentLog = new PaymentLog();
             paymentLog.setPayCode(payCode);
             paymentLog.setPayStep(PayStepType.REFUND);//支付步骤
             //记录日志
-            paymentLogService.updatePaymentLog(paymentLog,refundMemo);
-            return ResponseEntity.ok(Tips.of(1,"退款成功"));
+            paymentLogService.updatePaymentLog(paymentLog, refundMemo);
+            return ResponseEntity.ok(Tips.of(1, "退款成功"));
         }
 
-        return ResponseEntity.ok(Tips.of(-1,"退款失败"));
+        return ResponseEntity.ok(Tips.of(-1, "退款失败"));
     }
 
     @ApiOperation("取消微信支付处理")
@@ -199,32 +199,32 @@ public class WxPaymentApi {
             @ApiImplicitParam(paramType = "query", name = "payCode", value = "支付code", required = true, dataType = "String")
     })
     @PutMapping("/cancel")
-    public ResponseEntity<Tips> cancel(@RequestParam("paymentName") String paymentName,@RequestParam("appid") String appid,@RequestParam("payCode") String payCode) {
+    public ResponseEntity<Tips> cancel(@RequestParam("paymentName") String paymentName, @RequestParam("appid") String appid, @RequestParam("payCode") String payCode) {
         //依据前端传递的支付商户简称查询支付配置信息
         ResponseEntity<PaymentConfig> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(paymentName);
 
-        ResponseEntity fetchResult=fetchAndSetAliPayConfig(paymentSignResponseEntity);
-        if(Objects.nonNull(fetchResult)){
+        ResponseEntity fetchResult = fetchAndSetAliPayConfig(paymentSignResponseEntity);
+        if (Objects.nonNull(fetchResult)) {
             return fetchResult;
         }
-        boolean result = weChatUtil.cancel(appid,payCode);
-        if(result){
-            return ResponseEntity.ok(Tips.of(1,"取消微信支付成功"));
+        boolean result = weChatUtil.cancel(appid, payCode);
+        if (result) {
+            return ResponseEntity.ok(Tips.of(1, "取消微信支付成功"));
         }
-        return ResponseEntity.badRequest().body(Tips.of(-1,"取消微信支付失败"));
+        return ResponseEntity.badRequest().body(Tips.of(-1, "取消微信支付失败"));
     }
 
     @Nullable
-    private ResponseEntity fetchAndSetAliPayConfig(ResponseEntity<PaymentConfig> paymentSignResponseEntity){
-        if(Objects.isNull(paymentSignResponseEntity)||paymentSignResponseEntity.getStatusCode().isError()){
-            return ResponseEntity.badRequest().body(Tips.of(-1,"远程查询支付配置信息失败"));
+    private ResponseEntity fetchAndSetAliPayConfig(ResponseEntity<PaymentConfig> paymentSignResponseEntity) {
+        if (Objects.isNull(paymentSignResponseEntity) || paymentSignResponseEntity.getStatusCode().isError()) {
+            return ResponseEntity.badRequest().body(Tips.of(-1, "远程查询支付配置信息失败"));
         }
         PaymentConfig paymentSign = paymentSignResponseEntity.getBody();
-        if(Objects.isNull(paymentSign)) {
+        if (Objects.isNull(paymentSign)) {
             return ResponseEntity.badRequest().body(Tips.of(-1, "未找到支付配置信息"));
         }
-        if(!Objects.equals(paymentSign.getPayPlatformType(), PayPlatformType.WE_CHAT.name())){
-            return ResponseEntity.badRequest().body(Tips.of(-1,"支付配置信息与调用接口不匹配"));
+        if (!Objects.equals(paymentSign.getPayPlatformType(), PayPlatformType.WE_CHAT.name())) {
+            return ResponseEntity.badRequest().body(Tips.of(-1, "支付配置信息与调用接口不匹配"));
         }
         PaymentProperties.WeChatPayConfig weChatPayConfig = weChatUtil.getProperties().getWeChatPayConfig();
         weChatPayConfig.setPartnerId(paymentSign.getPartnerId());//设置支付商户

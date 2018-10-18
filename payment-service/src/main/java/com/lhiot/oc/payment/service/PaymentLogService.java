@@ -1,7 +1,7 @@
 package com.lhiot.oc.payment.service;
 
-import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.StringUtils;
+import com.leon.microx.web.result.Tips;
 import com.lhiot.oc.payment.domain.PaymentFlow;
 import com.lhiot.oc.payment.domain.PaymentLog;
 import com.lhiot.oc.payment.domain.PaymentRefund;

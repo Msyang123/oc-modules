@@ -1,9 +1,9 @@
 package com.lhiot.oc.delivery.service;
 
-import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.Calculator;
 import com.leon.microx.util.Jackson;
 import com.leon.microx.util.Maps;
+import com.leon.microx.web.result.Tips;
 import com.lhiot.oc.delivery.dada.DadaDeliveryClient;
 import com.lhiot.oc.delivery.dada.vo.DadaOrderAddResult;
 import com.lhiot.oc.delivery.dada.vo.OrderParam;
