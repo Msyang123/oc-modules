@@ -1,14 +1,16 @@
 package com.lhiot.oc.payment.api;
 
-import com.leon.microx.support.result.Tips;
-import com.leon.microx.util.StringUtils;
+import com.leon.microx.web.result.Tips;
 import com.lhiot.oc.payment.domain.PaymentLog;
 import com.lhiot.oc.payment.domain.SignParam;
 import com.lhiot.oc.payment.domain.enums.PayPlatformType;
 import com.lhiot.oc.payment.domain.enums.PayStepType;
 import com.lhiot.oc.payment.domain.enums.SourceType;
 import com.lhiot.oc.payment.feign.BaseUserServerFeign;
-import com.lhiot.oc.payment.feign.domain.*;
+import com.lhiot.oc.payment.feign.domain.BalanceOperationParam;
+import com.lhiot.oc.payment.feign.domain.BaseUserResult;
+import com.lhiot.oc.payment.feign.domain.OperationStatus;
+import com.lhiot.oc.payment.feign.domain.PaymentPasswordParam;
 import com.lhiot.oc.payment.service.PaymentLogService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -35,6 +37,7 @@ import java.util.Objects;
 public class CurrencyPaymentApi {
     private final BaseUserServerFeign baseUserServerFeign;
     private final PaymentLogService paymentLogService;
+
     @Autowired
     public CurrencyPaymentApi(BaseUserServerFeign baseUserServerFeign, PaymentLogService paymentLogService) {
         this.baseUserServerFeign = baseUserServerFeign;
@@ -44,13 +47,13 @@ public class CurrencyPaymentApi {
     @ApiOperation(value = "鲜果币支付-充值接口")
     @ApiImplicitParam(paramType = "body", name = "signParam", dataType = "SignParam", required = true, value = "鲜果币支付传入参数")
     @PostMapping("/recharge")
-    public ResponseEntity<?> currencyRecharge(@RequestBody SignParam signParam){
-        ResponseEntity validateResult=this.validate(signParam);
+    public ResponseEntity<?> currencyRecharge(@RequestBody SignParam signParam) {
+        ResponseEntity validateResult = this.validate(signParam);
 
-        if(Objects.nonNull(validateResult)){
+        if (Objects.nonNull(validateResult)) {
             return validateResult;
         }
-        BalanceOperationParam balanceOperationParam=new BalanceOperationParam();
+        BalanceOperationParam balanceOperationParam = new BalanceOperationParam();
         balanceOperationParam.setBaseUserId(signParam.getAttach().getBaseuserId());
         balanceOperationParam.setApplicationType(signParam.getAttach().getApplicationType());
         balanceOperationParam.setMoney(signParam.getFee());
@@ -60,7 +63,7 @@ public class CurrencyPaymentApi {
         //扣减或者充值鲜果币
         ResponseEntity responseEntity = baseUserServerFeign.updateCurrencyById(balanceOperationParam);
         //如果成功 添加支付记录
-        if(responseEntity.getStatusCode().is2xxSuccessful()){
+        if (responseEntity.getStatusCode().is2xxSuccessful()) {
             PaymentLog paymentLog = new PaymentLog();
             paymentLog.setUserId(signParam.getAttach().getUserId());
             paymentLog.setBaseUserId(signParam.getAttach().getBaseuserId());
@@ -80,22 +83,22 @@ public class CurrencyPaymentApi {
     @ApiOperation(value = "鲜果币支付-支付接口")
     @ApiImplicitParam(paramType = "body", name = "signParam", dataType = "SignParam", required = true, value = "鲜果币支付传入参数")
     @PostMapping("/pay")
-    public ResponseEntity<?> currencyPay(@RequestBody SignParam signParam){
-        ResponseEntity validateResult=this.validate(signParam);
+    public ResponseEntity<?> currencyPay(@RequestBody SignParam signParam) {
+        ResponseEntity validateResult = this.validate(signParam);
 
-        if(Objects.nonNull(validateResult)){
+        if (Objects.nonNull(validateResult)) {
             return validateResult;
         }
-        PaymentPasswordParam paymentPasswordParam=new PaymentPasswordParam();
+        PaymentPasswordParam paymentPasswordParam = new PaymentPasswordParam();
         paymentPasswordParam.setPaymentPassword(signParam.getAttach().getPaymentPassword());
         paymentPasswordParam.setUserId(signParam.getAttach().getBaseuserId());
         ResponseEntity verificationResult = baseUserServerFeign.determinePaymentPassword(paymentPasswordParam);
 
-        if (Objects.isNull(verificationResult)||verificationResult.getStatusCode().isError()){
+        if (Objects.isNull(verificationResult) || verificationResult.getStatusCode().isError()) {
             return ResponseEntity.badRequest().body(Tips.of("-1", "鲜果币支付密码不正确"));
         }
 
-        BalanceOperationParam balanceOperationParam=new BalanceOperationParam();
+        BalanceOperationParam balanceOperationParam = new BalanceOperationParam();
         balanceOperationParam.setBaseUserId(signParam.getAttach().getBaseuserId());
         balanceOperationParam.setApplicationType(signParam.getAttach().getApplicationType());
         balanceOperationParam.setMoney(signParam.getFee());
@@ -105,7 +108,7 @@ public class CurrencyPaymentApi {
         //扣减或者充值鲜果币
         ResponseEntity responseEntity = baseUserServerFeign.updateCurrencyById(balanceOperationParam);
         //如果成功 添加支付记录
-        if(responseEntity.getStatusCode().is2xxSuccessful()){
+        if (responseEntity.getStatusCode().is2xxSuccessful()) {
             PaymentLog paymentLog = new PaymentLog();
             paymentLog.setUserId(signParam.getAttach().getUserId());
             paymentLog.setBaseUserId(signParam.getAttach().getBaseuserId());
@@ -125,17 +128,17 @@ public class CurrencyPaymentApi {
     @ApiOperation(value = "鲜果币支付-支付退款接口")
     @ApiImplicitParam(paramType = "body", name = "signParam", dataType = "SignParam", required = true, value = "鲜果币支付传入参数")
     @PostMapping("/refund")
-    public ResponseEntity<?> currencyRefund(@RequestBody SignParam signParam){
-        ResponseEntity validateResult=this.validate(signParam);
+    public ResponseEntity<?> currencyRefund(@RequestBody SignParam signParam) {
+        ResponseEntity validateResult = this.validate(signParam);
 
-        if(Objects.nonNull(validateResult)){
+        if (Objects.nonNull(validateResult)) {
             return validateResult;
         }
 
-        if(Objects.nonNull(paymentLogService.getPaymentLogByPayCodeAndPayStep(signParam.getPayCode(),PayStepType.NOTIFY.name()))){
+        if (Objects.nonNull(paymentLogService.getPaymentLogByPayCodeAndPayStep(signParam.getPayCode(), PayStepType.NOTIFY.name()))) {
             return ResponseEntity.badRequest().body(Tips.of("-1", "此笔交易已返回鲜果币，请勿重复发起退款"));
         }
-        BalanceOperationParam balanceOperationParam=new BalanceOperationParam();
+        BalanceOperationParam balanceOperationParam = new BalanceOperationParam();
         balanceOperationParam.setBaseUserId(signParam.getAttach().getBaseuserId());
         balanceOperationParam.setApplicationType(signParam.getAttach().getApplicationType());
         balanceOperationParam.setMoney(signParam.getFee());
@@ -145,7 +148,7 @@ public class CurrencyPaymentApi {
         //扣减或者充值鲜果币
         ResponseEntity responseEntity = baseUserServerFeign.updateCurrencyById(balanceOperationParam);
         //如果成功 添加支付记录
-        if(responseEntity.getStatusCode().is2xxSuccessful()){
+        if (responseEntity.getStatusCode().is2xxSuccessful()) {
             PaymentLog paymentLog = new PaymentLog();
             paymentLog.setPayCode(signParam.getPayCode());
             paymentLog.setPayStep(PayStepType.REFUND);//支付步骤
@@ -155,24 +158,24 @@ public class CurrencyPaymentApi {
     }
 
     @Nullable
-    private ResponseEntity validate(SignParam signParam){
-        if(Objects.isNull(signParam)){
+    private ResponseEntity validate(SignParam signParam) {
+        if (Objects.isNull(signParam)) {
             return ResponseEntity.badRequest().body(Tips.of("-1", "支付传递参数为空"));
         }
-        if(Objects.isNull(signParam.getAttach())){
+        if (Objects.isNull(signParam.getAttach())) {
             return ResponseEntity.badRequest().body(Tips.of("-1", "鲜果币充值支付传递附加参数为空"));
         }
         if (signParam.getAttach().getBaseuserId() == null) {
             return ResponseEntity.badRequest().body(Tips.of("-1", "基础用户ID为空"));
         }
         ResponseEntity<BaseUserResult> baseUser = baseUserServerFeign.findBaseUserById(signParam.getAttach().getBaseuserId());
-        if(Objects.isNull(baseUser)||baseUser.getStatusCode().isError()){
+        if (Objects.isNull(baseUser) || baseUser.getStatusCode().isError()) {
             return ResponseEntity.badRequest().body(Tips.of("-1", "基础用户不存在"));
         }
         if (Objects.isNull(signParam.getFee())) {
             return ResponseEntity.badRequest().body(Tips.of("-1", "支付金额为空"));
         }
-        if (signParam.getFee()<=0) {
+        if (signParam.getFee() <= 0) {
             return ResponseEntity.badRequest().body(Tips.of("-1", "支付金额不能小于0"));
         }
 

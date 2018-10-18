@@ -1,8 +1,8 @@
 package com.lhiot.oc.order.api;
 
-import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.BeanUtils;
 import com.leon.microx.util.StringUtils;
+import com.leon.microx.web.result.Tips;
 import com.lhiot.oc.order.event.OrderFlowEvent;
 import com.lhiot.oc.order.feign.BaseServiceFeign;
 import com.lhiot.oc.order.feign.HaiDingService;
@@ -118,7 +118,7 @@ public class OrderApi {
             return ResponseEntity.badRequest().body("未找到订单");
         }
         if (Objects.equals(searchBaseOrderInfo.getAllowRefund(), AllowRefund.NO)) {
-            return ResponseEntity.badRequest().body("订单未非允许退货订单");
+            return ResponseEntity.badRequest().body("订单为非允许退货订单");
         }
         //只允许待发货 已发货 退货中的订单退货
         if (!Objects.equals(searchBaseOrderInfo.getStatus(), WAIT_SEND_OUT) &&
@@ -247,7 +247,7 @@ public class OrderApi {
             return ResponseEntity.badRequest().body("远程查找调货门店查询未找到门店，请重试！");
         }
 
-        ResponseEntity hdResponse =haiDingService.hdCancel(searchBaseOrderInfo.getHdOrderCode(), "海鼎调货");
+        ResponseEntity hdResponse = haiDingService.hdCancel(searchBaseOrderInfo.getHdOrderCode(), "海鼎调货");
         if (Objects.isNull(hdResponse) || !Objects.equals(HD_CANCEL_ORDER_SUCCESS_RESULT_STRING, hdResponse.getBody())) {
             log.info("海鼎取消订单编号为：" + searchBaseOrderInfo.getHdOrderCode());
             return ResponseEntity.badRequest().body("海鼎取消订单失败，请重试！");

@@ -3,8 +3,8 @@ package com.lhiot.oc.payment.api;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.domain.AlipayTradeAppPayModel;
 import com.alipay.api.domain.AlipayTradeCancelModel;
-import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.Jackson;
+import com.leon.microx.web.result.Tips;
 import com.lhiot.oc.payment.domain.Attach;
 import com.lhiot.oc.payment.domain.PaymentLog;
 import com.lhiot.oc.payment.domain.SignParam;
@@ -58,8 +58,8 @@ public class AliPaymentApi {
         //依据前端传递的支付商户简称查询支付配置信息
         ResponseEntity<PaymentConfig> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(signParam.getAttach().getPaymentName());
 
-        ResponseEntity fetchResult=fetchAndSetAliPayConfig(paymentSignResponseEntity);
-        if(Objects.nonNull(fetchResult)){
+        ResponseEntity fetchResult = fetchAndSetAliPayConfig(paymentSignResponseEntity);
+        if (Objects.nonNull(fetchResult)) {
             return fetchResult;
         }
         aliPayUtil.getProperties().getAliPayConfig().setNotifyUrl(signParam.getBackUrl());//设置回调地址
@@ -80,7 +80,7 @@ public class AliPaymentApi {
 
     @ApiOperation(value = "支付 -回调api")
     @PostMapping("/notify")
-    public ResponseEntity<Tips> payNotify(Map<String, String> params){
+    public ResponseEntity<Tips> payNotify(Map<String, String> params) {
 
         log.info("========支付成功，后台回调=======");
         //Map<String, String> params = aliPayUtil.aliPayNotifyParams(request);
@@ -92,8 +92,8 @@ public class AliPaymentApi {
 
         //依据前端传递的支付商户简称查询支付配置信息
         ResponseEntity<PaymentConfig> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(attach.getPaymentName());
-        ResponseEntity fetchResult=fetchAndSetAliPayConfig(paymentSignResponseEntity);
-        if(Objects.nonNull(fetchResult)){
+        ResponseEntity fetchResult = fetchAndSetAliPayConfig(paymentSignResponseEntity);
+        if (Objects.nonNull(fetchResult)) {
             return fetchResult;
         }
 
@@ -102,14 +102,14 @@ public class AliPaymentApi {
             //幂等处理
             PaymentLog paymentLog = paymentLogService.getPaymentLogByPayCodeAndPayStep(payCode, PayStepType.NOTIFY.name());
             if (Objects.nonNull(paymentLog)) {
-                return ResponseEntity.ok(Tips.of(1,"success"));
+                return ResponseEntity.ok(Tips.of(1, "success"));
             }
 
             int fee = Integer.parseInt(AliPayUtil.yuanToFen(params.get("total_amount")));
 
             if (paymentLog.getFee() != fee) {
                 log.error("支付金额与回调金额不一致{},{}", fee, paymentLog);
-                return ResponseEntity.badRequest().body(Tips.of(-1,"failure"));
+                return ResponseEntity.badRequest().body(Tips.of(-1, "failure"));
             }
 
             //获取传达的附加参数获取用户信息
@@ -117,42 +117,42 @@ public class AliPaymentApi {
 
             paymentLog.setPayStep(PayStepType.NOTIFY);//支付步骤
 
-            paymentLog.setPayAt(Objects.isNull(params.get("gmt_payment"))?new Timestamp(System.currentTimeMillis()):new Timestamp(DateFormatUtil.format1(params.get("gmt_payment")).getTime()));
+            paymentLog.setPayAt(Objects.isNull(params.get("gmt_payment")) ? new Timestamp(System.currentTimeMillis()) : new Timestamp(DateFormatUtil.format1(params.get("gmt_payment")).getTime()));
             paymentLog.setTradeId(params.get("trade_no"));
             paymentLog.setBankType(params.get("fund_bill_list"));
 
             //记录日志
             paymentLogService.updatePaymentLog(paymentLog);
-            return ResponseEntity.ok(Tips.of(1,"success"));
+            return ResponseEntity.ok(Tips.of(1, "success"));
         }
-        return ResponseEntity.badRequest().body(Tips.of(-1,"failure"));
+        return ResponseEntity.badRequest().body(Tips.of(-1, "failure"));
     }
 
     @ApiOperation(value = "撤销支付宝支付")
     @PutMapping("/cancel/{payCode}")
-    public ResponseEntity<Tips> cancel(@PathVariable("payCode") String payCode,@RequestParam("paymentName") String paymentName) throws AlipayApiException {
+    public ResponseEntity<Tips> cancel(@PathVariable("payCode") String payCode, @RequestParam("paymentName") String paymentName) throws AlipayApiException {
         log.info("========撤销支付宝支付成功，后台回调=======");
 
         //依据前端传递的支付商户简称查询支付配置信息
         ResponseEntity<PaymentConfig> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(paymentName);
-        ResponseEntity fetchResult=fetchAndSetAliPayConfig(paymentSignResponseEntity);
-        if(Objects.nonNull(fetchResult)){
+        ResponseEntity fetchResult = fetchAndSetAliPayConfig(paymentSignResponseEntity);
+        if (Objects.nonNull(fetchResult)) {
             return fetchResult;
         }
 
-        AlipayTradeCancelModel model=new AlipayTradeCancelModel();
+        AlipayTradeCancelModel model = new AlipayTradeCancelModel();
         model.setOutTradeNo(payCode);
 
         //撤销支付不需要更新支付日志
-        Tips tips =aliPayUtil.cancel(model);
+        Tips tips = aliPayUtil.cancel(model);
         return ResponseEntity.ok(tips);
     }
 
 
     @ApiOperation(value = "撤销支付宝支付 - 异步回调")
     @PostMapping("/cancel/notify")
-    public ResponseEntity<String> cancelNotify(Map<String, String> params){
-        log.info("========撤销支付宝支付成功，后台回调======={}",params.get("trade_no"));
+    public ResponseEntity<String> cancelNotify(Map<String, String> params) {
+        log.info("========撤销支付宝支付成功，后台回调======={}", params.get("trade_no"));
         //Map<String, String> params = aliPayUtil.aliPayNotifyParams(request);
         return ResponseEntity.ok("success");
     }
@@ -168,39 +168,40 @@ public class AliPaymentApi {
 
         ResponseEntity<PaymentConfig> paymentSignResponseEntity = dataServerFeign.findPaymentSignByPaymentName(paymentName);
 
-        ResponseEntity fetchResult=fetchAndSetAliPayConfig(paymentSignResponseEntity);
-        if(Objects.nonNull(fetchResult)){
+        ResponseEntity fetchResult = fetchAndSetAliPayConfig(paymentSignResponseEntity);
+        if (Objects.nonNull(fetchResult)) {
             return fetchResult;
         }
-        boolean refundResult = aliPayUtil.refund(payCode,aliPayUtil.fenToYuan(refundFee),refundMemo,payCode);//退款
-        if(refundResult){
-            PaymentLog paymentLog=new PaymentLog();
+        boolean refundResult = aliPayUtil.refund(payCode, aliPayUtil.fenToYuan(refundFee), refundMemo, payCode);//退款
+        if (refundResult) {
+            PaymentLog paymentLog = new PaymentLog();
             paymentLog.setPayCode(payCode);
             paymentLog.setPayStep(PayStepType.REFUND);//支付步骤
             //记录日志
-            paymentLogService.updatePaymentLog(paymentLog,refundMemo);
-            return ResponseEntity.ok(Tips.of(1,"退款成功"));
+            paymentLogService.updatePaymentLog(paymentLog, refundMemo);
+            return ResponseEntity.ok(Tips.of(1, "退款成功"));
         }
 
-        return ResponseEntity.ok(Tips.of(-1,"退款失败"));
+        return ResponseEntity.ok(Tips.of(-1, "退款失败"));
     }
 
     /**
      * 获取并设置支付宝配置信息
+     *
      * @param paymentSignResponseEntity
      * @return
      */
     @Nullable
-    private ResponseEntity fetchAndSetAliPayConfig(ResponseEntity<PaymentConfig> paymentSignResponseEntity){
-        if(Objects.isNull(paymentSignResponseEntity)||paymentSignResponseEntity.getStatusCode().isError()){
-            return ResponseEntity.badRequest().body(Tips.of(-1,"远程查询支付配置信息失败"));
+    private ResponseEntity fetchAndSetAliPayConfig(ResponseEntity<PaymentConfig> paymentSignResponseEntity) {
+        if (Objects.isNull(paymentSignResponseEntity) || paymentSignResponseEntity.getStatusCode().isError()) {
+            return ResponseEntity.badRequest().body(Tips.of(-1, "远程查询支付配置信息失败"));
         }
         PaymentConfig paymentSign = paymentSignResponseEntity.getBody();
-        if(Objects.isNull(paymentSign)) {
+        if (Objects.isNull(paymentSign)) {
             return ResponseEntity.badRequest().body(Tips.of(-1, "未找到支付配置信息"));
         }
-        if(!Objects.equals(paymentSign.getPayPlatformType(), PayPlatformType.ALIPAY.name())){
-            return ResponseEntity.badRequest().body(Tips.of(-1,"支付配置信息与调用接口不匹配"));
+        if (!Objects.equals(paymentSign.getPayPlatformType(), PayPlatformType.ALIPAY.name())) {
+            return ResponseEntity.badRequest().body(Tips.of(-1, "支付配置信息与调用接口不匹配"));
         }
         PaymentProperties.AliPayConfig aliPayConfig = aliPayUtil.getProperties().getAliPayConfig();
         aliPayConfig.setAppId(paymentSign.getPartnerId());//设置支付商户

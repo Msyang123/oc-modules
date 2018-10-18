@@ -1,7 +1,7 @@
 package com.lhiot.oc.delivery.api;
 
-import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.*;
+import com.leon.microx.web.result.Tips;
 import com.lhiot.oc.delivery.domain.DeliverFeeParam;
 import com.lhiot.oc.delivery.domain.DeliverTimeItem;
 import com.lhiot.oc.delivery.feign.BasicDataService;
@@ -163,9 +163,9 @@ public class DeliveryCommonApi {
             String display = firstLabel
                     ? "立即配送"
                     : StringUtils.format("{}-{}",
-                            Converter.format(Converter.date(startTime, "yyyy-MM-dd HH:mm:ss"), "HH:mm"),
-                            Converter.format(Converter.date(nextStartTime, "yyyy-MM-dd HH:mm:ss"), "HH:mm")
-                    );
+                    Converter.format(Converter.date(startTime, "yyyy-MM-dd HH:mm:ss"), "HH:mm"),
+                    Converter.format(Converter.date(nextStartTime, "yyyy-MM-dd HH:mm:ss"), "HH:mm")
+            );
             DeliverTimeItem deliverTimeItem = new DeliverTimeItem(display, startTime, nextStartTime);
             firstLabel = false;
             if (calendar.getTime().before(tonightBegin)) {

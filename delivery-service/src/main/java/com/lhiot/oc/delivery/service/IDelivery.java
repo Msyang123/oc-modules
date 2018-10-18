@@ -1,6 +1,6 @@
 package com.lhiot.oc.delivery.service;
 
-import com.leon.microx.support.result.Tips;
+import com.leon.microx.web.result.Tips;
 import com.lhiot.oc.delivery.domain.DeliverBaseOrder;
 import com.lhiot.oc.delivery.domain.enums.CoordinateSystem;
 

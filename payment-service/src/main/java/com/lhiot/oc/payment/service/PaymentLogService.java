@@ -1,7 +1,7 @@
 package com.lhiot.oc.payment.service;
 
-import com.leon.microx.support.result.Tips;
 import com.leon.microx.util.StringUtils;
+import com.leon.microx.web.result.Tips;
 import com.lhiot.oc.payment.domain.PaymentFlow;
 import com.lhiot.oc.payment.domain.PaymentLog;
 import com.lhiot.oc.payment.domain.PaymentRefund;
@@ -11,7 +11,6 @@ import com.lhiot.oc.payment.domain.enums.PayStepType;
 import com.lhiot.oc.payment.domain.enums.SourceType;
 import com.lhiot.oc.payment.feign.BaseUserServerFeign;
 import com.lhiot.oc.payment.feign.domain.BaseUserResult;
-import com.lhiot.oc.payment.feign.domain.UserDetailResult;
 import com.lhiot.oc.payment.mapper.PaymentFlowMapper;
 import com.lhiot.oc.payment.mapper.PaymentLogMapper;
 import com.lhiot.oc.payment.mapper.PaymentRefundMapper;
@@ -39,8 +38,8 @@ public class PaymentLogService {
 
 
     @Autowired
-    public PaymentLogService(PaymentLogMapper paymentLogMapper, PaymentFlowMapper paymentFlowMapper, PaymentRefundMapper paymentRefundMapper, BaseUserServerFeign baseUserServerFeign){
-        this.paymentLogMapper=paymentLogMapper;
+    public PaymentLogService(PaymentLogMapper paymentLogMapper, PaymentFlowMapper paymentFlowMapper, PaymentRefundMapper paymentRefundMapper, BaseUserServerFeign baseUserServerFeign) {
+        this.paymentLogMapper = paymentLogMapper;
         this.paymentFlowMapper = paymentFlowMapper;
         this.paymentRefundMapper = paymentRefundMapper;
         this.baseUserServerFeign = baseUserServerFeign;
@@ -48,25 +47,27 @@ public class PaymentLogService {
 
     /**
      * 依据订单编码查询支付日志
+     *
      * @param payCode
      * @return
      */
-    public PaymentLog getPaymentLogByPayCode(String payCode){
+    public PaymentLog getPaymentLogByPayCode(String payCode) {
         return paymentLogMapper.getPaymentLogByPayCode(payCode);
     }
 
     /**
      * 添加日志
+     *
      * @param paymentLog
      * @return
      */
-    public int insertPaymentLog(PaymentLog paymentLog){
+    public int insertPaymentLog(PaymentLog paymentLog) {
         //非空就不操作
-        if(Objects.isNull(paymentLogMapper.getPaymentLogByPayCode(paymentLog.getPayCode()))){
+        if (Objects.isNull(paymentLogMapper.getPaymentLogByPayCode(paymentLog.getPayCode()))) {
             return 0;
         }
         int result = paymentLogMapper.insertPaymentLog(paymentLog);
-        if(result>0) {
+        if (result > 0) {
             PaymentFlow paymentFlow = new PaymentFlow();
             paymentFlow.setCreateAt(new Date());
             paymentFlow.setPaymentLogId(paymentLog.getId());
@@ -79,10 +80,11 @@ public class PaymentLogService {
 
     /**
      * 添加日志
+     *
      * @param signParam
      * @return
      */
-    public int insertPaymentLog(SignParam signParam){
+    public int insertPaymentLog(SignParam signParam) {
         PaymentLog paymentLog = new PaymentLog();
         paymentLog.setPayStep(PayStepType.SIGN);//支付步骤：sign-签名成功
         paymentLog.setBaseUserId(signParam.getAttach().getBaseuserId());
@@ -98,18 +100,19 @@ public class PaymentLogService {
 
     /**
      * 回调修改日志
+     *
      * @return
      */
-    public int updatePaymentLog(PaymentLog paymentLog,String... refundMemo){
+    public int updatePaymentLog(PaymentLog paymentLog, String... refundMemo) {
 
         PaymentLog searchPaymentLong = paymentLogMapper.getPaymentLogByPayCode(paymentLog.getPayCode());
-        if(Objects.isNull(searchPaymentLong)){
+        if (Objects.isNull(searchPaymentLong)) {
             return 0;
         }
         paymentLog.setId(searchPaymentLong.getId());
         int result = paymentLogMapper.updatePaymentLog(paymentLog);
 
-        if(result>0) {
+        if (result > 0) {
             //写支付流水
             Date current = new Date();
             PaymentFlow paymentFlow = new PaymentFlow();
@@ -119,8 +122,8 @@ public class PaymentLogService {
             paymentFlow.setStatus(paymentLog.getPayStep());
             paymentFlowMapper.create(paymentFlow);
             //如果是退款就写退款记录
-            if(Objects.equals(paymentLog.getPayStep(),PayStepType.REFUND)){
-                PaymentRefund paymentRefund=new PaymentRefund();
+            if (Objects.equals(paymentLog.getPayStep(), PayStepType.REFUND)) {
+                PaymentRefund paymentRefund = new PaymentRefund();
                 paymentRefund.setCreateTime(current);
                 paymentRefund.setPaymentLogId(paymentLog.getId());
                 paymentRefund.setRefundMemo(refundMemo[0]);//退款理由
@@ -132,19 +135,20 @@ public class PaymentLogService {
 
     /**
      * 依据支付编码查询支付日志
+     *
      * @param payCode
      * @param payStep
      * @return
      */
-    public PaymentLog getPaymentLogByPayCodeAndPayStep(String payCode, String payStep){
-        Map<String,Object> param = new HashMap<String,Object>();
-        param.put("payCode",payCode);
-        param.put("payStep",payStep);
+    public PaymentLog getPaymentLogByPayCodeAndPayStep(String payCode, String payStep) {
+        Map<String, Object> param = new HashMap<String, Object>();
+        param.put("payCode", payCode);
+        param.put("payStep", payStep);
         return paymentLogMapper.getPaymentLogByPayCodeAndPayStep(param);
     }
 
     public Tips validateSignParam(SignParam signParam) {
-        if(Objects.isNull(signParam)){
+        if (Objects.isNull(signParam)) {
             return Tips.of("-1", "支付参数不能为空");
         }
         if (StringUtils.isBlank(signParam.getMemo())) {
@@ -159,7 +163,7 @@ public class PaymentLogService {
                 return Tips.of("-1", "充值基础用户信息不能为空");
             }
             ResponseEntity<BaseUserResult> baseUser = baseUserServerFeign.findBaseUserById(signParam.getAttach().getBaseuserId());
-            if(Objects.isNull(baseUser)||baseUser.getStatusCode().isError()){
+            if (Objects.isNull(baseUser) || baseUser.getStatusCode().isError()) {
                 return Tips.of("-1", "充值基础用户不存在");
             }
         }
