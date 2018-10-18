@@ -10,7 +10,6 @@ import com.lhiot.oc.payment.domain.enums.PayPlatformType;
 import com.lhiot.oc.payment.domain.enums.PayStepType;
 import com.lhiot.oc.payment.domain.enums.SourceType;
 import com.lhiot.oc.payment.feign.BaseUserServerFeign;
-import com.lhiot.oc.payment.feign.domain.BaseUserResult;
 import com.lhiot.oc.payment.mapper.PaymentFlowMapper;
 import com.lhiot.oc.payment.mapper.PaymentLogMapper;
 import com.lhiot.oc.payment.mapper.PaymentRefundMapper;
@@ -87,7 +86,6 @@ public class PaymentLogService {
     public int insertPaymentLog(SignParam signParam) {
         PaymentLog paymentLog = new PaymentLog();
         paymentLog.setPayStep(PayStepType.SIGN);//支付步骤：sign-签名成功
-        paymentLog.setBaseUserId(signParam.getAttach().getBaseuserId());
         paymentLog.setUserId(signParam.getAttach().getUserId());
         paymentLog.setApplicationType(signParam.getAttach().getApplicationType());
         paymentLog.setSourceType(signParam.getAttach().getSourceType());
@@ -159,12 +157,9 @@ public class PaymentLogService {
         }
         //验证业务信息
         if (Objects.equals(signParam.getAttach().getSourceType(), SourceType.RECHARGE)) {
-            if (Objects.isNull(signParam.getAttach().getBaseuserId())) {
-                return Tips.of("-1", "充值基础用户信息不能为空");
-            }
-            ResponseEntity<BaseUserResult> baseUser = baseUserServerFeign.findBaseUserById(signParam.getAttach().getBaseuserId());
+            ResponseEntity baseUser = baseUserServerFeign.findUserById(signParam.getAttach().getUserId());
             if (Objects.isNull(baseUser) || baseUser.getStatusCode().isError()) {
-                return Tips.of("-1", "充值基础用户不存在");
+                return Tips.of("-1", "充值用户不存在");
             }
         }
         if (StringUtils.isBlank(signParam.getPayCode())) {

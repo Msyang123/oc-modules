@@ -40,7 +40,7 @@ import java.util.TreeMap;
 @Slf4j
 @RestController
 @Api("微信公共支付api")
-@RequestMapping("/wxpayment")
+@RequestMapping("/wx-payment")
 public class WxPaymentApi {
     private final PaymentLogService paymentLogService;
     private final WeChatUtil weChatUtil;
