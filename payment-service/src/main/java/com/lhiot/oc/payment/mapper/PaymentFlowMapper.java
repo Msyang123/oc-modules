@@ -2,6 +2,7 @@ package com.lhiot.oc.payment.mapper;
 
 import com.lhiot.oc.payment.domain.PaymentFlow;
 import org.apache.ibatis.annotations.Mapper;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ import java.util.List;
 * @date 2018/09/20
 */
 @Mapper
+@Repository
 public interface PaymentFlowMapper {
 
     /**
