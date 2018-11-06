@@ -1,4 +1,4 @@
-package com.lhiot.oc.delivery.fengniao.vo;
+package com.lhiot.oc.delivery.fengniao.model;
 
 /**
  * 抽象响应父类

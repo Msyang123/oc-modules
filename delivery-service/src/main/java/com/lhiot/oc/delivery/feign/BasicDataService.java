@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Component
-@FeignClient("data-service-v1-0")
+@FeignClient("basic-data-service-v1-0")
 public interface BasicDataService {
 
     //查询门店信息

@@ -86,7 +86,7 @@ public class DadaDeliveryApi {
             return ResponseEntity.badRequest().body(Tips.of(-1, "超过配送范围！"));
         }
         //发送达达
-        return ResponseEntity.ok(dadaDeliveryService.send(coordinateSystem, deliverBaseOrder));
+        return ResponseEntity.ok(dadaDeliveryService.send(coordinateSystem, deliverBaseOrder,distance));
     }
 
     @GetMapping("/detail/{hdOrderCode}")

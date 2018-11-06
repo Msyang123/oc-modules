@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * 基础数据中心基础服务
  * Created by yj
  */
-@FeignClient("data-service-v1-0")
+@FeignClient("basic-data-service-v1-0")
 @Component
 public interface BaseDataServerFeign {
 

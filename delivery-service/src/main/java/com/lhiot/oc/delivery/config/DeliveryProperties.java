@@ -14,5 +14,7 @@ public class DeliveryProperties {
     private FengNiaoProperties fengNiao;
 
     private DadaProperties dada;
+
+    private MeiTuanProperties meiTuan;
 }
 

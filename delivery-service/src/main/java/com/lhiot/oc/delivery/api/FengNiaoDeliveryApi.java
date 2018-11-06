@@ -90,7 +90,7 @@ public class FengNiaoDeliveryApi {
             return ResponseEntity.badRequest().body(Tips.of(-1, "超过配送范围！"));
         }
         //发送蜂鸟配送
-        return ResponseEntity.ok(fengniaoDeliveryService.send(coordinateSystem, deliverBaseOrder));
+        return ResponseEntity.ok(fengniaoDeliveryService.send(coordinateSystem, deliverBaseOrder,distance));
     }
 
     @GetMapping("/detail/{hdOrderCode}")
