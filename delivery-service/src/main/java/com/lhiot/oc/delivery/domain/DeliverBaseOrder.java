@@ -128,6 +128,7 @@ public class DeliverBaseOrder extends PagerRequestObject {
 
     /**
     *配送时间段
+     * 格式如：{"display":"立即配送","startTime":"2018-09-22 11:30:00","endTime":"2018-08-15 12:30:00"}
     */
     @JsonProperty("deliverTime")
     @ApiModelProperty(value = "配送时间段", dataType = "String")

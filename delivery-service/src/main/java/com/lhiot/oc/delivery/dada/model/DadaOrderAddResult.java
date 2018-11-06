@@ -1,4 +1,4 @@
-package com.lhiot.oc.delivery.dada.vo;
+package com.lhiot.oc.delivery.dada.model;
 
 import lombok.Data;
 

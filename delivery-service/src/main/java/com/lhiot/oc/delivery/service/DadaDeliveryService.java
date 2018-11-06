@@ -5,8 +5,8 @@ import com.leon.microx.util.Jackson;
 import com.leon.microx.util.Maps;
 import com.leon.microx.web.result.Tips;
 import com.lhiot.oc.delivery.dada.DadaDeliveryClient;
-import com.lhiot.oc.delivery.dada.vo.DadaOrderAddResult;
-import com.lhiot.oc.delivery.dada.vo.OrderParam;
+import com.lhiot.oc.delivery.dada.model.DadaOrderAddResult;
+import com.lhiot.oc.delivery.dada.model.OrderParam;
 import com.lhiot.oc.delivery.domain.DeliverBaseOrder;
 import com.lhiot.oc.delivery.domain.DeliverNote;
 import com.lhiot.oc.delivery.domain.enums.CoordinateSystem;
@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
@@ -42,7 +43,7 @@ public class DadaDeliveryService implements IDelivery {
      *
      * @return Tips
      */
-    public Tips send(CoordinateSystem coordinateSystem, DeliverBaseOrder deliverBaseOrder) {
+    public Tips send(CoordinateSystem coordinateSystem, DeliverBaseOrder deliverBaseOrder, BigDecimal distance) {
         log.info("订单达达配送：{}", deliverBaseOrder);
         OrderParam orderParam = new OrderParam();
         orderParam.setBackUrl(deliverBaseOrder.getBackUrl()); // 设置业务回调地址
@@ -83,19 +84,25 @@ public class DadaDeliveryService implements IDelivery {
             log.error("达达发送配送失败,{}", e);
             return Tips.of(-1, "达达发送配送失败");
         }
+
         //记录配送信息
         DeliverNote deliverNote = new DeliverNote();
-        deliverNote.setOrderId(deliverBaseOrder.getId());
+        deliverNote.setOrderId(deliverBaseOrder.getOrderId());
         deliverNote.setOrderCode(deliverBaseOrder.getOrderCode());//订单号
         deliverNote.setDeliverCode(deliverBaseOrder.getHdOrderCode());//配送单号与海鼎订单号一致
         deliverNote.setDeliverType(DeliverType.DADA);
         deliverNote.setStoreCode(deliverBaseOrder.getStoreCode());
         deliverNote.setRemark(deliverBaseOrder.getRemark());
         deliverNote.setFee(Calculator.toInt(Calculator.mul(dadaOrderAddResult.getResult().getDeliverFee(), 100.0)));
-        deliverNote.setDistance(dadaOrderAddResult.getResult().getDistance());
-        deliverNote.setDeliverCode(deliverBaseOrder.getHdOrderCode());//配送单单号
+        deliverNote.setDistance(dadaOrderAddResult.getResult().getDistance());//达达自己返回配送距离，故不使用自己的距离
         //创建配送单
         deliveryNoteService.createNewDeliverNote(deliverNote);
+
+        //更新配送信息
+        DeliverNote updateDeliverNote = new DeliverNote();
+        updateDeliverNote.setDeliverStatus(DeliveryStatus.UNRECEIVE);
+        updateDeliverNote.setId(deliverNote.getId());
+        deliveryNoteService.updateById(updateDeliverNote);
 
         //写入配送订单流程表
         deliverBaseOrderService.create(deliverBaseOrder);
@@ -157,7 +164,7 @@ public class DadaDeliveryService implements IDelivery {
         switch (Integer.valueOf(resultMap.get("order_status"))) {
             // 待接单
             case 1:
-                deliverNote.setDeliverStatus(DeliveryStatus.UNRECEIVED);
+                deliverNote.setDeliverStatus(DeliveryStatus.UNRECEIVE);
                 deliveryNoteService.updateById(deliverNote);
                 break;
             // 待取货

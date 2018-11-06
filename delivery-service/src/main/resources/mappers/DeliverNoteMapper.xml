@@ -21,6 +21,7 @@
         <result column="deliver_status" property="deliverStatus" />
         <result column="store_code" property="storeCode" />
         <result column="remark" property="remark" />
+        <result column="ext" property="ext" />
     </resultMap>
 
     <!-- base查询字段  -->
@@ -42,6 +43,7 @@
             deliver_status,
             store_code,
             remark,
+            ext,
         </trim>
     </sql>
 
@@ -97,6 +99,9 @@
             <if test="remark != null ">
                 remark,
             </if>
+            <if test="ext != null ">
+                ext,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides="," >
             <if test="id != null ">
@@ -146,6 +151,9 @@
             </if>
             <if test="remark != null ">
                 #{remark},
+            </if>
+            <if test="ext != null ">
+                #{ext},
             </if>
         </trim>
     </insert>
@@ -201,6 +209,9 @@
             </if>
             <if test="remark != null ">
                 remark = #{remark},
+            </if>
+            <if test="ext != null ">
+                ext = #{ext},
             </if>
         </set>
         where id=#{id}
@@ -290,6 +301,9 @@
             </if>
             <if test="remark != null ">
                 and remark = #{remark}
+            </if>
+            <if test="ext != null ">
+                and ext = #{ext}
             </if>
         </where>
     </sql>
