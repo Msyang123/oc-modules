@@ -46,9 +46,10 @@ public class MeiTuanDeliveryService implements IDelivery {
     /**
      * 发送订单给美团(基于门店方式)
      * 门店对应为我们系统ERP中的门店
+     *
      * @return Tips
      */
-    public Tips send(CoordinateSystem coordinateSystem, DeliverBaseOrder deliverBaseOrder,BigDecimal distance) {
+    public Tips send(CoordinateSystem coordinateSystem, DeliverBaseOrder deliverBaseOrder, BigDecimal distance) {
         log.info("发送美团的订单{}", deliverBaseOrder);
         /*ResponseEntity storeResponseEntity = basicDataService.findStoreByCode(deliverBaseOrder.getStoreCode(), deliverBaseOrder.getApplyType());
         if (storeResponseEntity.getStatusCode().isError() || Objects.isNull(storeResponseEntity.getBody())) {
@@ -57,7 +58,7 @@ public class MeiTuanDeliveryService implements IDelivery {
         Store store = (Store) storeResponseEntity.getBody();*/
         //距离换算
         /*BigDecimal distance = Distance.getDistance(store.getStorePosition().getLat(), store.getStorePosition().getLng(), deliverBaseOrder.getLat(), deliverBaseOrder.getLng());
-        */
+         */
         //记录配送信息
         DeliverNote deliverNote = new DeliverNote();
         deliverNote.setOrderId(deliverBaseOrder.getOrderId());
@@ -120,19 +121,19 @@ public class MeiTuanDeliveryService implements IDelivery {
         createOrderByShopRequest.setExpectedDeliveryTime(DateUtil.fromDateStr(String.valueOf(deliverTime.get("endTime"))));
 
         //依据订单配送时间来决定是及时单还是预约单
-        Date startTime=DateUtil.fromString(String.valueOf(deliverTime.get("startTime")));
+        Date startTime = DateUtil.fromString(String.valueOf(deliverTime.get("startTime")));
         //当前的23:59:59
         Calendar todayCalendar = Calendar.getInstance();
 
-        todayCalendar.set(todayCalendar.get(Calendar.YEAR), todayCalendar.get(Calendar.MONTH), todayCalendar.get(Calendar.DAY_OF_MONTH),23, 59, 59);
+        todayCalendar.set(todayCalendar.get(Calendar.YEAR), todayCalendar.get(Calendar.MONTH), todayCalendar.get(Calendar.DAY_OF_MONTH), 23, 59, 59);
         Date today = todayCalendar.getTime();
-        if(startTime.after(today)){
+        if (startTime.after(today)) {
             createOrderByShopRequest.setOrderType(OrderType.PREBOOK.getCode());//订单类型，目前只支持预约单0: 及时单(尽快送达，限当日订单)1: 预约单
-        }else{
+        } else {
             createOrderByShopRequest.setOrderType(OrderType.NORMAL.getCode());
         }
-
-        createOrderByShopRequest.setPoiSeq(deliverBaseOrder.getHdOrderCode());
+        int hdOrderCodeLength = deliverBaseOrder.getHdOrderCode().length();
+        createOrderByShopRequest.setPoiSeq(deliverBaseOrder.getHdOrderCode().substring(hdOrderCodeLength - 4, hdOrderCodeLength));//骑手取货单号
         createOrderByShopRequest.setNote(deliverBaseOrder.getRemark());
         try {
             String response = meiTuanClient.deliver(createOrderByShopRequest);
@@ -187,17 +188,21 @@ public class MeiTuanDeliveryService implements IDelivery {
         cancelOrderRequest.setCancelOrderReasonId(CancelOrderReasonId.findByCode(cancelReasonId));
         cancelOrderRequest.setCancelReason(cancelReason);
         cancelOrderRequest.setDeliveryId(searchDeliverNote.getId());
-        cancelOrderRequest.setMtPeisongId(hdOrderCode);
+        cancelOrderRequest.setMtPeisongId(searchDeliverNote.getExt());
         try {
             String cancel = meiTuanClient.cancel(cancelOrderRequest);
             log.error("取消美团配送,{}", cancel);
-            //TODO 需要处理失败结果
-            //修改数据库中记录
-            searchDeliverNote.setFailureCause(cancelReason);
-            searchDeliverNote.setCancelTime(new Date());
-            searchDeliverNote.setDeliverStatus(DeliveryStatus.FAILURE);
-            deliveryNoteService.updateById(searchDeliverNote);
-            return Tips.of(1, "取消美团配送成功");
+            CancelOrderResponse cancelOrderResponse=Jackson.object(cancel,CancelOrderResponse.class);
+            if(Objects.equals(cancelOrderResponse.getCode(),"0")){
+                //修改数据库中记录
+                searchDeliverNote.setFailureCause(cancelReason);
+                searchDeliverNote.setCancelTime(new Date());
+                searchDeliverNote.setDeliverStatus(DeliveryStatus.FAILURE);
+                deliveryNoteService.updateById(searchDeliverNote);
+                return Tips.of(1, "取消美团配送成功");
+            }else{
+                return Tips.of(-1, "取消美团配送失败"+cancel);
+            }
         } catch (IOException e) {
             log.error("取消美团配送失败,{e}", e);
             return Tips.of(-1, "取消美团配送失败");
