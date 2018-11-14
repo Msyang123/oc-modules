@@ -4,7 +4,7 @@
 
     <!-- 数据库字段对象关系映射 -->
     <resultMap id="BaseResultMap"
-        type="com.lhiot.oc.delivery.domain.DeliverNote" >
+        type="com.lhiot.oc.delivery.entity.DeliverNote" >
         <id column="id" property="id"/>
         <result column="deliver_code" property="deliverCode" />
         <result column="order_id" property="orderId" />
@@ -48,7 +48,7 @@
     </sql>
 
     <!--新增配送单信息-->
-    <insert id="create" parameterType="com.lhiot.oc.delivery.domain.DeliverNote" useGeneratedKeys="true" keyProperty="id">
+    <insert id="create" parameterType="com.lhiot.oc.delivery.entity.DeliverNote" useGeneratedKeys="true" keyProperty="id">
         insert into deliver_note
         <trim prefix="(" suffix=")" suffixOverrides="," >
             <if test="id != null ">
@@ -159,7 +159,7 @@
     </insert>
 
     <!--根据id修改配送单信息-->
-    <update id="updateById" parameterType="com.lhiot.oc.delivery.domain.DeliverNote">
+    <update id="updateById" parameterType="com.lhiot.oc.delivery.entity.DeliverNote">
         update deliver_note
         <set>
             <if test="id != null ">
@@ -311,7 +311,7 @@
 
     <!--查询配送单信息列表-->
      <select id="pageDeliverNotes" resultMap="BaseResultMap"
-        parameterType="com.lhiot.oc.delivery.domain.DeliverNote">
+        parameterType="com.lhiot.oc.delivery.entity.DeliverNote">
 	        select <include refid="Base_Column_List" />
 	        from deliver_note
 	        <include refid="Base_Where_Condition" />
@@ -320,7 +320,7 @@
 
     <!--查询配送单信息总记录-->
     <select id="pageDeliverNoteCounts" resultType="long"
-        parameterType="com.lhiot.oc.delivery.domain.DeliverNote">
+        parameterType="com.lhiot.oc.delivery.entity.DeliverNote">
             select count(1)
             from deliver_note
             <include refid="Base_Where_Condition" />

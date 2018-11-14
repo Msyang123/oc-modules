@@ -1,7 +1,6 @@
 package com.lhiot.oc.delivery.feign;
 
-import com.lhiot.oc.delivery.domain.enums.ApplicationType;
-import com.lhiot.oc.delivery.feign.domain.Store;
+import com.lhiot.oc.delivery.model.ApplicationType;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
