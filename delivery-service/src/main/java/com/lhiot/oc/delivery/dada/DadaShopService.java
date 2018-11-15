@@ -2,7 +2,7 @@ package com.lhiot.oc.delivery.dada;
 
 import com.leon.microx.util.Maps;
 import com.leon.microx.util.Pair;
-import com.lhiot.oc.delivery.dada.vo.ShopParam;
+import com.lhiot.oc.delivery.dada.model.ShopParam;
 
 import java.io.IOException;
 import java.util.ArrayList;

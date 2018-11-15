@@ -95,7 +95,7 @@ public class DeliverNote extends PagerRequestObject {
     *配送方式 FENGNIAO-蜂鸟配送DADA-达达配送 OWN-自己配送
     */
     @JsonProperty("deliverType")
-    @ApiModelProperty(value = "配送方式 FENGNIAO-蜂鸟配送DADA-达达配送 OWN-自己配送", dataType = "DeliverType")
+    @ApiModelProperty(value = "配送方式 FENGNIAO-蜂鸟配送DADA-达达配送 MEITUAN-美团配送 OWN-自己配送", dataType = "DeliverType")
     private DeliverType deliverType;
 
     /**
@@ -127,7 +127,7 @@ public class DeliverNote extends PagerRequestObject {
     *配送状态 UNRECEIVED-未接单 WAIT_GET-待取货 DELIVERING-配送中 DONE-配送完成 FAILURE-配送失败
     */
     @JsonProperty("deliverStatus")
-    @ApiModelProperty(value = "配送状态 UNRECEIVED-未接单 WAIT_GET-待取货 DELIVERING-配送中 DONE-配送完成 FAILURE-配送失败", dataType = "DeliveryStatus")
+    @ApiModelProperty(value = "配送状态 UNRECEIVE-未接单 WAIT_GET-待取货 DELIVERING-配送中 DONE-配送完成 FAILURE-配送失败", dataType = "DeliveryStatus")
     private DeliveryStatus deliverStatus;
 
     /**
@@ -143,5 +143,12 @@ public class DeliverNote extends PagerRequestObject {
     @JsonProperty("remark")
     @ApiModelProperty(value = "备注", dataType = "String")
     private String remark;
+
+    /**
+     *扩展数据
+     */
+    @JsonProperty("ext")
+    @ApiModelProperty(value = "扩展数据", dataType = "String")
+    private String ext;
 
 }

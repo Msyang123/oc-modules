@@ -6,7 +6,7 @@ import com.leon.microx.util.auditing.Random;
 import com.lhiot.oc.delivery.config.FengNiaoProperties;
 import com.lhiot.oc.delivery.fengniao.util.HttpClient;
 import com.lhiot.oc.delivery.fengniao.util.OpenSignHelper;
-import com.lhiot.oc.delivery.fengniao.vo.*;
+import com.lhiot.oc.delivery.fengniao.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;

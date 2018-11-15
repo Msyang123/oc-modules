@@ -12,7 +12,7 @@ import com.lhiot.oc.delivery.domain.enums.DeliveryStatus;
 import com.lhiot.oc.delivery.feign.BasicDataService;
 import com.lhiot.oc.delivery.feign.domain.Store;
 import com.lhiot.oc.delivery.fengniao.FengNiaoDeliveryClient;
-import com.lhiot.oc.delivery.fengniao.vo.*;
+import com.lhiot.oc.delivery.fengniao.model.*;
 import com.lhiot.oc.delivery.util.Distance;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBucket;
@@ -58,7 +58,7 @@ public class FengniaoDeliveryService implements IDelivery {
      *
      * @return Tips
      */
-    public Tips send(CoordinateSystem coordinateSystem, DeliverBaseOrder deliverBaseOrder) {
+    public Tips send(CoordinateSystem coordinateSystem, DeliverBaseOrder deliverBaseOrder,BigDecimal distance) {
         log.info("发送蜂鸟的订单{}", deliverBaseOrder);
         ResponseEntity storeResponseEntity = basicDataService.findStoreByCode(deliverBaseOrder.getStoreCode(), deliverBaseOrder.getApplyType());
         if (storeResponseEntity.getStatusCode().isError() || Objects.isNull(storeResponseEntity.getBody())) {
@@ -66,7 +66,7 @@ public class FengniaoDeliveryService implements IDelivery {
         }
         Store store = (Store) storeResponseEntity.getBody();
         //距离换算
-        BigDecimal distance = Distance.getDistance(store.getStorePosition().getLat(), store.getStorePosition().getLng(), deliverBaseOrder.getLat(), deliverBaseOrder.getLng());
+        //BigDecimal distance = Distance.getDistance(store.getStorePosition().getLat(), store.getStorePosition().getLng(), deliverBaseOrder.getLat(), deliverBaseOrder.getLng());
 
         ElemeCreateOrderRequest.ElemeCreateRequestData requestData = new ElemeCreateOrderRequest.ElemeCreateRequestData();
         //设置门店编码
@@ -136,7 +136,7 @@ public class FengniaoDeliveryService implements IDelivery {
             if (fengniaoOrderAddResult.getCode() == 200) {
                 //记录配送信息
                 DeliverNote deliverNote = new DeliverNote();
-                deliverNote.setOrderId(deliverBaseOrder.getId());
+                deliverNote.setOrderId(deliverBaseOrder.getOrderId());
                 deliverNote.setOrderCode(deliverBaseOrder.getOrderCode());//订单号
                 deliverNote.setDeliverCode(deliverBaseOrder.getHdOrderCode());//配送单号与海鼎订单号一致
                 deliverNote.setDeliverType(DeliverType.FENGNIAO);
@@ -144,9 +144,13 @@ public class FengniaoDeliveryService implements IDelivery {
                 deliverNote.setRemark(deliverBaseOrder.getRemark());
                 deliverNote.setFee(deliverBaseOrder.getDeliveryFee());//自己传递过来的配送费
                 deliverNote.setDistance(distance.doubleValue());//自己计算的直线距离
-                deliverNote.setDeliverCode(deliverBaseOrder.getHdOrderCode());//配送单单号
                 //创建配送单
                 deliveryNoteService.createNewDeliverNote(deliverNote);
+                //更新配送信息
+                DeliverNote updateDeliverNote = new DeliverNote();
+                updateDeliverNote.setDeliverStatus(DeliveryStatus.UNRECEIVE);
+                updateDeliverNote.setId(deliverNote.getId());
+                deliveryNoteService.updateById(updateDeliverNote);
                 //写入配送订单流程表
                 deliverBaseOrderService.create(deliverBaseOrder);
                 return Tips.info("创建蜂鸟配送成功");

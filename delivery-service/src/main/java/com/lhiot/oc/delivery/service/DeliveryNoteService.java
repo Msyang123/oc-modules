@@ -106,7 +106,7 @@ public class DeliveryNoteService {
     }
     public void createNewDeliverNote(DeliverNote deliverNote){
 
-        deliverNote.setDeliverStatus(DeliveryStatus.UNRECEIVED);
+        deliverNote.setDeliverStatus(DeliveryStatus.CREATE);
         deliverNote.setCreateTime(new Date());
         deliverNoteMapper.create(deliverNote);
 

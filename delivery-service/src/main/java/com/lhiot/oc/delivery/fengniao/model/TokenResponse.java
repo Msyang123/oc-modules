@@ -1,4 +1,4 @@
-package com.lhiot.oc.delivery.fengniao.vo;
+package com.lhiot.oc.delivery.fengniao.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
