@@ -16,6 +16,7 @@ public enum DeliverType {
 
     MEITUAN(MeiTuanAdapter.class, "美团配送"),
 
+    @Deprecated
     OWN(Void.class, "自己配送");
 
     @Getter

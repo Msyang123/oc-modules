@@ -15,6 +15,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -52,6 +53,7 @@ public class DeliveryService implements ApplicationContextAware {
         return Optional.of((Store) response.getBody());
     }
 
+    @Nullable
     public AdaptableClient adapt(DeliverType deliverType) {
         return (AdaptableClient) context.getBean(deliverType.getClientClass());
     }

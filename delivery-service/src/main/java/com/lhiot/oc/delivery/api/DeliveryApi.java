@@ -5,6 +5,7 @@ import com.leon.microx.util.*;
 import com.leon.microx.web.result.Tips;
 import com.leon.microx.web.swagger.ApiParamType;
 import com.lhiot.oc.delivery.api.calculator.FeeCalculator;
+import com.lhiot.oc.delivery.client.AdaptableClient;
 import com.lhiot.oc.delivery.entity.DeliverNote;
 import com.lhiot.oc.delivery.feign.Store;
 import com.lhiot.oc.delivery.model.*;
@@ -110,7 +111,11 @@ public class DeliveryApi {
             return ResponseEntity.badRequest().body("查询门店信息失败！");
         }
         long deliverNoteId = snowflake.longId();
-        Tips tips = deliveryService.adapt(type).send(coordinate, optional.get(), deliverOrder, deliverNoteId);
+        AdaptableClient adapter = deliveryService.adapt(type);
+        if (Objects.isNull(adapter)) {
+            return ResponseEntity.badRequest().body("不支持的配送方式！");
+        }
+        Tips tips = adapter.send(coordinate, optional.get(), deliverOrder, deliverNoteId);
         if (tips.err()) {
             return ResponseEntity.badRequest().body(tips.getMessage());
         }
@@ -138,7 +143,11 @@ public class DeliveryApi {
         if (Objects.isNull(deliverNote)) {
             return ResponseEntity.badRequest().body("未找到配送单！");
         }
-        Tips tips = deliveryService.adapt(type).cancel(deliverNote, reason);
+        AdaptableClient adapter = deliveryService.adapt(type);
+        if (Objects.isNull(adapter)) {
+            return ResponseEntity.badRequest().body("不支持的配送方式！");
+        }
+        Tips tips = adapter.cancel(deliverNote, reason);
         if (tips.err()) {
             return ResponseEntity.badRequest().body(tips.getMessage());
         }
@@ -153,7 +162,11 @@ public class DeliveryApi {
     @GetMapping("/{deliverType}/delivery-notes/cancel/reasons")
     @ApiOperation(value = "配送取消原因列表", response = Object.class)
     public ResponseEntity cancelReasons(@PathVariable("deliverType") DeliverType type) {
-        Tips tips = deliveryService.adapt(type).cancelReasons();
+        AdaptableClient adapter = deliveryService.adapt(type);
+        if (Objects.isNull(adapter)) {
+            return ResponseEntity.badRequest().body("不支持的配送方式！");
+        }
+        Tips tips = adapter.cancelReasons();
         if (tips.err()) {
             return ResponseEntity.badRequest().body(tips.getMessage());
         }
@@ -167,7 +180,11 @@ public class DeliveryApi {
         if (Objects.isNull(deliverNote)) {
             return ResponseEntity.badRequest().body("未找到配送单！");
         }
-        Tips tips = deliveryService.adapt(type).deliverNoteDetail(deliverNote);
+        AdaptableClient adapter = deliveryService.adapt(type);
+        if (Objects.isNull(adapter)) {
+            return ResponseEntity.badRequest().body("不支持的配送方式！");
+        }
+        Tips tips = adapter.deliverNoteDetail(deliverNote);
         if (tips.err()) {
             return ResponseEntity.badRequest().body(tips.getMessage());
         }
