@@ -5,12 +5,15 @@ import com.leon.microx.util.Maps;
 import com.leon.microx.util.SnowflakeId;
 import com.leon.microx.util.StringUtils;
 import com.leon.microx.web.result.Tips;
+import com.lhiot.oc.order.event.OrderFlowEvent;
 import com.lhiot.oc.order.mapper.*;
 import com.lhiot.oc.order.model.*;
+import com.lhiot.oc.order.model.type.OrderStatus;
 import com.lhiot.oc.order.model.type.ReceivingWay;
 import com.lhiot.oc.order.model.type.RefundStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,6 +69,7 @@ public class OrderService {
             orderProduct.setOrderId(baseOrder.getId());
         }
         orderProductMapper.batchInsert(param.getOrderProducts());
+
         OrderStore orderStore = param.getOrderStore();
         orderStore.setHdOrderCode(orderCode);
         orderStore.setOrderId(baseOrder.getId());
@@ -88,45 +92,35 @@ public class OrderService {
     public Tips validationParam(CreateOrderParam param) {
         //应付金额为空或者小于零
         if (param.getAmountPayable() < 0) {
-            return Tips.of(-1, "应付金额为空或者小于零");
+            return Tips.warn("应付金额为空或者小于零");
         }
         if (param.getCouponAmount() > param.getTotalAmount()) {
-            return Tips.of(-1, "优惠金额不能大于订单总金额");
+            return Tips.warn("优惠金额不能大于订单总金额");
         }
         //不算优惠商品应付金额
         int productPayable = param.getAmountPayable() + param.getCouponAmount();
         //商品为空
         List<OrderProduct> orderProducts = param.getOrderProducts();
         if (CollectionUtils.isEmpty(orderProducts)) {
-            return Tips.of(-1, "商品为空");
+            return Tips.warn("商品为空");
         }
         int productAmount = 0;
         //校验商品数量
         for (OrderProduct orderProduct : orderProducts) {
             //判断传入购买份数
             if (Objects.isNull(orderProduct.getProductQty()) || orderProduct.getProductQty() <= 0) {
-                return Tips.of(-1, "商品购买数量为0");
+                return Tips.warn("商品购买数量为0");
             }
             productAmount += orderProduct.getTotalPrice();
         }
         if (!Objects.equals(productPayable, productAmount) || !Objects.equals(param.getTotalAmount(), productAmount)) {
-            return Tips.of(-1, "订单传入的金额有误");
+            return Tips.warn("订单传入的金额有误");
         }
         //送货上门的订单，地址不能为空
         if (ReceivingWay.TO_THE_HOME.equals(param.getReceivingWay()) && Objects.isNull(param.getAddress())) {
-            return Tips.of(-1, "送货上门，地址为空");
+            return Tips.warn("送货上门，地址为空");
         }
-        return Tips.of(1, "校验成功");
-    }
-
-    /**
-     * 依据id修改订单状态
-     *
-     * @param baseOrder BaseOrder
-     * @return int
-     */
-    public int updateOrderStatusById(BaseOrder baseOrder) {
-        return this.baseOrderMapper.updateOrderStatusById(baseOrder);
+        return Tips.info("校验成功");
     }
 
     public int updateOrderStatusByCode(BaseOrder baseOrder) {
@@ -163,18 +157,17 @@ public class OrderService {
      * @param orderId       Long
      * @return int
      */
-    public int changeStore(Store targetStore, String operationUser, Long orderId) {
+    public int changeStore(Store targetStore, String operationUser, Long orderId,String hdOrderCode) {
 
-        //修改订单为待收货状态
         BaseOrder baseOrder = new BaseOrder();
         baseOrder.setId(orderId);
-        baseOrder.setHdOrderCode(snowflakeId.stringId());
+        baseOrder.setHdOrderCode(hdOrderCode);
         int result = baseOrderMapper.updateHdOrderCodeById(baseOrder);
 
         if (result > 0) {
             //设置调货订单门店信息
             OrderStore orderStore = new OrderStore();
-            orderStore.setHdOrderCode(baseOrder.getHdOrderCode());
+            orderStore.setHdOrderCode(hdOrderCode);
             orderStore.setOrderId(orderId);
             orderStore.setStoreId(targetStore.getId());
             orderStore.setStoreName(targetStore.getName());
@@ -186,20 +179,26 @@ public class OrderService {
         return result;
     }
 
+    public Tips updateStatus(OrderDetailResult orderDetailResult){
+        BaseOrder baseOrder = new BaseOrder();
+        baseOrder.setCode(orderDetailResult.getCode());
+        baseOrder.setStatus(OrderStatus.DISPATCHING);
+        int result = baseOrderMapper.updateOrderStatusByCode(baseOrder);
+        if (result > 0) {
+            publisher.publishEvent(new OrderFlowEvent(orderDetailResult.getStatus(), OrderStatus.DISPATCHING, orderDetailResult.getId()));
+            return Tips.empty();
+        }
+        return Tips.warn("修改状态失败");
+    }
+
 
     @Nullable
     public OrderDetailResult findByCode(String code, boolean needProductList, boolean needOrderFlowList) {
-        OrderDetailResult searchBaseOrderInfo = this.baseOrderMapper.findByCode(code);
+        OrderDetailResult searchBaseOrderInfo = this.baseOrderMapper.selectByCode(code);
         if (Objects.isNull(searchBaseOrderInfo)) {
             return null;
         }
-        searchBaseOrderInfo.setOrderStore(orderStoreMapper.findByHdOrderCode(searchBaseOrderInfo.getHdOrderCode()));
-        if (needProductList) {
-            searchBaseOrderInfo.setOrderProductList(orderProductMapper.findOrderProductsByOrderId(searchBaseOrderInfo.getId()));
-        }
-        if (needOrderFlowList) {
-            searchBaseOrderInfo.setOrderFlowList(orderFlowMapper.flowByOrderId(searchBaseOrderInfo.getId()));
-        }
+       this.addAttachments(searchBaseOrderInfo,needProductList,needOrderFlowList);
         return searchBaseOrderInfo;
     }
 
@@ -210,17 +209,11 @@ public class OrderService {
 
     @Nullable
     public OrderDetailResult findById(Long id, boolean needProductList, boolean needOrderFlowList) {
-        OrderDetailResult searchBaseOrderInfo = this.baseOrderMapper.findById(id);
+        OrderDetailResult searchBaseOrderInfo = this.baseOrderMapper.selectById(id);
         if (Objects.isNull(searchBaseOrderInfo)) {
             return null;
         }
-        searchBaseOrderInfo.setOrderStore(orderStoreMapper.findByHdOrderCode(searchBaseOrderInfo.getHdOrderCode()));
-        if (needProductList) {
-            searchBaseOrderInfo.setOrderProductList(orderProductMapper.findOrderProductsByOrderId(searchBaseOrderInfo.getId()));
-        }
-        if (needOrderFlowList) {
-            searchBaseOrderInfo.setOrderFlowList(orderFlowMapper.flowByOrderId(searchBaseOrderInfo.getId()));
-        }
+        this.addAttachments(searchBaseOrderInfo,needProductList,needOrderFlowList);
         return searchBaseOrderInfo;
     }
 
@@ -229,4 +222,13 @@ public class OrderService {
         return this.findById(id, false, false);
     }
 
+    private void addAttachments(OrderDetailResult searchBaseOrderInfo,boolean needProductList, boolean needOrderFlowList){
+        searchBaseOrderInfo.setOrderStore(orderStoreMapper.findByHdOrderCode(searchBaseOrderInfo.getHdOrderCode()));
+        if (needProductList) {
+            searchBaseOrderInfo.setOrderProductList(orderProductMapper.selectOrderProductsByOrderId(searchBaseOrderInfo.getId()));
+        }
+        if (needOrderFlowList) {
+            searchBaseOrderInfo.setOrderFlowList(orderFlowMapper.selectFlowByOrderId(searchBaseOrderInfo.getId()));
+        }
+    }
 }

@@ -53,6 +53,10 @@
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>com.leon.microx.common</groupId>
+            <artifactId>microx-redis-core</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>mysql</groupId>

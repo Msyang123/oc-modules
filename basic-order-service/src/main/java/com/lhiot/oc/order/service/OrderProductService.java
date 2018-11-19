@@ -26,9 +26,6 @@ public class OrderProductService {
         return orderProductMapper.batchInsert(orderProducts);
     }
 
-    public List<OrderProduct> findOrderProductsByOrderId(long orderId) {
-        return orderProductMapper.findOrderProductsByOrderId(orderId);
-    }
 
     //修改订单商品状态
     public boolean updateOrderProductByIds(Long orderId, RefundStatus refundStatus, List<String> orderProductIds) {
@@ -39,6 +36,6 @@ public class OrderProductService {
     }
 
     public List<OrderProduct> findOrderProductListByIds(List<String> idList){
-       return orderProductMapper.findOrderProductsByIds(idList);
+       return orderProductMapper.selectOrderProductsByIds(idList);
     }
 }

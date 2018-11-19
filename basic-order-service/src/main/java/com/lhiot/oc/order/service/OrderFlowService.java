@@ -37,9 +37,4 @@ public class OrderFlowService {
         orderFlow.setCreateAt(Date.from(Instant.now()));
         orderFlowMapper.create(orderFlow);
     }
-
-    //根据订单id查询
-    public List<OrderFlow> flowByOrderId(Long orderId) {
-        return orderFlowMapper.flowByOrderId(orderId);
-    }
 }

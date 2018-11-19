@@ -2,10 +2,7 @@ package com.lhiot.oc.order.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.lhiot.oc.order.model.type.AllowRefund;
-import com.lhiot.oc.order.model.type.ApplicationType;
-import com.lhiot.oc.order.model.type.OrderStatus;
-import com.lhiot.oc.order.model.type.ReceivingWay;
+import com.lhiot.oc.order.model.type.*;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -24,6 +21,7 @@ public class BaseOrder {
     private Long id;
     private String code;
     private Long userId;
+    private OrderType orderType;
     private ApplicationType applicationType;
     private ReceivingWay receivingWay;
     private Integer totalAmount;
@@ -41,14 +39,14 @@ public class BaseOrder {
     private String address;
     private String remark;
     @ApiModelProperty(notes = "提货截止时间", dataType = "String")
-    private Date deliveryEndTime;
+    private Date deliveryEndAt;
     private Date hdStockAt;
     private String hdOrderCode;
     @ApiModelProperty(notes = "用户昵称", dataType = "String")
     private String nickname;
 
     @ApiModelProperty(notes = "配送时间段", dataType = "String")
-    private String deliverTime;
+    private String deliverAt;
     @ApiModelProperty(notes = "是否允许退款YES是NO否", dataType = "AllowRefund")
     private AllowRefund allowRefund = AllowRefund.YES;
 }

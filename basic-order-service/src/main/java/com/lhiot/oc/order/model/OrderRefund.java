@@ -18,7 +18,7 @@ public class OrderRefund {
     private Long userId;
     private String orderProductIds;
     private String reason;
-    private OrderRefundStatus orderRefundStatus;
+    private OrderRefundStatus refundStatus;
     private RefundType refundType;
     private Date applyAt = Date.from(Instant.now());
     private Date disposeAt;

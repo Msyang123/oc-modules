@@ -7,9 +7,9 @@
         VALUES (#{orderId},#{status},#{preStatus},#{createAt})
     </insert>
 
-    <select id="flowByOrderId" parameterType="Long" resultType="com.lhiot.oc.order.model.OrderFlow">
+    <select id="selectFlowByOrderId" parameterType="Long" resultType="com.lhiot.oc.order.model.OrderFlow">
         SELECT id,order_id as orderId,status as status,pre_status as preStatus,create_at as createAt
         FROM order_flow
-        WHERE order_id = #{0} order by id desc
+        WHERE order_id = #{0} order by create_at desc
     </select>
 </mapper>
