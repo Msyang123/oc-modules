@@ -13,7 +13,6 @@ import com.lhiot.oc.order.model.type.ReceivingWay;
 import com.lhiot.oc.order.model.type.RefundStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -121,10 +120,6 @@ public class OrderService {
             return Tips.warn("送货上门，地址为空");
         }
         return Tips.info("校验成功");
-    }
-
-    public int updateOrderStatusByCode(BaseOrder baseOrder) {
-        return this.baseOrderMapper.updateOrderStatusByCode(baseOrder);
     }
 
     /**

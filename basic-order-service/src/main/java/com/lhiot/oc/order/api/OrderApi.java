@@ -292,7 +292,7 @@ public class OrderApi {
             return ResponseEntity.badRequest().body("海鼎发送失败！");
         }
         //修改订单hdCode以及添加调货门店信息
-        int result = orderService.changeStore(storeInfo, operationUser, searchBaseOrderInfo.getId(),newHdOrderCode);
+        int result = orderService.changeStore(storeInfo, operationUser, searchBaseOrderInfo.getId(), newHdOrderCode);
         if (result > 0) {
             return ResponseEntity.ok().body("调货成功");
         }
