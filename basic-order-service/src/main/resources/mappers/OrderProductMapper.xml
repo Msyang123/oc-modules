@@ -24,7 +24,7 @@
         SELECT <include refid="columns"/>
         FROM order_product
         WHERE id IN
-        <foreach collection="list" item="item" close=")" open=")" separator=",">
+        <foreach collection="list" item="item" close=")" open="(" separator=",">
             #{item}
         </foreach>
     </select>

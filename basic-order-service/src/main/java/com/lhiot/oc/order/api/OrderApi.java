@@ -1,9 +1,6 @@
 package com.lhiot.oc.order.api;
 
-import com.leon.microx.util.BeanUtils;
-import com.leon.microx.util.Maps;
-import com.leon.microx.util.SnowflakeId;
-import com.leon.microx.util.StringUtils;
+import com.leon.microx.util.*;
 import com.leon.microx.web.result.Multiple;
 import com.leon.microx.web.result.Tips;
 import com.leon.microx.web.swagger.ApiParamType;
@@ -286,10 +283,16 @@ public class OrderApi {
         haiDingOrderParam.setStoreId(storeInfo.getId());
         haiDingOrderParam.setHdOrderCode(newHdOrderCode);
 
-        ResponseEntity hdReduceResponse = haiDingService.reduce(haiDingOrderParam); //thirdPartyServiceFeign.hdReduce(orderInfo);
-        if (hdReduceResponse == null || hdReduceResponse.getStatusCode().isError()) {
-            //TODO 此处需要重试或者其他方式处理
-            return ResponseEntity.badRequest().body("海鼎发送失败！");
+        //海鼎减库存失败重试机制
+        Retry retry = Retry.of(()->{
+            ResponseEntity hdReduceResponse = haiDingService.reduce(haiDingOrderParam);
+            if (hdReduceResponse == null || hdReduceResponse.getStatusCode().isError()){
+                throw new RuntimeException("海鼎发送失败！");
+            }
+            return true;
+        }).count(3).intervalMs(30).run();
+        if (Objects.nonNull(retry.exception())){
+            return ResponseEntity.badRequest().body("调货失败");
         }
         //修改订单hdCode以及添加调货门店信息
         int result = orderService.changeStore(storeInfo, operationUser, searchBaseOrderInfo.getId(), newHdOrderCode);
