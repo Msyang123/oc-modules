@@ -4,7 +4,7 @@
 
     <!-- 数据库字段对象关系映射 -->
     <resultMap id="BaseResultMap"
-        type="com.lhiot.oc.delivery.domain.DeliverOrderProduct" >
+        type="com.lhiot.oc.delivery.model.DeliverProduct" >
         <id column="id" property="id"/>
         <result column="deliver_base_order_id" property="deliverBaseOrderId" />
         <result column="barcode" property="barcode" />
@@ -65,7 +65,7 @@
     </insert>
 
     <!--根据id修改配送订单商品列-->
-    <update id="updateById" parameterType="com.lhiot.oc.delivery.domain.DeliverOrderProduct">
+    <update id="updateById" parameterType="com.lhiot.oc.delivery.model.DeliverProduct">
         update deliver_order_product
         <set>
             <if test="id != null ">
@@ -176,7 +176,7 @@
 
     <!--查询配送订单商品列列表-->
      <select id="pageDeliverOrderProducts" resultMap="BaseResultMap"
-        parameterType="com.lhiot.oc.delivery.domain.DeliverOrderProduct">
+        parameterType="com.lhiot.oc.delivery.model.DeliverProduct">
 	        select <include refid="Base_Column_List" />
 	        from deliver_order_product
 	        <include refid="Base_Where_Condition" />
@@ -185,7 +185,7 @@
 
     <!--查询配送订单商品列总记录-->
     <select id="pageDeliverOrderProductCounts" resultType="long"
-        parameterType="com.lhiot.oc.delivery.domain.DeliverOrderProduct">
+        parameterType="com.lhiot.oc.delivery.model.DeliverProduct">
             select count(1)
             from deliver_order_product
             <include refid="Base_Where_Condition" />

@@ -4,7 +4,7 @@
 
     <!-- 数据库字段对象关系映射 -->
     <resultMap id="BaseResultMap"
-        type="com.lhiot.oc.delivery.domain.DeliverFlow" >
+        type="com.lhiot.oc.delivery.entity.DeliverFlow" >
         <id column="id" property="id"/>
         <result column="deliver_note_id" property="deliverNoteId" />
         <result column="status" property="status" />
@@ -24,7 +24,7 @@
     </sql>
 
     <!--新增配送状态流转记录-->
-    <insert id="create" parameterType="com.lhiot.oc.delivery.domain.DeliverFlow" useGeneratedKeys="true" keyProperty="id">
+    <insert id="create" parameterType="com.lhiot.oc.delivery.entity.DeliverFlow" useGeneratedKeys="true" keyProperty="id">
         insert into deliver_flow
         <trim prefix="(" suffix=")" suffixOverrides="," >
             <if test="id != null ">
@@ -63,7 +63,7 @@
     </insert>
 
     <!--根据id修改配送状态流转记录-->
-    <update id="updateById" parameterType="com.lhiot.oc.delivery.domain.DeliverFlow">
+    <update id="updateById" parameterType="com.lhiot.oc.delivery.entity.DeliverFlow">
         update deliver_flow
         <set>
             <if test="id != null ">
@@ -126,7 +126,7 @@
 
     <!--查询配送状态流转记录列表-->
      <select id="pageDeliverFlows" resultMap="BaseResultMap"
-        parameterType="com.lhiot.oc.delivery.domain.DeliverFlow">
+        parameterType="com.lhiot.oc.delivery.entity.DeliverFlow">
 	        select <include refid="Base_Column_List" />
 	        from deliver_flow
 	        <include refid="Base_Where_Condition" />
@@ -135,7 +135,7 @@
 
     <!--查询配送状态流转记录总记录-->
     <select id="pageDeliverFlowCounts" resultType="long"
-        parameterType="com.lhiot.oc.delivery.domain.DeliverFlow">
+        parameterType="com.lhiot.oc.delivery.entity.DeliverFlow">
             select count(1)
             from deliver_flow
             <include refid="Base_Where_Condition" />
