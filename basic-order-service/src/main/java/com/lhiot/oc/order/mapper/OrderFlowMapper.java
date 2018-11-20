@@ -19,5 +19,5 @@ public interface OrderFlowMapper {
     int create(OrderFlow orderFlow);
 
     //根据订单id查询
-    List<OrderFlow> flowByOrderId(Long orderId);
+    List<OrderFlow> selectFlowByOrderId(Long orderId);
 }

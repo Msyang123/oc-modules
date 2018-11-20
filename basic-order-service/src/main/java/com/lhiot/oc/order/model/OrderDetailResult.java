@@ -1,9 +1,6 @@
 package com.lhiot.oc.order.model;
 
-import com.lhiot.oc.order.model.type.AllowRefund;
-import com.lhiot.oc.order.model.type.ApplicationType;
-import com.lhiot.oc.order.model.type.OrderStatus;
-import com.lhiot.oc.order.model.type.ReceivingWay;
+import com.lhiot.oc.order.model.type.*;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -25,6 +22,7 @@ public class OrderDetailResult {
     private Long userId;
     @ApiModelProperty(notes = "应用类型", dataType = "ApplicationTypeEnum")
     private ApplicationType applicationType;
+    private OrderType orderType;
     @ApiModelProperty(notes = "提货方式", dataType = "String")
     private ReceivingWay receivingWay;
     @ApiModelProperty(notes = "订单总金额", dataType = "Integer")
@@ -49,14 +47,14 @@ public class OrderDetailResult {
     private String address;
     @ApiModelProperty(notes = "备注", dataType = "String")
     private String remark;
-    @ApiModelProperty(notes = "提货截止时间", dataType = "String")
-    private Date deliveryEndTime;
+    @ApiModelProperty(notes = "提货截止时间", dataType = "Date")
+    private Date deliveryEndAt;
     @ApiModelProperty(notes = "海鼎的订单编码", dataType = "String")
     private String hdOrderCode;
     @ApiModelProperty(notes = "用户昵称", dataType = "String")
     private String nickname;
     @ApiModelProperty(notes = "配送时间段", dataType = "String")
-    private String deliverTime;
+    private String deliverAt;
     @ApiModelProperty(notes = "是否允许退款YES是NO否", dataType = "AllowRefund")
     private AllowRefund allowRefund = AllowRefund.YES;
     @ApiModelProperty(notes = "订单创建时间",dataType = "Date")

@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Date;
-import java.util.List;
 
 @Service
 @Slf4j
@@ -36,10 +35,5 @@ public class OrderFlowService {
         orderFlow.setPreStatus(preStatus);
         orderFlow.setCreateAt(Date.from(Instant.now()));
         orderFlowMapper.create(orderFlow);
-    }
-
-    //根据订单id查询
-    public List<OrderFlow> flowByOrderId(Long orderId) {
-        return orderFlowMapper.flowByOrderId(orderId);
     }
 }

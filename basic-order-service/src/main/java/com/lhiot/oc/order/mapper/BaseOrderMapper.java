@@ -5,6 +5,9 @@ import com.lhiot.oc.order.model.OrderDetailResult;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * zhangfeng created in 2018/9/19 9:49
  **/
@@ -37,7 +40,9 @@ public interface BaseOrderMapper {
      */
     int updateHdOrderCodeById(BaseOrder baseOrder);
 
-    OrderDetailResult findByCode(String code);
+    OrderDetailResult selectByCode(String code);
 
-    OrderDetailResult findById(Long id);
+    OrderDetailResult selectById(Long id);
+
+    List<OrderDetailResult> selectListByUserIdAndOrderType(Map<String,Object> map);
 }

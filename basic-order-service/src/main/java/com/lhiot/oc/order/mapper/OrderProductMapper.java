@@ -16,10 +16,10 @@ public interface OrderProductMapper {
 
     int batchInsert(List<OrderProduct> orderProducts);
 
-    List<OrderProduct> findOrderProductsByOrderId(long orderId);
+    List<OrderProduct> selectOrderProductsByOrderId(long orderId);
 
     int updateOrderProductByIds(Map<String, Object> map);
 
-    List<OrderProduct> findOrderProductsByIds(List<String> idList);
+    List<OrderProduct> selectOrderProductsByIds(List<String> idList);
 
 }
