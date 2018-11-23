@@ -71,7 +71,6 @@ public class OrderApi {
     @ApiImplicitParam(paramType = "body", name = "orderParam", dataType = "CreateOrderParam", required = true, value = "创建订单传入参数")
     @Transactional
     public ResponseEntity createOrderWithAssortment(@RequestBody CreateOrderParam orderParam) {
-
         //验证参数中优惠金额及商品
         Tips backMsg = orderService.validationParam(orderParam);
         if (backMsg.err()) {
@@ -214,6 +213,23 @@ public class OrderApi {
             return ResponseEntity.badRequest().body("订单不存在");
         }
         if (!Objects.equals(orderDetailResult.getStatus(), OrderStatus.SEND_OUT)) {
+            return ResponseEntity.badRequest().body(orderDetailResult.getStatus().getDescription() + "状态不可进行配送");
+        }
+        Tips tips = orderService.updateStatus(orderDetailResult);
+        if (tips.err()) {
+            return ResponseEntity.badRequest().body("更新订单状态为配送中失败");
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{orderCode}/delivered")
+    @ApiOperation(value = "修改订单为已发货", response = ResponseEntity.class)
+    public ResponseEntity delivered(@PathVariable("orderCode") String orderCode) {
+        OrderDetailResult orderDetailResult = orderService.findByCode(orderCode);
+        if (Objects.isNull(orderDetailResult)) {
+            return ResponseEntity.badRequest().body("订单不存在");
+        }
+        if (!Objects.equals(orderDetailResult.getStatus(), OrderStatus.WAIT_SEND_OUT)) {
             return ResponseEntity.badRequest().body(orderDetailResult.getStatus().getDescription() + "状态不可进行配送");
         }
         Tips tips = orderService.updateStatus(orderDetailResult);

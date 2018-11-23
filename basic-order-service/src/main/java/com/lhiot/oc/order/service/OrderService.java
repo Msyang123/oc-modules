@@ -177,10 +177,10 @@ public class OrderService {
     public Tips updateStatus(OrderDetailResult orderDetailResult){
         BaseOrder baseOrder = new BaseOrder();
         baseOrder.setCode(orderDetailResult.getCode());
-        baseOrder.setStatus(OrderStatus.DISPATCHING);
+        baseOrder.setStatus(OrderStatus.SEND_OUT);
         int result = baseOrderMapper.updateOrderStatusByCode(baseOrder);
         if (result > 0) {
-            publisher.publishEvent(new OrderFlowEvent(orderDetailResult.getStatus(), OrderStatus.DISPATCHING, orderDetailResult.getId()));
+            publisher.publishEvent(new OrderFlowEvent(orderDetailResult.getStatus(), OrderStatus.SEND_OUT, orderDetailResult.getId()));
             return Tips.empty();
         }
         return Tips.warn("修改状态失败");

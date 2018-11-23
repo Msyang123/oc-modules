@@ -21,7 +21,7 @@ public class BaseOrder {
     private Long id;
     private String code;
     private Long userId;
-    private OrderType orderType;
+    private String orderType;
     private ApplicationType applicationType;
     private ReceivingWay receivingWay;
     private Integer totalAmount;

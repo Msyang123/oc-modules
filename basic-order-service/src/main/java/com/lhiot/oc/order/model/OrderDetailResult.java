@@ -22,7 +22,7 @@ public class OrderDetailResult {
     private Long userId;
     @ApiModelProperty(notes = "应用类型", dataType = "ApplicationTypeEnum")
     private ApplicationType applicationType;
-    private OrderType orderType;
+    private String orderType;
     @ApiModelProperty(notes = "提货方式", dataType = "String")
     private ReceivingWay receivingWay;
     @ApiModelProperty(notes = "订单总金额", dataType = "Integer")

@@ -17,7 +17,7 @@ public class CreateOrderParam {
 
     private Long userId;
     private ApplicationType applicationType;
-    private OrderType orderType;
+    private String orderType;
     private ReceivingWay receivingWay;
     private Integer couponAmount = 0;
     private Integer totalAmount;
