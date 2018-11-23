@@ -61,6 +61,15 @@ public class MeiTuanClient {
     }
 
     /**
+     * 回调签名验证
+     * @param params
+     * @return
+     */
+    public String backSignature(Map<String, String> params){
+        return this.openSignHelper.generateSign(params);
+    }
+
+    /**
      * 发送美团业务命令
      *
      * @param request 数据

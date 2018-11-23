@@ -16,6 +16,7 @@ import com.lhiot.oc.delivery.model.DeliverType;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * 达达客户端适配
@@ -91,6 +92,12 @@ public class DadaAdapter implements AdaptableClient {
             log.error(e.getMessage(), e);
             return Tips.error("达达查询配送单失败 - " + e.getMessage(), e);
         }
+    }
+
+    @Override
+    public Tips backSignature(Map<String,String> backParam){
+        boolean verifyResult = client.inspect(backParam.get("client_id"),backParam.get("order_id"),backParam.get("update_time"),backParam.get("signature"));
+        return verifyResult?Tips.info("验证成功"):Tips.error("验证失败",new IllegalArgumentException());
     }
 
     private OrderParam createDeliverParam(DeliverOrder deliverOrder) {
