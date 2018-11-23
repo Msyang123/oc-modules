@@ -1,19 +1,20 @@
 package com.lhiot.oc.order.api;
 
+import com.leon.microx.probe.annotation.Sniffer;
+import com.leon.microx.probe.collector.ProbeEventPublisher;
+import com.leon.microx.probe.event.ProbeEvent;
 import com.leon.microx.util.*;
 import com.leon.microx.web.result.Multiple;
 import com.leon.microx.web.result.Tips;
 import com.leon.microx.web.swagger.ApiParamType;
+import com.lhiot.oc.order.entity.type.HdStatus;
+import com.lhiot.oc.order.entity.type.OrderRefundStatus;
+import com.lhiot.oc.order.entity.type.OrderStatus;
 import com.lhiot.oc.order.event.OrderFlowEvent;
 import com.lhiot.oc.order.feign.BaseServiceFeign;
 import com.lhiot.oc.order.feign.HaiDingService;
 import com.lhiot.oc.order.mapper.BaseOrderMapper;
 import com.lhiot.oc.order.model.*;
-import com.lhiot.oc.order.model.type.AllowRefund;
-import com.lhiot.oc.order.model.type.OrderRefundStatus;
-import com.lhiot.oc.order.model.type.OrderStatus;
-import com.lhiot.oc.order.model.type.OrderType;
-import com.lhiot.oc.order.service.OrderProductService;
 import com.lhiot.oc.order.service.OrderService;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -29,12 +30,11 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-import static com.lhiot.oc.order.model.type.OrderStatus.WAIT_SEND_OUT;
+import static com.lhiot.oc.order.entity.type.OrderStatus.WAIT_SEND_OUT;
 
 /**
  * zhangfeng created in 2018/9/19 9:42
@@ -50,19 +50,19 @@ public class OrderApi {
     private RedissonClient redissonClient;
     private BaseServiceFeign baseServiceFeign;
     private ApplicationEventPublisher publisher;
+    private ProbeEventPublisher probeEventPublisher;
     private HaiDingService haiDingService;
-    private OrderProductService orderProductService;
     private SnowflakeId snowflakeId;
     private static final String HD_CANCEL_ORDER_SUCCESS_RESULT_STRING = "{\"success\":true}";
 
-    public OrderApi(OrderService orderService, BaseOrderMapper baseOrderMapper, RedissonClient redissonClient, BaseServiceFeign baseServiceFeign, ApplicationEventPublisher publisher, HaiDingService haiDingService, OrderProductService orderProductService, SnowflakeId snowflakeId) {
+    public OrderApi(OrderService orderService, BaseOrderMapper baseOrderMapper, RedissonClient redissonClient, BaseServiceFeign baseServiceFeign, ApplicationEventPublisher publisher, ProbeEventPublisher probeEventPublisher, HaiDingService haiDingService, SnowflakeId snowflakeId) {
         this.orderService = orderService;
         this.baseOrderMapper = baseOrderMapper;
         this.redissonClient = redissonClient;
         this.baseServiceFeign = baseServiceFeign;
         this.publisher = publisher;
+        this.probeEventPublisher = probeEventPublisher;
         this.haiDingService = haiDingService;
-        this.orderProductService = orderProductService;
         this.snowflakeId = snowflakeId;
     }
 
@@ -71,7 +71,6 @@ public class OrderApi {
     @ApiImplicitParam(paramType = "body", name = "orderParam", dataType = "CreateOrderParam", required = true, value = "创建订单传入参数")
     @Transactional
     public ResponseEntity createOrderWithAssortment(@RequestBody CreateOrderParam orderParam) {
-
         //验证参数中优惠金额及商品
         Tips backMsg = orderService.validationParam(orderParam);
         if (backMsg.err()) {
@@ -103,29 +102,28 @@ public class OrderApi {
     @ApiOperation("根据用户Id获取订单列表")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = ApiParamType.PATH, name = "userId", value = "业务用户Id", dataType = "Long", required = true),
-            @ApiImplicitParam(paramType = ApiParamType.QUERY, name = "orderType", value = "订单类型", dataType = "OrderType")
+            @ApiImplicitParam(paramType = ApiParamType.QUERY, name = "orderType", value = "订单类型", dataType = "String")
     })
     @GetMapping("/user/{userId}")
-    public ResponseEntity ordersByUserId(@PathVariable("userId") Long userId, @RequestParam(value = "orderType", required = false) OrderType orderType) {
+    public ResponseEntity ordersByUserId(@PathVariable("userId") Long userId, @RequestParam(value = "orderType", required = false) String orderType) {
         List<OrderDetailResult> results = baseOrderMapper.selectListByUserIdAndOrderType(Maps.of("userId", userId, "orderType", orderType));
         return ResponseEntity.ok(CollectionUtils.isEmpty(results) ? Multiple.of(new ArrayList<>()) : Multiple.of(results));
     }
 
-
-    @ApiOperation(value = "取消订单", response = ResponseEntity.class)
-    @ApiImplicitParam(paramType = "path", name = "orderCode", value = "订单Code", required = true, dataType = "String")
-    @PutMapping("/{orderCode}/cancel")
-    public ResponseEntity cancelOrder(@PathVariable("orderCode") String orderCode) {
+    @ApiOperation(value = "修改订单状态", response = ResponseEntity.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = ApiParamType.PATH, name = "orderCode", value = "订单Code", required = true, dataType = "String"),
+            @ApiImplicitParam(paramType = ApiParamType.QUERY, name = "orderStatus", value = "修改后订单状态", required = true, dataType = "OrderStatus")
+    })
+    @PutMapping("/{orderCode}/status")
+    public ResponseEntity cancelOrder(@PathVariable("orderCode") String orderCode, @RequestParam("orderStatus") OrderStatus orderStatus) {
         OrderDetailResult orderDetailResult = orderService.findByCode(orderCode);
         if (Objects.isNull(orderDetailResult)) {
             return ResponseEntity.badRequest().body("订单不存在！");
         }
-        if (!Objects.equals(orderDetailResult.getStatus(), OrderStatus.WAIT_PAYMENT)) {
-            return ResponseEntity.badRequest().body(orderDetailResult.getStatus().getDescription() + "状态不可取消订单");
-        }
-        Tips tips = orderService.updateStatus(orderDetailResult);
+        Tips tips = orderService.updateStatus(orderDetailResult, orderStatus);
         if (tips.err()) {
-            return ResponseEntity.badRequest().body("更新订单失效失败！");
+            return ResponseEntity.badRequest().body(tips.getMessage());
         }
         return ResponseEntity.ok().build();
     }
@@ -137,106 +135,43 @@ public class OrderApi {
         //防止一个订单重复提交
         RBucket<String> rBucket = redissonClient.getBucket("order_refund_" + orderCode);
         String rBucketId = rBucket.get();
-
         if (StringUtils.isNotBlank(rBucketId) && rBucketId.equals(orderCode)) {
             return ResponseEntity.badRequest().body("退货中。。。。");
         }
         rBucket.set(orderCode, 30, TimeUnit.SECONDS);
 
-        OrderDetailResult searchBaseOrderInfo = orderService.findByCode(orderCode);
-        if (Objects.isNull(searchBaseOrderInfo)) {
-            return ResponseEntity.badRequest().body("未找到订单");
+        Tips tips = orderService.validateRefund(orderCode, returnOrderParam);
+        if (tips.err()) {
+            return ResponseEntity.badRequest().body(tips.getMessage());
         }
-        if (Objects.equals(searchBaseOrderInfo.getAllowRefund(), AllowRefund.NO)) {
-            return ResponseEntity.badRequest().body("订单为非允许退货订单");
-        }
-        //只允许待发货 已发货 退货中的订单退货
-        if (!Objects.equals(searchBaseOrderInfo.getStatus(), WAIT_SEND_OUT) &&
-                !Objects.equals(searchBaseOrderInfo.getStatus(), OrderStatus.SEND_OUT) &&
-                !Objects.equals(searchBaseOrderInfo.getStatus(), OrderStatus.RECEIVED)) {
-            return ResponseEntity.badRequest().body("只允许待发货/已发货的订单退货，当前订单状态为:" + searchBaseOrderInfo.getStatus().getDescription());
-        }
-        BaseOrder baseOrder = new BaseOrder();
-        OrderRefund orderRefund = new OrderRefund();
-        switch (searchBaseOrderInfo.getStatus()) {
+        OrderDetailResult order = (OrderDetailResult) tips.getData();
+        Pair<OrderRefundStatus, OrderStatus> pair = null;
+        switch (order.getStatus()) {
             case WAIT_SEND_OUT:
-                ResponseEntity cancelResponse = haiDingService.hdCancel(searchBaseOrderInfo.getHdOrderCode(), returnOrderParam.getReason());
-                if (Objects.isNull(cancelResponse) || cancelResponse.getStatusCode().isError()) {
-                    return ResponseEntity.badRequest().body("取消海鼎订单失败!");
-                }
-                orderRefund.setRefundStatus(OrderRefundStatus.ALREADY_RETURN);
-                baseOrder.setStatus(OrderStatus.ALREADY_RETURN);
+                pair = orderService.hdCancel(order.getHdOrderCode(), returnOrderParam.getReason());
                 break;
             case SEND_OUT:
             case RECEIVED:
-                HaiDingOrderParam haiDingOrderParam = new HaiDingOrderParam();
-                BeanUtils.of(haiDingOrderParam).populate(searchBaseOrderInfo);
-                List<OrderProduct> refundProducts = orderProductService.findOrderProductListByIds(Arrays.asList(StringUtils.tokenizeToStringArray(returnOrderParam.getOrderProductIds(), ",")));
-                if (CollectionUtils.isEmpty(refundProducts)) {
-                    return ResponseEntity.badRequest().body("退货商品列表为空！");
-                }
-                OrderStore store = searchBaseOrderInfo.getOrderStore();
-                haiDingOrderParam.setStoreName(store.getStoreName());
-                haiDingOrderParam.setStoreCode(store.getStoreCode());
-                haiDingOrderParam.setStoreId(store.getStoreId());
-                haiDingOrderParam.setOrderProducts(refundProducts);
-                ResponseEntity refundResponse = haiDingService.hdRefund(haiDingOrderParam);
-                if (Objects.isNull(refundResponse) || refundResponse.getStatusCode().isError()) {
-                    return ResponseEntity.badRequest().body("海鼎退货失败！");
-                }
-                orderRefund.setRefundStatus(OrderRefundStatus.RETURNING);
-                baseOrder.setStatus(OrderStatus.RETURNING);
+                pair = orderService.hdRefund(order, returnOrderParam);
                 break;
             default:
                 return ResponseEntity.badRequest().body("海鼎退货失败！");
         }
-
-        baseOrder.setCode(searchBaseOrderInfo.getCode());
-        baseOrder.setId(searchBaseOrderInfo.getId());
-
-        BeanUtils.of(orderRefund).populate(returnOrderParam);
-        orderRefund.setHdOrderCode(searchBaseOrderInfo.getHdOrderCode());
-        orderRefund.setOrderId(searchBaseOrderInfo.getId());
-        orderRefund.setUserId(searchBaseOrderInfo.getUserId());
-        orderService.refundOrderByCode(baseOrder, orderRefund);
+        if (pair.isEmpty()) {
+            return ResponseEntity.badRequest().body("海鼎退货失败！");
+        }
+        try {
+            orderService.refundUpdateByCode(pair, returnOrderParam, order);
+        } catch (Exception e) {
+            probeEventPublisher.publish(
+                    ProbeEvent.of(Sniffer.Type.API_EXCEPTION, "记录退款日志错误")
+                            .stackTrace(Exceptions.stackTrace(e))
+            );
+        }
         //构建写order_flow库的数据
         this.publisher.publishEvent(
-                new OrderFlowEvent(searchBaseOrderInfo.getStatus(), baseOrder.getStatus(), searchBaseOrderInfo.getId())
+                new OrderFlowEvent(order.getStatus(), pair.getSecond(), order.getId())
         );
-        return ResponseEntity.ok().build();
-    }
-
-    @PutMapping("/{orderCode}/dispatching")
-    @ApiOperation(value = "修改订单为配送中", response = ResponseEntity.class)
-    public ResponseEntity dispatching(@PathVariable("orderCode") String orderCode) {
-        OrderDetailResult orderDetailResult = orderService.findByCode(orderCode);
-        if (Objects.isNull(orderDetailResult)) {
-            return ResponseEntity.badRequest().body("订单不存在");
-        }
-        if (!Objects.equals(orderDetailResult.getStatus(), OrderStatus.SEND_OUT)) {
-            return ResponseEntity.badRequest().body(orderDetailResult.getStatus().getDescription() + "状态不可进行配送");
-        }
-        Tips tips = orderService.updateStatus(orderDetailResult);
-        if (tips.err()) {
-            return ResponseEntity.badRequest().body("更新订单状态为配送中失败");
-        }
-        return ResponseEntity.ok().build();
-    }
-
-    @ApiOperation(value = "修改订单为已收货", response = ResponseEntity.class)
-    @PutMapping(value = "/{orderCode}/received")
-    public ResponseEntity received(@PathVariable("orderCode") String orderCode) {
-        OrderDetailResult orderDetailResult = orderService.findByCode(orderCode);
-        if (Objects.isNull(orderDetailResult)) {
-            return ResponseEntity.badRequest().body("订单不存在");
-        }
-        if (!Objects.equals(orderDetailResult.getStatus(), WAIT_SEND_OUT) && !Objects.equals(orderDetailResult.getStatus(), OrderStatus.DISPATCHING)) {
-            return ResponseEntity.badRequest().body(orderDetailResult.getStatus().getDescription() + "状态不可更改为已收货");
-        }
-        Tips tips = orderService.updateStatus(orderDetailResult);
-        if (tips.err()) {
-            return ResponseEntity.badRequest().body("更新订单状态为配送中失败");
-        }
         return ResponseEntity.ok().build();
     }
 
@@ -249,56 +184,39 @@ public class OrderApi {
     })
     @PutMapping("/{orderCode}/store")
     public ResponseEntity modifyStoreInOrder(@PathVariable("orderCode") String orderCode, @RequestParam Long storeId, @RequestParam String operationUser) {
-        OrderDetailResult searchBaseOrderInfo = orderService.findByCode(orderCode);
-        if (Objects.isNull(searchBaseOrderInfo)) {
+        OrderDetailResult order = orderService.findByCode(orderCode);
+        if (Objects.isNull(order)) {
             return ResponseEntity.badRequest().body("订单不存在！");
         }
-        if (!Objects.equals(WAIT_SEND_OUT, searchBaseOrderInfo.getStatus()) || !Objects.equals(HdStatus.SEND_OUT, searchBaseOrderInfo.getHdStatus())) {
-            log.info("订单状态：" + searchBaseOrderInfo.getStatus() + "----海鼎状态：" + searchBaseOrderInfo.getHdStatus());
+        if (!Objects.equals(WAIT_SEND_OUT, order.getStatus()) || !Objects.equals(HdStatus.SEND_OUT, order.getHdStatus())) {
+            log.info("订单状态：" + order.getStatus() + "----海鼎状态：" + order.getHdStatus());
             return ResponseEntity.badRequest().body("当前订单状态不可调货！");
         }
         //远程查找调货门店 不需要查询门店位置
-        ResponseEntity storeInfoResponseEntity = baseServiceFeign.findStoreById(storeId, null);
-        if (storeInfoResponseEntity == null || storeInfoResponseEntity.getStatusCode().isError()) {
+        ResponseEntity response = baseServiceFeign.findStoreById(storeId);
+        if (response.getStatusCode().isError()) {
             log.info("远程查找调货门店查询失败：{}", storeId);
             return ResponseEntity.badRequest().body("远程查找调货门店查询失败，请重试！");
         }
-        Store storeInfo = (Store) storeInfoResponseEntity.getBody();
-        if (storeInfo == null) {
-            log.info("远程查找调货门店查询未找到门店：{}", storeId);
-            return ResponseEntity.badRequest().body("远程查找调货门店查询未找到门店，请重试！");
-        }
-
-        ResponseEntity hdResponse = haiDingService.hdCancel(searchBaseOrderInfo.getHdOrderCode(), "海鼎调货");
+        ResponseEntity hdResponse = haiDingService.hdCancel(order.getHdOrderCode(), "海鼎调货");
         if (Objects.isNull(hdResponse) || !Objects.equals(HD_CANCEL_ORDER_SUCCESS_RESULT_STRING, hdResponse.getBody())) {
-            log.info("海鼎取消订单编号为：" + searchBaseOrderInfo.getHdOrderCode());
+            log.info("海鼎取消订单编号为：" + order.getHdOrderCode());
             return ResponseEntity.badRequest().body("海鼎取消订单失败，请重试！");
         }
+        Store storeInfo = Objects.requireNonNull((Store) response.getBody());
         //重新生成海鼎订单编号
         String newHdOrderCode = snowflakeId.stringId();
-        HaiDingOrderParam haiDingOrderParam = new HaiDingOrderParam();
-        BeanUtils.of(haiDingOrderParam).populate(searchBaseOrderInfo);
-        haiDingOrderParam.setStoreName(storeInfo.getName());
-        haiDingOrderParam.setStoreCode(storeInfo.getCode());
-        haiDingOrderParam.setStoreId(storeInfo.getId());
-        haiDingOrderParam.setHdOrderCode(newHdOrderCode);
-
-        //海鼎减库存失败重试机制
-        Retry retry = Retry.of(()->{
-            ResponseEntity hdReduceResponse = haiDingService.reduce(haiDingOrderParam);
-            if (hdReduceResponse == null || hdReduceResponse.getStatusCode().isError()){
-                throw new RuntimeException("海鼎发送失败！");
-            }
-            return true;
-        }).count(3).intervalMs(30).run();
-        if (Objects.nonNull(retry.exception())){
-            return ResponseEntity.badRequest().body("调货失败");
+        //发送海鼎
+        Tips tips = orderService.hdReduce(order, storeInfo, newHdOrderCode);
+        if (tips.err()) {
+            probeEventPublisher.publish(ProbeEvent.of(Sniffer.Type.METHOD_EXCEPTION, "订单：" + orderCode + "调货重新发送海鼎失败！"));
         }
         //修改订单hdCode以及添加调货门店信息
-        int result = orderService.changeStore(storeInfo, operationUser, searchBaseOrderInfo.getId(), newHdOrderCode);
-        if (result > 0) {
-            return ResponseEntity.ok().body("调货成功");
+        try {
+            orderService.changeStore(storeInfo, operationUser, order.getId(), newHdOrderCode);
+        } catch (Exception e) {
+            probeEventPublisher.publish(ProbeEvent.of(Sniffer.Type.METHOD_EXCEPTION, "订单：" + orderCode + "调货重新发送海鼎成功，记录日志错误！"));
         }
-        return ResponseEntity.badRequest().body("调货失败");
+        return ResponseEntity.ok().body("调货成功");
     }
 }

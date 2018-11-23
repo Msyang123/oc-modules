@@ -1,6 +1,7 @@
 package com.lhiot.oc.order.model;
 
-import com.lhiot.oc.order.model.type.*;
+import com.lhiot.oc.order.entity.*;
+import com.lhiot.oc.order.entity.type.*;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -21,8 +22,8 @@ public class OrderDetailResult {
     @ApiModelProperty(notes = "用户Id", dataType = "Long")
     private Long userId;
     @ApiModelProperty(notes = "应用类型", dataType = "ApplicationTypeEnum")
-    private ApplicationType applicationType;
-    private OrderType orderType;
+    private String applicationType;
+    private String orderType;
     @ApiModelProperty(notes = "提货方式", dataType = "String")
     private ReceivingWay receivingWay;
     @ApiModelProperty(notes = "订单总金额", dataType = "Integer")

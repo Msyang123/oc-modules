@@ -1,23 +1,30 @@
 package com.lhiot.oc.order.model;
 
 import com.leon.microx.util.BeanUtils;
-import com.lhiot.oc.order.model.type.ApplicationType;
-import com.lhiot.oc.order.model.type.OrderType;
-import com.lhiot.oc.order.model.type.ReceivingWay;
+import com.leon.microx.web.result.Tips;
+import com.lhiot.dc.dictionary.DictionaryClient;
+import com.lhiot.dc.dictionary.module.Dictionary;
+import com.lhiot.oc.order.entity.BaseOrder;
+import com.lhiot.oc.order.entity.OrderProduct;
+import com.lhiot.oc.order.entity.OrderStore;
+import com.lhiot.oc.order.entity.type.ReceivingWay;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Data
 @ApiModel
 public class CreateOrderParam {
 
+    @ApiModelProperty(notes = "业务用户Id", dataType = "Long")
     private Long userId;
-    private ApplicationType applicationType;
-    private OrderType orderType;
+    @ApiModelProperty(notes = "应用类型", dataType = "Long")
+    private String applicationType;
+    private String orderType;
     private ReceivingWay receivingWay;
     private Integer couponAmount = 0;
     private Integer totalAmount;
@@ -49,7 +56,22 @@ public class CreateOrderParam {
      */
     public BaseOrder toOrderObject() {
         BaseOrder baseOrder = new BaseOrder();
+        this.applicationType = this.applicationType.toUpperCase();
+        this.orderType = this.orderType.toUpperCase();
         BeanUtils.of(baseOrder).populate(BeanUtils.of(this).toMap());
         return baseOrder;
     }
+
+    public Tips validateApplicationTypeAndOrderType(DictionaryClient client) {
+        Optional<Dictionary> optional = client.dictionary("applications");
+        if (!optional.isPresent()){
+            return Tips.warn("没有applications这个字典");
+        }
+        if (!optional.get().hasEntry(this.applicationType)) {
+            return Tips.warn("没有这个字典项");
+        }
+
+        return Tips.warn("验证通过！");
+    }
+
 }

@@ -1,7 +1,7 @@
 package com.lhiot.oc.order.service;
 
 import com.lhiot.oc.order.mapper.OrderRefundMapper;
-import com.lhiot.oc.order.model.OrderRefund;
+import com.lhiot.oc.order.entity.OrderRefund;
 
 /**
  * @Author zhangfeng created in 2018/9/25 18:34

@@ -1,8 +1,8 @@
 package com.lhiot.oc.order.service;
 
 import com.lhiot.oc.order.mapper.OrderFlowMapper;
-import com.lhiot.oc.order.model.OrderFlow;
-import com.lhiot.oc.order.model.type.OrderStatus;
+import com.lhiot.oc.order.entity.OrderFlow;
+import com.lhiot.oc.order.entity.type.OrderStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

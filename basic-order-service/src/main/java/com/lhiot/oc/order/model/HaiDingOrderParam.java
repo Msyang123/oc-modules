@@ -1,6 +1,6 @@
 package com.lhiot.oc.order.model;
 
-import com.leon.microx.util.BeanUtils;
+import com.lhiot.oc.order.entity.OrderProduct;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

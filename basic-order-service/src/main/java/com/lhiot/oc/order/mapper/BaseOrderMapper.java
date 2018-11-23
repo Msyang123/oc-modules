@@ -1,6 +1,6 @@
 package com.lhiot.oc.order.mapper;
 
-import com.lhiot.oc.order.model.BaseOrder;
+import com.lhiot.oc.order.entity.BaseOrder;
 import com.lhiot.oc.order.model.OrderDetailResult;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;

@@ -27,3 +27,7 @@ oc-modules:
     snowflake-id:
       worker-id: 2
       data-center-id: 2
+lhiot:
+  dictionary:
+    server:
+      base-url: http://base-order-service-v1-0

@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.lhiot.oc.order.mapper.BaseOrderMapper">
-    <insert id="insert" parameterType="com.lhiot.oc.order.model.BaseOrder" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="com.lhiot.oc.order.entity.BaseOrder" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO base_order (order_code,application_type,user_id,nickname,total_amount,delivery_amount,coupon_amount,amount_payable,receiving_way,status
         ,receive_user,contact_phone,address,hd_status,remark,delivery_end_at,hd_order_code,deliver_at,allow_refund,create_at,order_type)
         VALUE (#{code},#{applicationType},#{userId},#{nickname},#{totalAmount},#{deliveryAmount},#{couponAmount},#{amountPayable},#{receivingWay},#{status}
         ,#{receiveUser},#{contactPhone},#{address},#{hdStatus},#{remark},#{deliveryEndAt},#{hdOrderCode},#{deliverAt},#{allowRefund},#{createAt},#{orderType})
     </insert>
 
-    <update id="updateOrderStatusById" parameterType="com.lhiot.oc.order.model.BaseOrder">
+    <update id="updateOrderStatusById" parameterType="com.lhiot.oc.order.entity.BaseOrder">
         update base_order set status = #{status}
         where id=#{id}
     </update>
 
-    <update id="updateOrderStatusByCode" parameterType="com.lhiot.oc.order.model.BaseOrder">
+    <update id="updateOrderStatusByCode" parameterType="com.lhiot.oc.order.entity.BaseOrder">
         update base_order set status = #{status}
         where order_code=#{code}
     </update>
 
-    <update id="updateHdOrderCodeById" parameterType="com.lhiot.oc.order.model.BaseOrder">
+    <update id="updateHdOrderCodeById" parameterType="com.lhiot.oc.order.entity.BaseOrder">
         update base_order set hd_order_code = #{hdOrderCode}
         where id=#{id}
     </update>
@@ -102,12 +102,12 @@
         <result column="deliver_at" property="deliverAt"/>
         <result column="allow_refund" property="allowRefund"/>
         <result column="create_at" property="createAt"/>
-        <association property="orderStore" javaType="com.lhiot.oc.order.model.OrderStore">
+        <association property="orderStore" javaType="com.lhiot.oc.order.entity.OrderStore">
             <result column="store_id" property="storeId"/>
             <result column="store_name" property="storeName"/>
             <result column="store_code" property="storeCode"/>
         </association>
-        <collection  property="orderProductList"  ofType="com.lhiot.oc.order.model.OrderProduct">
+        <collection  property="orderProductList"  ofType="com.lhiot.oc.order.entity.OrderProduct">
             <id column="opid" property="id"/>
             <result column="order_id" property="orderId" />
             <result column="specification_id" property="specificationId" />

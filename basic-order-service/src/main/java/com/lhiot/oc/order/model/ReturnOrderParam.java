@@ -1,6 +1,6 @@
 package com.lhiot.oc.order.model;
 
-import com.lhiot.oc.order.model.type.RefundType;
+import com.lhiot.oc.order.entity.type.RefundType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

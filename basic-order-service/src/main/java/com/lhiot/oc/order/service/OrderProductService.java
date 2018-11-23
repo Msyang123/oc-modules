@@ -2,8 +2,8 @@ package com.lhiot.oc.order.service;
 
 import com.leon.microx.util.Maps;
 import com.lhiot.oc.order.mapper.OrderProductMapper;
-import com.lhiot.oc.order.model.OrderProduct;
-import com.lhiot.oc.order.model.type.RefundStatus;
+import com.lhiot.oc.order.entity.OrderProduct;
+import com.lhiot.oc.order.entity.type.RefundStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

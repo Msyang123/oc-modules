@@ -16,11 +16,11 @@
         </foreach>
     </insert>
 
-    <select id="selectOrderProductsByOrderId" parameterType="Long" resultType="com.lhiot.oc.order.model.OrderProduct">
+    <select id="selectOrderProductsByOrderId" parameterType="Long" resultType="com.lhiot.oc.order.entity.OrderProduct">
         select <include refid="columns"/> from order_product where order_id=#{0}
     </select>
 
-    <select id="selectOrderProductsByIds" parameterType="list" resultType="com.lhiot.oc.order.model.OrderProduct">
+    <select id="selectOrderProductsByIds" parameterType="list" resultType="com.lhiot.oc.order.entity.OrderProduct">
         SELECT <include refid="columns"/>
         FROM order_product
         WHERE id IN
