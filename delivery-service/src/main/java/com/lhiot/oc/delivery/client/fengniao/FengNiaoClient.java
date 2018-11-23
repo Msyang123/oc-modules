@@ -2,6 +2,7 @@ package com.lhiot.oc.delivery.client.fengniao;
 
 import com.leon.microx.util.Jackson;
 import com.leon.microx.util.Maps;
+import com.leon.microx.util.auditing.MD5;
 import com.leon.microx.util.auditing.Random;
 import com.lhiot.oc.delivery.client.fengniao.model.*;
 import com.lhiot.oc.delivery.client.fengniao.util.HttpClient;
@@ -103,6 +104,13 @@ public class FengNiaoClient {
         return httpClient.post(api, requestJson);
     }
 
+    public String backSignature(String appId, String data, String salt, @NonNull TokenResponse tokenResponse) {
+        StringBuffer needSignatureStr = new StringBuffer();
+
+        String accessToken = tokenResponse.getData().getAccessToken();
+        needSignatureStr.append("app_id=").append(appId).append("&").append("access_token=").append(accessToken).append("&data=").append(data).append("&").append("salt=").append(salt);
+        return MD5.str(needSignatureStr.toString());
+    }
 
     /**
      * 获取蜂鸟配送Token

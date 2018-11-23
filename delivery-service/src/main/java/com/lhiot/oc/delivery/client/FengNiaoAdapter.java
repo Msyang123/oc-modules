@@ -14,12 +14,14 @@ import com.lhiot.oc.delivery.entity.DeliverNote;
 import com.lhiot.oc.delivery.feign.Store;
 import com.lhiot.oc.delivery.model.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author Leon (234239150@qq.com) created in 9:05 18.11.13
@@ -100,6 +102,19 @@ public class FengNiaoAdapter implements AdaptableClient {
             log.error(e.getMessage(), e);
             return Tips.error("蜂鸟查询配送单失败 - " + e.getMessage(), e);
         }
+    }
+
+    @Override
+    public Tips backSignature(Map<String,String> backParam){
+        String appId = backParam.get("app_id");
+        String data = backParam.get("data");
+        String signature = backParam.get("signature");
+        String salt = backParam.get("salt");
+        String calcSignature = client.backSignature(appId, data, salt, client.accessToken(ACCESS_TOKEN_CACHE_NAME));
+        log.info("---获取到的signature："+signature);
+        log.info("---得到的calcSignature："+calcSignature);
+        // 判断签名是否相等
+        return Objects.equals(calcSignature,signature)?Tips.of(HttpStatus.OK,"验证成功"):Tips.of(HttpStatus.BAD_REQUEST,"验证错误");
     }
 
     private DeliverNote createDeliverNote(DeliverOrder deliverOrder, double distance) {

@@ -146,6 +146,17 @@ public class DadaClient {
         return this.send(orderParam, DadaApi.API_ORDER_QUERY_DELIVER_FEE, isGcj02);
     }
 
+    /**
+     * @param clientId   客户端ID
+     * @param orderId    订单ID
+     * @param updateTime 修改时间戳
+     * @param signature  签名串
+     * @return 验签是否通过
+     */
+    public boolean inspect(Object clientId, Object orderId, Object updateTime, Object signature){
+        return this.helper.inspect(clientId,orderId,updateTime,signature);
+    }
+
 
     /**
      * 投诉

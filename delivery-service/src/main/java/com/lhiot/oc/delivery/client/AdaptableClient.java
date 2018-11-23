@@ -11,6 +11,8 @@ import com.lhiot.oc.delivery.model.CoordinateSystem;
 import com.lhiot.oc.delivery.model.DeliverOrder;
 import org.springframework.lang.Nullable;
 
+import java.util.Map;
+
 /**
  * 可以被适配的配送端抽象
  */
@@ -56,4 +58,11 @@ public interface AdaptableClient {
         Position.Coordinate deliverCoordinate = Position.base(deliverOrder.getLng(), deliverOrder.getLat());
         return storeCoordinate.distance(deliverCoordinate).doubleValue();
     }
+
+    /**
+     * 回调验签
+     * @param backParam 验签参数列表
+     * @return
+     */
+    Tips backSignature(Map<String,String> backParam);
 }

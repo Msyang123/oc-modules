@@ -12,6 +12,7 @@ import com.lhiot.oc.delivery.entity.DeliverNote;
 import com.lhiot.oc.delivery.feign.Store;
 import com.lhiot.oc.delivery.model.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -90,6 +91,11 @@ public class MeiTuanAdapter implements AdaptableClient {
             log.error(e.getMessage(), e);
             return Tips.error("美团查询配送单失败 - " + e.getMessage(), e);
         }
+    }
+
+    @Override
+    public Tips backSignature(Map<String,String> backParam){
+        return Objects.equals(backParam.get("sign"),client.backSignature(backParam))?Tips.of(HttpStatus.OK,"验证成功"):Tips.of(HttpStatus.BAD_REQUEST,"验证错误");
     }
 
     private DeliverNote createDeliverNote(double distance, DeliverOrder deliverOrder) {
