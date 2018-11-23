@@ -1,4 +1,4 @@
-package com.lhiot.oc.order.model.type;
+package com.lhiot.oc.order.entity.type;
 
 import lombok.Getter;
 

@@ -1,7 +1,6 @@
 package com.lhiot.oc.order.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.lhiot.oc.order.model.type.ApplicationType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

@@ -1,6 +1,6 @@
 package com.lhiot.oc.order.event;
 
-import com.lhiot.oc.order.model.type.OrderStatus;
+import com.lhiot.oc.order.entity.type.OrderStatus;
 import lombok.Data;
 
 import java.io.Serializable;

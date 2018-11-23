@@ -1,6 +1,6 @@
 package com.lhiot.oc.order.mapper;
 
-import com.lhiot.oc.order.model.OrderRefund;
+import com.lhiot.oc.order.entity.OrderRefund;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 

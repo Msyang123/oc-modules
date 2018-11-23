@@ -1,6 +1,6 @@
 package com.lhiot.oc.order.mapper;
 
-import com.lhiot.oc.order.model.OrderFlow;
+import com.lhiot.oc.order.entity.OrderFlow;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 

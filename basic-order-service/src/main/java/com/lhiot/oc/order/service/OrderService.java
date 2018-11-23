@@ -1,18 +1,20 @@
 package com.lhiot.oc.order.service;
 
-import com.leon.microx.util.BeanUtils;
-import com.leon.microx.util.Maps;
-import com.leon.microx.util.SnowflakeId;
-import com.leon.microx.util.StringUtils;
+import com.leon.microx.util.*;
 import com.leon.microx.web.result.Tips;
+import com.lhiot.dc.dictionary.DictionaryClient;
+import com.lhiot.oc.order.entity.BaseOrder;
+import com.lhiot.oc.order.entity.OrderProduct;
+import com.lhiot.oc.order.entity.OrderRefund;
+import com.lhiot.oc.order.entity.OrderStore;
+import com.lhiot.oc.order.entity.type.*;
 import com.lhiot.oc.order.event.OrderFlowEvent;
+import com.lhiot.oc.order.feign.HaiDingService;
 import com.lhiot.oc.order.mapper.*;
 import com.lhiot.oc.order.model.*;
-import com.lhiot.oc.order.model.type.OrderStatus;
-import com.lhiot.oc.order.model.type.ReceivingWay;
-import com.lhiot.oc.order.model.type.RefundStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+
+import static com.lhiot.oc.order.entity.type.OrderStatus.WAIT_SEND_OUT;
 
 /**
  * @author zhangfeng created in 2018/9/19 9:19
@@ -39,8 +43,10 @@ public class OrderService {
     private SnowflakeId snowflakeId;
     private OrderRefundMapper orderRefundMapper;
     private ApplicationEventPublisher publisher;
+    private DictionaryClient client;
+    private HaiDingService haiDingService;
 
-    public OrderService(BaseOrderMapper baseOrderMapper, OrderProductMapper orderProductMapper, OrderStoreMapper orderStoreMapper, OrderFlowMapper orderFlowMapper, SnowflakeId snowflakeId, OrderRefundMapper orderRefundMapper, ApplicationEventPublisher publisher) {
+    public OrderService(BaseOrderMapper baseOrderMapper, OrderProductMapper orderProductMapper, OrderStoreMapper orderStoreMapper, OrderFlowMapper orderFlowMapper, SnowflakeId snowflakeId, OrderRefundMapper orderRefundMapper, ApplicationEventPublisher publisher, DictionaryClient client, HaiDingService haiDingService) {
         this.baseOrderMapper = baseOrderMapper;
         this.orderProductMapper = orderProductMapper;
         this.orderStoreMapper = orderStoreMapper;
@@ -48,6 +54,8 @@ public class OrderService {
         this.snowflakeId = snowflakeId;
         this.orderRefundMapper = orderRefundMapper;
         this.publisher = publisher;
+        this.client = client;
+        this.haiDingService = haiDingService;
     }
 
     /**
@@ -89,6 +97,12 @@ public class OrderService {
      * @return Tips
      */
     public Tips validationParam(CreateOrderParam param) {
+
+        //验证订单类型 和 应用类型是否符合
+        Tips tips = param.validateApplicationTypeAndOrderType(client);
+        if (tips.err()) {
+            return tips;
+        }
         //应付金额为空或者小于零
         if (param.getAmountPayable() < 0) {
             return Tips.warn("应付金额为空或者小于零");
@@ -123,13 +137,24 @@ public class OrderService {
     }
 
     /**
-     * 依据订单编码退货
+     * 依据订单编码退货记录退货日志以及修改订单状态
      *
-     * @param baseOrder   BaseOrder
-     * @param orderRefund OrderRefund
-     * @return int
+     * @param pair             订单修改后状态以及退货日志状态
+     * @param returnOrderParam 退货信息
+     * @param order            订单信息
      */
-    public int refundOrderByCode(BaseOrder baseOrder, OrderRefund orderRefund) {
+    public void refundUpdateByCode(Pair<OrderRefundStatus, OrderStatus> pair, ReturnOrderParam returnOrderParam, OrderDetailResult order) {
+        BaseOrder baseOrder = new BaseOrder();
+        baseOrder.setCode(order.getCode());
+        baseOrder.setId(order.getId());
+        baseOrder.setStatus(pair.getSecond());
+
+        OrderRefund orderRefund = new OrderRefund();
+        BeanUtils.of(orderRefund).populate(returnOrderParam);
+        orderRefund.setHdOrderCode(order.getHdOrderCode());
+        orderRefund.setOrderId(order.getId());
+        orderRefund.setUserId(order.getUserId());
+        orderRefund.setRefundStatus(pair.getFirst());
 
         int result = this.baseOrderMapper.updateOrderStatusByCode(baseOrder);
         if (result > 0) {
@@ -141,7 +166,6 @@ public class OrderService {
                     "refundStatus", RefundStatus.REFUND,
                     "orderProductIds", orderProductIds));
         }
-        return result;
     }
 
     /**
@@ -152,40 +176,183 @@ public class OrderService {
      * @param orderId       Long
      * @return int
      */
-    public int changeStore(Store targetStore, String operationUser, Long orderId,String hdOrderCode) {
-
+    public void changeStore(Store targetStore, String operationUser, Long orderId, String hdOrderCode) {
         BaseOrder baseOrder = new BaseOrder();
         baseOrder.setId(orderId);
         baseOrder.setHdOrderCode(hdOrderCode);
-        int result = baseOrderMapper.updateHdOrderCodeById(baseOrder);
+        baseOrderMapper.updateHdOrderCodeById(baseOrder);
 
-        if (result > 0) {
-            //设置调货订单门店信息
-            OrderStore orderStore = new OrderStore();
-            orderStore.setHdOrderCode(hdOrderCode);
-            orderStore.setOrderId(orderId);
-            orderStore.setStoreId(targetStore.getId());
-            orderStore.setStoreName(targetStore.getName());
-            orderStore.setStoreCode(targetStore.getCode());
-            orderStore.setOperationUser(operationUser);
-            orderStore.setCreateAt(Date.from(Instant.now()));
-            orderStoreMapper.insert(orderStore);
-        }
-        return result;
+        //设置调货订单门店信息
+        OrderStore orderStore = new OrderStore();
+        orderStore.setHdOrderCode(hdOrderCode);
+        orderStore.setOrderId(orderId);
+        orderStore.setStoreId(targetStore.getId());
+        orderStore.setStoreName(targetStore.getName());
+        orderStore.setStoreCode(targetStore.getCode());
+        orderStore.setOperationUser(operationUser);
+        orderStore.setCreateAt(Date.from(Instant.now()));
+        orderStoreMapper.insert(orderStore);
     }
 
-    public Tips updateStatus(OrderDetailResult orderDetailResult){
+    /**
+     * 验证订单状态修改
+     *
+     * @param modifyStatus 修改后订单状态
+     * @param nowStatus    订单当前状态
+     * @return Tips
+     */
+    public Tips validateUpdateStatus(OrderStatus modifyStatus, OrderStatus nowStatus) {
+        Tips tips = Tips.warn("修改订单状态失败");
+        switch (modifyStatus) {
+            case FAILURE:
+                if (!Objects.equals(nowStatus, OrderStatus.WAIT_PAYMENT)) {
+                    return Tips.warn(nowStatus.getDescription() + "状态不可取消订单");
+                }
+                break;
+            case SEND_OUT:
+                if (!Objects.equals(nowStatus, OrderStatus.WAIT_SEND_OUT)) {
+                    return Tips.warn(nowStatus.getDescription() + "状态不可进行发货");
+                }
+                break;
+            case DISPATCHING:
+                if (!Objects.equals(nowStatus, OrderStatus.SEND_OUT)) {
+                    return Tips.warn(nowStatus.getDescription() + "状态不可进行配送");
+                }
+                break;
+            case RECEIVED:
+                if (!Objects.equals(nowStatus, WAIT_SEND_OUT) &&
+                        !Objects.equals(nowStatus, OrderStatus.DISPATCHING)) {
+                    return Tips.warn(nowStatus.getDescription() + "状态不可更改为已收货");
+                }
+                break;
+            case WAIT_SEND_OUT:
+                tips = Tips.empty();
+                break;
+            case RETURNING:
+            case ALREADY_RETURN:
+                tips = Tips.warn(nowStatus.getDescription() + "状态不可直接修改为" + modifyStatus.getDescription() + "状态");
+                break;
+            default:
+                break;
+        }
+        return tips;
+    }
+
+    /**
+     * 根据订单code修改订单状态
+     *
+     * @param orderStatus       订单修改后的状态
+     * @param orderDetailResult 订单信息
+     * @return Tips
+     */
+    public Tips updateStatus(OrderDetailResult orderDetailResult, OrderStatus orderStatus) {
+        Tips tips = this.validateUpdateStatus(orderStatus, orderDetailResult.getStatus());
+        if (tips.err()) {
+            return tips;
+        }
         BaseOrder baseOrder = new BaseOrder();
         baseOrder.setCode(orderDetailResult.getCode());
-        baseOrder.setStatus(OrderStatus.SEND_OUT);
+        baseOrder.setStatus(orderStatus);
         int result = baseOrderMapper.updateOrderStatusByCode(baseOrder);
         if (result > 0) {
-            publisher.publishEvent(new OrderFlowEvent(orderDetailResult.getStatus(), OrderStatus.SEND_OUT, orderDetailResult.getId()));
+            publisher.publishEvent(new OrderFlowEvent(orderDetailResult.getStatus(), orderStatus, orderDetailResult.getId()));
             return Tips.empty();
         }
         return Tips.warn("修改状态失败");
     }
 
+    /**
+     * 订单退货验证
+     *
+     * @param orderCode 订单编号
+     * @param param     退货信息
+     * @return Tips
+     */
+    public Tips validateRefund(String orderCode, ReturnOrderParam param) {
+
+        if (Objects.equals(RefundType.PART, param.getRefundType()) && StringUtils.isBlank(param.getOrderProductIds())) {
+            return Tips.warn("部分退货，商品不可为空！");
+        }
+        OrderDetailResult order = this.findByCode(orderCode);
+        if (Objects.isNull(order)) {
+            return Tips.warn("订单不存在！");
+        }
+        if (Objects.equals(order.getAllowRefund(), AllowRefund.NO)) {
+            return Tips.warn("该订单不可以退货！");
+        }
+        //只允许待发货 已发货 退货中的订单退货
+        if (!Objects.equals(order.getStatus(), WAIT_SEND_OUT) &&
+                !Objects.equals(order.getStatus(), OrderStatus.SEND_OUT) &&
+                !Objects.equals(order.getStatus(), OrderStatus.RECEIVED)) {
+            return Tips.warn("只允许待发货/已发货的订单退货，当前订单状态为:" + order.getStatus().getDescription());
+        }
+        return Tips.empty().data(order);
+    }
+
+    /**
+     * 海鼎取消订单
+     *
+     * @param hdOrderCode 海鼎订单编号
+     * @param reason      退货原因
+     * @return Pair
+     */
+    public Pair<OrderRefundStatus, OrderStatus> hdCancel(String hdOrderCode, String reason) {
+        ResponseEntity cancelResponse = haiDingService.hdCancel(hdOrderCode, reason);
+        if (Objects.isNull(cancelResponse) || cancelResponse.getStatusCode().isError()) {
+            return Pair.empty();
+        }
+        return Pair.of(OrderRefundStatus.ALREADY_RETURN, OrderStatus.ALREADY_RETURN);
+    }
+
+    /**
+     * 海鼎退货退款
+     *
+     * @param order       订单信息
+     * @param refundParam 退货信息
+     * @return Pair
+     */
+    public Pair<OrderRefundStatus, OrderStatus> hdRefund(OrderDetailResult order, ReturnOrderParam refundParam) {
+        HaiDingOrderParam haiDingOrderParam = new HaiDingOrderParam();
+        BeanUtils.of(haiDingOrderParam).populate(order);
+        List<OrderProduct> refundProducts = orderProductMapper.selectOrderProductsByIds(Arrays.asList(StringUtils.tokenizeToStringArray(refundParam.getOrderProductIds(), ",")));
+        if (CollectionUtils.isEmpty(refundProducts)) {
+            return Pair.empty();
+        }
+        OrderStore store = order.getOrderStore();
+        haiDingOrderParam.setStoreName(store.getStoreName());
+        haiDingOrderParam.setStoreCode(store.getStoreCode());
+        haiDingOrderParam.setStoreId(store.getStoreId());
+        haiDingOrderParam.setReturnReason(refundParam.getReason());
+        haiDingOrderParam.setOrderProducts(refundProducts);
+        ResponseEntity refundResponse = haiDingService.hdRefund(haiDingOrderParam);
+        if (Objects.isNull(refundResponse) || refundResponse.getStatusCode().isError()) {
+            return Pair.empty();
+        }
+        return Pair.of(OrderRefundStatus.RETURNING, OrderStatus.RETURNING);
+    }
+
+    public Tips hdReduce(OrderDetailResult order, Store store, String hdOrderCode) {
+        HaiDingOrderParam haiDingOrderParam = new HaiDingOrderParam();
+        BeanUtils.of(haiDingOrderParam).populate(order);
+        haiDingOrderParam.setStoreName(store.getName());
+        haiDingOrderParam.setStoreCode(store.getCode());
+        haiDingOrderParam.setStoreId(store.getId());
+        haiDingOrderParam.setHdOrderCode(hdOrderCode);
+
+        //海鼎减库存失败重试机制
+        Retry retry = Retry.of(() -> haiDingService.reduce(haiDingOrderParam)).count(3).intervalMs(30).run();
+        ResponseEntity response = (ResponseEntity)retry.result();
+
+        if (response.getStatusCode().isError()) {
+            return Tips.warn("海鼎发送失败");
+        }
+        if (Objects.nonNull(retry.exception())) {
+            Throwable error = Exceptions.unwrap(retry.exception());
+            log.error(error.getMessage(), error);
+            return Tips.warn("海鼎发送失败");
+        }
+        return Tips.empty();
+    }
 
     @Nullable
     public OrderDetailResult findByCode(String code, boolean needProductList, boolean needOrderFlowList) {
@@ -193,7 +360,7 @@ public class OrderService {
         if (Objects.isNull(searchBaseOrderInfo)) {
             return null;
         }
-       this.addAttachments(searchBaseOrderInfo,needProductList,needOrderFlowList);
+        this.addAttachments(searchBaseOrderInfo, needProductList, needOrderFlowList);
         return searchBaseOrderInfo;
     }
 
@@ -208,7 +375,7 @@ public class OrderService {
         if (Objects.isNull(searchBaseOrderInfo)) {
             return null;
         }
-        this.addAttachments(searchBaseOrderInfo,needProductList,needOrderFlowList);
+        this.addAttachments(searchBaseOrderInfo, needProductList, needOrderFlowList);
         return searchBaseOrderInfo;
     }
 
@@ -217,7 +384,7 @@ public class OrderService {
         return this.findById(id, false, false);
     }
 
-    private void addAttachments(OrderDetailResult searchBaseOrderInfo,boolean needProductList, boolean needOrderFlowList){
+    private void addAttachments(OrderDetailResult searchBaseOrderInfo, boolean needProductList, boolean needOrderFlowList) {
         searchBaseOrderInfo.setOrderStore(orderStoreMapper.findByHdOrderCode(searchBaseOrderInfo.getHdOrderCode()));
         if (needProductList) {
             searchBaseOrderInfo.setOrderProductList(orderProductMapper.selectOrderProductsByOrderId(searchBaseOrderInfo.getId()));

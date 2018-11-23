@@ -3,7 +3,6 @@ package com.lhiot.oc.order.feign;
 import com.leon.microx.web.result.Multiple;
 import com.lhiot.oc.order.model.ProductShelfResult;
 import com.lhiot.oc.order.model.Store;
-import com.lhiot.oc.order.model.type.ApplicationType;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,8 +18,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient("basic-data-service-v1-0")
 public interface BaseServiceFeign {
 
+
     @RequestMapping(value = "/stores/{storeId}", method = RequestMethod.GET)
-    ResponseEntity<Store> findStoreById(@PathVariable("storeId") Long storeId, @RequestParam("applicationType") ApplicationType applicationType);
+    ResponseEntity<Store> findStoreById(@PathVariable("storeId") Long storeId);
 
 
     @RequestMapping(value = "/products/shelf/list", method = RequestMethod.GET)
