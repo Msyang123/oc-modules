@@ -2,8 +2,10 @@ package com.lhiot.oc.order.entity;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.lhiot.dc.dictionary.type.ApplicationType;
-import com.lhiot.oc.order.entity.type.*;
+import com.lhiot.oc.order.entity.type.AllowRefund;
+import com.lhiot.oc.order.entity.type.HdStatus;
+import com.lhiot.oc.order.entity.type.OrderStatus;
+import com.lhiot.oc.order.entity.type.ReceivingWay;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -23,7 +25,7 @@ public class BaseOrder {
     private String code;
     private Long userId;
     private String orderType;
-    private ApplicationType applicationType;
+    private String applicationType;
     private ReceivingWay receivingWay;
     private Integer totalAmount;
     private Integer amountPayable;

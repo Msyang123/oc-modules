@@ -6,6 +6,7 @@ import com.leon.microx.probe.event.ProbeEvent;
 import com.leon.microx.util.*;
 import com.leon.microx.web.result.Multiple;
 import com.leon.microx.web.result.Tips;
+import com.leon.microx.web.result.Tuple;
 import com.leon.microx.web.swagger.ApiParamType;
 import com.lhiot.oc.order.entity.type.HdStatus;
 import com.lhiot.oc.order.entity.type.OrderRefundStatus;
@@ -106,8 +107,9 @@ public class OrderApi {
     })
     @GetMapping("/user/{userId}")
     public ResponseEntity ordersByUserId(@PathVariable("userId") Long userId, @RequestParam(value = "orderType", required = false) String orderType) {
+        //TODO
         List<OrderDetailResult> results = baseOrderMapper.selectListByUserIdAndOrderType(Maps.of("userId", userId, "orderType", orderType));
-        return ResponseEntity.ok(CollectionUtils.isEmpty(results) ? Multiple.of(new ArrayList<>()) : Multiple.of(results));
+        return ResponseEntity.ok(CollectionUtils.isEmpty(results) ? Tuple.of(new ArrayList<>()) : Tuple.of(results));
     }
 
     @ApiOperation(value = "修改订单状态", response = ResponseEntity.class)
@@ -138,7 +140,7 @@ public class OrderApi {
         if (StringUtils.isNotBlank(rBucketId) && rBucketId.equals(orderCode)) {
             return ResponseEntity.badRequest().body("退货中。。。。");
         }
-        rBucket.set(orderCode, 30, TimeUnit.SECONDS);
+        rBucket.set(orderCode, 10, TimeUnit.SECONDS);
 
         Tips tips = orderService.validateRefund(orderCode, returnOrderParam);
         if (tips.err()) {
@@ -155,9 +157,9 @@ public class OrderApi {
                 pair = orderService.hdRefund(order, returnOrderParam);
                 break;
             default:
-                return ResponseEntity.badRequest().body("海鼎退货失败！");
+                break;
         }
-        if (pair.isEmpty()) {
+        if (Objects.isNull(pair)) {
             return ResponseEntity.badRequest().body("海鼎退货失败！");
         }
         try {

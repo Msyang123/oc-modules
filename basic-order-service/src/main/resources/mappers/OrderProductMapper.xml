@@ -39,7 +39,7 @@
 
     <sql id="columns">
         <trim suffixOverrides=",">
-            order_id,specification_id,barcode,
+            id,order_id,specification_id,barcode,
             total_price,product_qty,shelf_qty,refund_status,discount_price,
             product_name,image,total_weight,shelf_id
         </trim>

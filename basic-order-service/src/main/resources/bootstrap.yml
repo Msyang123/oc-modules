@@ -30,4 +30,4 @@ oc-modules:
 lhiot:
   dictionary:
     server:
-      base-url: http://base-order-service-v1-0
+      base-url: http://basic-data-service-v1-0
