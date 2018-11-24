@@ -3,7 +3,6 @@ package com.lhiot.oc.order.service;
 import com.leon.microx.util.*;
 import com.leon.microx.web.result.Tips;
 import com.lhiot.dc.dictionary.DictionaryClient;
-import com.lhiot.dc.dictionary.module.Dictionary;
 import com.lhiot.oc.order.entity.BaseOrder;
 import com.lhiot.oc.order.entity.OrderProduct;
 import com.lhiot.oc.order.entity.OrderRefund;
@@ -341,7 +340,7 @@ public class OrderService {
 
         //海鼎减库存失败重试机制
         Retry retry = Retry.of(() -> haiDingService.reduce(haiDingOrderParam)).count(3).intervalMs(30).run();
-        ResponseEntity response = (ResponseEntity)retry.result();
+        ResponseEntity response = (ResponseEntity) retry.result();
 
         if (response.getStatusCode().isError()) {
             return Tips.warn("海鼎发送失败");
@@ -355,9 +354,8 @@ public class OrderService {
     }
 
     /**
-     *
-     * @param code 订单code
-     * @param needProductList 是否查询商品信息
+     * @param code              订单code
+     * @param needProductList   是否查询商品信息
      * @param needOrderFlowList 是否查询订单状态流水
      * @return OrderDetailResult
      */
@@ -373,6 +371,7 @@ public class OrderService {
 
     /**
      * 默认不查询订单商品和流水信息
+     *
      * @param code 订单code
      * @return OrderDetailResult
      */
