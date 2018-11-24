@@ -35,7 +35,7 @@ public class MeiTuanAdapter implements AdaptableClient {
 
     @Override
     public Tips send(CoordinateSystem coordinate, Store store, DeliverOrder deliverOrder, Long deliverNoteId) {
-        double distance = this.distance(store, deliverOrder);
+        double distance = this.distance(store, deliverOrder,coordinate);
         if (Calculator.gt(distance, FeeCalculator.MAX_DELIVERY_RANGE)) {
             return Tips.warn("超过配送范围！");
         }

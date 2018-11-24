@@ -74,6 +74,7 @@ public class OrderService {
         List<OrderProduct> productList = param.getOrderProducts();
         for (OrderProduct orderProduct : productList) {
             orderProduct.setOrderId(baseOrder.getId());
+            orderProduct.setRefundStatus(RefundStatus.NOT_REFUND);
         }
         orderProductMapper.batchInsert(param.getOrderProducts());
 
@@ -89,7 +90,6 @@ public class OrderService {
         return orderDetail;
     }
 
-
     /**
      * 验证创建订单数据 可以是套餐 也可以是商品
      *
@@ -99,9 +99,8 @@ public class OrderService {
     public Tips validationParam(CreateOrderParam param) {
 
         //验证订单类型 和 应用类型是否符合
-        Tips tips = param.validateApplicationTypeAndOrderType(client);
-        if (tips.err()) {
-            return tips;
+        if (!param.validateDictionary(client)) {
+            return Tips.warn("字典项不存在");
         }
         //应付金额为空或者小于零
         if (param.getAmountPayable() < 0) {
@@ -341,7 +340,7 @@ public class OrderService {
 
         //海鼎减库存失败重试机制
         Retry retry = Retry.of(() -> haiDingService.reduce(haiDingOrderParam)).count(3).intervalMs(30).run();
-        ResponseEntity response = (ResponseEntity)retry.result();
+        ResponseEntity response = (ResponseEntity) retry.result();
 
         if (response.getStatusCode().isError()) {
             return Tips.warn("海鼎发送失败");
@@ -354,6 +353,12 @@ public class OrderService {
         return Tips.empty();
     }
 
+    /**
+     * @param code              订单code
+     * @param needProductList   是否查询商品信息
+     * @param needOrderFlowList 是否查询订单状态流水
+     * @return OrderDetailResult
+     */
     @Nullable
     public OrderDetailResult findByCode(String code, boolean needProductList, boolean needOrderFlowList) {
         OrderDetailResult searchBaseOrderInfo = this.baseOrderMapper.selectByCode(code);
@@ -364,6 +369,12 @@ public class OrderService {
         return searchBaseOrderInfo;
     }
 
+    /**
+     * 默认不查询订单商品和流水信息
+     *
+     * @param code 订单code
+     * @return OrderDetailResult
+     */
     @Nullable
     public OrderDetailResult findByCode(String code) {
         return this.findByCode(code, false, false);

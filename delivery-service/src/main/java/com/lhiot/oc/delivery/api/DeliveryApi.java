@@ -54,11 +54,17 @@ public class DeliveryApi {
         if (!store.isPresent()) {
             return ResponseEntity.badRequest().body("查询门店信息失败！");
         }
-        Store.Position position = store.get().getStorePosition();
         DeliverTime time = feeQuery.getDeliveryTime();
-
+        //传入经纬度是否需要转换坐标系
+        if (feeQuery.getCoordinateSystem().isNeedConvert()) {
+            Position.BD09 bd09 = Position.baidu(feeQuery.getTargetLng(), feeQuery.getTargetLat());
+            Position.GCJ02 amap = Position.GCJ02.of(bd09);
+            feeQuery.setTargetLng(amap.getLongitude());
+            feeQuery.setTargetLat(amap.getLatitude());
+        }
         Optional<Long> deliverFee = FeeCalculator.of(feeQuery.getOrderFee(), feeQuery.getWeight())
-                .distance(Position.base(position.getLat(), position.getLng()), Position.base(feeQuery.getTargetLat(), feeQuery.getTargetLng()))
+                .distance(Position.base(store.get().getLatitude().doubleValue(), store.get().getLongitude().doubleValue()),
+                        Position.base(feeQuery.getTargetLng(), feeQuery.getTargetLat()))
                 .period(time.getStartTime(), time.getEndTime())
                 .completed();
 
@@ -106,7 +112,7 @@ public class DeliveryApi {
     @ApiOperation(value = "发送配送单")
     @PostMapping("/{deliverType}/delivery-notes")
     public ResponseEntity create(@PathVariable("deliverType") DeliverType type, @RequestParam("coordinate") CoordinateSystem coordinate, @RequestBody DeliverOrder deliverOrder) {
-        Optional<Store> optional = deliveryService.store(Long.valueOf(deliverOrder.getStoreCode()), deliverOrder.getApplyType());
+        Optional<Store> optional = deliveryService.store(deliverOrder.getStoreCode(), deliverOrder.getApplyType());
         if (!optional.isPresent()) {
             return ResponseEntity.badRequest().body("查询门店信息失败！");
         }
@@ -193,7 +199,7 @@ public class DeliveryApi {
 
     @ApiOperation(value = "配送单回调验签")
     @PostMapping("/{deliverType}/back-signature")
-    public ResponseEntity backSignature(@PathVariable("deliverType") DeliverType type,@RequestBody Map<String,String> params){
+    public ResponseEntity backSignature(@PathVariable("deliverType") DeliverType type, @RequestBody Map<String, String> params) {
         AdaptableClient adapter = deliveryService.adapt(type);
         if (Objects.isNull(adapter)) {
             return ResponseEntity.badRequest().body("不支持的配送方式！");

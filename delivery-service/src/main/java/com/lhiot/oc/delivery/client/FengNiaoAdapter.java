@@ -30,6 +30,7 @@ import java.util.Objects;
 public class FengNiaoAdapter implements AdaptableClient {
 
     private static final String ACCESS_TOKEN_CACHE_NAME = "com:lhiot:oc:delivery:fengniao:access-token";
+    private static final int POSITION_SOURCE  = 3;//表示使用高德坐标系
 
     private FengNiaoClient client;
 
@@ -39,12 +40,12 @@ public class FengNiaoAdapter implements AdaptableClient {
 
     @Override
     public Tips send(CoordinateSystem coordinate, Store store, DeliverOrder deliverOrder, Long deliverNoteId) {
-        double distance = this.distance(store, deliverOrder);
+        double distance = this.distance(store, deliverOrder,coordinate);
         if (Calculator.gt(distance, FeeCalculator.MAX_DELIVERY_RANGE)) {
             return Tips.warn("超过配送范围！");
         }
         try {
-            String response = client.deliver(this.createRequestData(coordinate, store, deliverOrder), client.accessToken(ACCESS_TOKEN_CACHE_NAME));
+            String response = client.deliver(this.createRequestData(coordinate,store, deliverOrder), client.accessToken(ACCESS_TOKEN_CACHE_NAME));
             log.info("蜂鸟配送返回结果{}", response);
             OrderAdded added = Jackson.object(response, OrderAdded.class);
             if (added.getCode() == 200) {
@@ -134,15 +135,15 @@ public class FengNiaoAdapter implements AdaptableClient {
         ElemeCreateOrderRequest.ElemeCreateRequestData requestData = new ElemeCreateOrderRequest.ElemeCreateRequestData();
         //设置门店编码
         requestData.setChainStoreCode(store.getStoreCode());
-        //配送地址信息
+        //取货地址信息
         ElemeCreateOrderRequest.TransportInfo transportInfo = new ElemeCreateOrderRequest.TransportInfo();
         transportInfo.setAddress(store.getStoreAddress());
-        transportInfo.setLatitude(store.getStorePosition().getLat());
-        transportInfo.setLongitude(store.getStorePosition().getLng());
+        transportInfo.setLatitude(store.getLatitude().doubleValue());
+        transportInfo.setLongitude(store.getLongitude().doubleValue());
         transportInfo.setName(store.getStoreName());
         transportInfo.setRemark("");
         transportInfo.setTel(store.getStorePhone());
-        transportInfo.setPositionSource(coordinate.getPositionSource());
+        transportInfo.setPositionSource(POSITION_SOURCE);
         requestData.setTransportInfo(transportInfo);
 
         //收货人

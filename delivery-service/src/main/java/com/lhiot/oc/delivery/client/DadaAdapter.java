@@ -34,7 +34,7 @@ public class DadaAdapter implements AdaptableClient {
 
     @Override
     public Tips send(CoordinateSystem coordinate, Store store, DeliverOrder deliverOrder, Long deliverNoteId) {
-        double distance = this.distance(store, deliverOrder);
+        double distance = this.distance(store, deliverOrder,coordinate);
         if (Calculator.gt(distance, FeeCalculator.MAX_DELIVERY_RANGE)) {
             return Tips.warn("超过配送范围！");
         }
@@ -117,7 +117,7 @@ public class DadaAdapter implements AdaptableClient {
         orderParam.setLng(deliverOrder.getLng());
         orderParam.setOriginId(deliverOrder.getHdOrderCode());
         orderParam.setOriginMark("lhiot");
-        orderParam.setOriginMarkNo(deliverOrder.getApplyType().name());
+        orderParam.setOriginMarkNo(deliverOrder.getApplyType());
         orderParam.setReceiverAddress(deliverOrder.getAddress());
         orderParam.setReceiverName(deliverOrder.getReceiveUser());
         orderParam.setReceiverPhone(deliverOrder.getContactPhone());

@@ -1,7 +1,6 @@
 package com.lhiot.oc.order.model;
 
 import com.leon.microx.util.BeanUtils;
-import com.leon.microx.web.result.Tips;
 import com.lhiot.dc.dictionary.DictionaryClient;
 import com.lhiot.dc.dictionary.module.Dictionary;
 import com.lhiot.oc.order.entity.BaseOrder;
@@ -62,16 +61,20 @@ public class CreateOrderParam {
         return baseOrder;
     }
 
-    public Tips validateApplicationTypeAndOrderType(DictionaryClient client) {
-        Optional<Dictionary> optional = client.dictionary("applications");
-        if (!optional.isPresent()){
-            return Tips.warn("没有applications这个字典");
-        }
-        if (!optional.get().hasEntry(this.applicationType)) {
-            return Tips.warn("没有这个字典项");
-        }
+    /**
+     * 验证入参数据字典
+     *
+     * @return Tips
+     */
+    public boolean validateDictionary(DictionaryClient client) {
+        boolean hasApplicationType = client.dictionary("applications")
+                .map(dictionary -> dictionary.hasEntry(this.applicationType))
+                .orElse(false);
 
-        return Tips.warn("验证通过！");
+        boolean hasOrderType = client.dictionary("orderTypes")
+                .map(dictionary -> dictionary.hasEntry(this.orderType))
+                .orElse(false);
+
+        return hasApplicationType && hasOrderType;
     }
-
 }

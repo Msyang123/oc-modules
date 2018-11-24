@@ -29,7 +29,7 @@ public class DeliverOrder {
     private String orderCode;
 
     @ApiModelProperty(value = "应用类型:APP(视食),WECHAT_MALL(微商城),S_MALL(小程序),F_MALL(鲜果师)", dataType = "ApplicationType")
-    private ApplicationType applyType;
+    private String applyType;
 
     @ApiModelProperty(value = "门店编码", dataType = "String")
     private String storeCode;

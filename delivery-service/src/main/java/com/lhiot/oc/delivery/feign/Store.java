@@ -1,10 +1,11 @@
 package com.lhiot.oc.delivery.feign;
 
-import com.lhiot.oc.delivery.model.ApplicationType;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -83,39 +84,48 @@ public class Store {
      * 录播地址
      */
     private String tapeUrl;
+    /**
+     * 纬度
+     */
+    private BigDecimal latitude;
+
+    /**
+     * 经度
+     */
+    private BigDecimal longitude;
 
     private String distance;
 
-    private Position storePosition;
+//    private Position storePosition;
 
-    @Data
-    @ToString
-    public static class Position {
-
-        private Long id;
-
-        /**
-         * 坐标位置（经度）
-         */
-        private Double lng;
-
-        /**
-         * 坐标位置（纬度）
-         */
-        private Double lat;
-
-        /**
-         * 应用类型
-         */
-        private ApplicationType applicationType;
-
-        /**
-         * 门店编号
-         */
-        private Long storeId;
-
-        private List<Long> storeIds;
-    }
+//    @Data
+//    @ToString
+//    public static class Position {
+//
+//        private Long id;
+//
+//        /**
+//         * 坐标位置（经度）
+//         */
+//        private Double lng;
+//
+//        /**
+//         * 坐标位置（纬度）
+//         */
+//        private Double lat;
+//
+//        /**
+//         * 应用类型
+//         */
+//        private String applicationType;
+//
+//        /**
+//         * 门店编号
+//         */
+//        private Long storeId;
+//
+//        private List<Long> storeIds;
+//    }
 
     public enum Status {
 
