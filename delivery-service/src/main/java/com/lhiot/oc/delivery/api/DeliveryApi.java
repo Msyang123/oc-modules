@@ -56,9 +56,9 @@ public class DeliveryApi {
         }
         DeliverTime time = feeQuery.getDeliveryTime();
         //传入经纬度是否需要转换坐标系
-        if (feeQuery.getCoordinateSystem().isNeedConvert()){
+        if (feeQuery.getCoordinateSystem().isNeedConvert()) {
             Position.BD09 bd09 = Position.baidu(feeQuery.getTargetLng(), feeQuery.getTargetLat());
-            Position.GCJ02  amap = Position.GCJ02.of(bd09);
+            Position.GCJ02 amap = Position.GCJ02.of(bd09);
             feeQuery.setTargetLng(amap.getLongitude());
             feeQuery.setTargetLat(amap.getLatitude());
         }
