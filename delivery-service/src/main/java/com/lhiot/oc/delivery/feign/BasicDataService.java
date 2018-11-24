@@ -1,6 +1,5 @@
 package com.lhiot.oc.delivery.feign;
 
-import com.lhiot.oc.delivery.model.ApplicationType;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -15,8 +14,8 @@ public interface BasicDataService {
 
     //查询门店信息
     @RequestMapping(value = "/stores/{storeId}", method = RequestMethod.GET)
-    ResponseEntity<Store> findStoreById(@PathVariable("storeId") Long storeId, @RequestParam("applicationType") ApplicationType applicationType);
+    ResponseEntity<Store> findStoreById(@PathVariable("storeId") Long storeId, @RequestParam("applicationType") String applicationType);
 
     @RequestMapping(value = "/stores/code/{code}", method = RequestMethod.GET)
-    ResponseEntity<Store> findStoreByCode(@PathVariable("code") String code, @RequestParam("applicationType") ApplicationType applicationType);
+    ResponseEntity<Store> findStoreByCode(@PathVariable("code") String code, @RequestParam("applicationType") String applicationType);
 }

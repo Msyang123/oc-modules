@@ -31,6 +31,7 @@ public interface AdaptableClient {
 
     /**
      * 取消配送
+     *
      * @param deliverNote 配送单
      * @param reason      取消原因
      * @return Tips
@@ -52,17 +53,23 @@ public interface AdaptableClient {
      */
     Tips deliverNoteDetail(DeliverNote deliverNote);
 
-    default double distance(Store store, DeliverOrder deliverOrder) {
-        Store.Position position = store.getStorePosition();
-        Position.Coordinate storeCoordinate = Position.base(position.getLng(), position.getLat());
-        Position.Coordinate deliverCoordinate = Position.base(deliverOrder.getLng(), deliverOrder.getLat());
+    default double distance(Store store, DeliverOrder deliverOrder, CoordinateSystem coordinate) {
+        Position.Coordinate storeCoordinate = Position.base(store.getLongitude().doubleValue(), store.getLatitude().doubleValue());
+        Position.Coordinate deliverCoordinate;
+        if (coordinate.isNeedConvert()){
+            Position.BD09 bd09 = Position.baidu(deliverOrder.getLng(), deliverOrder.getLat());
+            deliverCoordinate = Position.GCJ02.of(bd09);
+        }else {
+            deliverCoordinate = Position.base(deliverOrder.getLng(), deliverOrder.getLat());
+        }
         return storeCoordinate.distance(deliverCoordinate).doubleValue();
     }
 
     /**
      * 回调验签
+     *
      * @param backParam 验签参数列表
      * @return
      */
-    Tips backSignature(Map<String,String> backParam);
+    Tips backSignature(Map<String, String> backParam);
 }
