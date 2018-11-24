@@ -190,4 +190,18 @@ public class DeliveryApi {
         }
         return ResponseEntity.ok(tips.getData());
     }
+
+    @ApiOperation(value = "配送单回调验签")
+    @PostMapping("/{deliverType}/back-signature")
+    public ResponseEntity backSignature(@PathVariable("deliverType") DeliverType type,@RequestBody Map<String,String> params){
+        AdaptableClient adapter = deliveryService.adapt(type);
+        if (Objects.isNull(adapter)) {
+            return ResponseEntity.badRequest().body("不支持的配送方式！");
+        }
+        Tips tips = adapter.backSignature(params);
+        if (tips.err()) {
+            return ResponseEntity.badRequest().body(tips.getMessage());
+        }
+        return ResponseEntity.ok(tips);
+    }
 }
