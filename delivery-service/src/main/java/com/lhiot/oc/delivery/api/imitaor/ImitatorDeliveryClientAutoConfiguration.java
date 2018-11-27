@@ -1,16 +1,9 @@
-package com.lhiot.oc.delivery.client.imitaor;
+package com.lhiot.oc.delivery.api.imitaor;
 
 import com.leon.microx.util.Jackson;
-import com.lhiot.oc.delivery.client.DadaAdapter;
 import com.lhiot.oc.delivery.client.DeliveryClientProperties;
-import com.lhiot.oc.delivery.client.FengNiaoAdapter;
-import com.lhiot.oc.delivery.client.MeiTuanAdapter;
 import com.lhiot.oc.delivery.client.dada.DadaClient;
-import com.lhiot.oc.delivery.client.fengniao.FengNiaoClient;
-import com.lhiot.oc.delivery.client.meituan.MeiTuanClient;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RedissonClient;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
