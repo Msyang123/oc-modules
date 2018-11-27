@@ -257,18 +257,39 @@ public class DadaClient {
     /**********************模拟配送端*******************************************************/
 
     /**
+     *
+     *  模拟配送端发起操作
+     *   接收
+     * @param hdOrderCode 订单code
+     * @return String
+     */
+    public String query(String hdOrderCode){
+        try {
+            // 初始化数据
+            Map<String, Object> map = new HashMap<>();
+            map.put("order_id", hdOrderCode);
+            Map<String, Object> data = this.helper.sign(this.converter.apply(map));
+            // 发送
+            return this.helper.post(this.converter.apply(data), DadaApi.API_ORDER_STATUS_QUERY);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    /**
      * 模拟配送端发起操作
      * 接收
      *
-     * @param orderId 订单ID
+     * @param hdOrderCode 订单ID
      * @return json
      */
-    public String accept(String orderId) {
+    public String accept(String hdOrderCode) {
 
         try {
             // 初始化数据
             Map<String, Object> map = new HashMap<>();
-            map.put("order_id", orderId);
+            map.put("order_id", hdOrderCode);
             Map<String, Object> data = this.helper.sign(this.converter.apply(map));
             // 发送
             return this.helper.post(this.converter.apply(data), DadaApi.API_ACCEPT);
@@ -282,15 +303,15 @@ public class DadaClient {
      * 模拟配送端发起操作
      * 取货
      *
-     * @param orderId 订单ID
+     * @param hdOrderCode 订单ID
      * @return json
      */
-    public String fetch(String orderId) {
+    public String fetch(String hdOrderCode) {
 
         try {
             // 初始化数据
             Map<String, Object> map = new HashMap<>();
-            map.put("order_id", orderId);
+            map.put("order_id", hdOrderCode);
             Map<String, Object> data = this.helper.sign(this.converter.apply(map));
             // 发送
             return this.helper.post(this.converter.apply(data), DadaApi.API_FETCH);
@@ -304,15 +325,15 @@ public class DadaClient {
      * 模拟配送端发起操作
      * 完成配送
      *
-     * @param orderId 订单ID
+     * @param hdOrderCode 订单ID
      * @return json
      */
-    public String finish(String orderId) {
+    public String finish(String hdOrderCode) {
 
         try {
             // 初始化数据
             Map<String, Object> map = new HashMap<>();
-            map.put("order_id", orderId);
+            map.put("order_id", hdOrderCode);
             Map<String, Object> data = this.helper.sign(this.converter.apply(map));
             // 发送
             return this.helper.post(this.converter.apply(data), DadaApi.API_FINISH);
@@ -326,15 +347,15 @@ public class DadaClient {
      * 模拟配送端发起操作
      * 取消
      *
-     * @param orderId 订单ID
+     * @param hdOrderCode 订单ID
      * @return json
      */
-    public String cancel(String orderId) {
+    public String cancel(String hdOrderCode) {
 
         try {
             // 初始化数据
             Map<String, Object> map = new HashMap<>();
-            map.put("order_id", orderId);
+            map.put("order_id", hdOrderCode);
             Map<String, Object> data = this.helper.sign(this.converter.apply(map));
             // 发送
             return this.helper.post(this.converter.apply(data), DadaApi.API_CANCEL);

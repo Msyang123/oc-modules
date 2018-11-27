@@ -201,7 +201,6 @@ public class OrderService {
      * @return Tips
      */
     public Tips validateUpdateStatus(OrderStatus modifyStatus, OrderStatus nowStatus) {
-        Tips tips = Tips.warn("修改订单状态失败");
         switch (modifyStatus) {
             case FAILURE:
                 if (!Objects.equals(nowStatus, OrderStatus.WAIT_PAYMENT)) {
@@ -225,16 +224,14 @@ public class OrderService {
                 }
                 break;
             case WAIT_SEND_OUT:
-                tips = Tips.empty();
-                break;
+                return Tips.empty();
             case RETURNING:
             case ALREADY_RETURN:
-                tips = Tips.warn(nowStatus.getDescription() + "状态不可直接修改为" + modifyStatus.getDescription() + "状态");
-                break;
+                return Tips.warn(nowStatus.getDescription() + "状态不可直接修改为" + modifyStatus.getDescription() + "状态");
             default:
                 break;
         }
-        return tips;
+        return Tips.empty();
     }
 
     /**

@@ -158,10 +158,11 @@ public class DeliveryApi {
             return ResponseEntity.badRequest().body(tips.getMessage());
         }
         // 配送状态流转记录
+        DeliverStatus preStatus = deliverNote.getDeliverStatus();
         deliverNote.setFailureCause(reason.getReason());
         deliverNote.setCancelTime(new Date());
         deliverNote.setDeliverStatus(DeliverStatus.FAILURE);
-        deliveryService.saveDeliverFlow(deliverNote);
+        deliveryService.saveDeliverFlow(deliverNote,preStatus);
         return ResponseEntity.ok().build();
     }
 

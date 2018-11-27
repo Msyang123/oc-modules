@@ -100,7 +100,7 @@
             <if test="remark != null ">
                 remark,
             </if>
-            <if test="deliverTime != null ">
+            <if test="deliverTimeString != null ">
                 deliver_time,
             </if>
             <if test="lng != null ">
@@ -165,8 +165,8 @@
             <if test="remark != null ">
                 #{remark},
             </if>
-            <if test="deliverTime != null ">
-                #{deliverTime},
+            <if test="deliverTimeString != null ">
+                #{deliverTimeString},
             </if>
             <if test="lng != null ">
                 #{lng},
