@@ -117,7 +117,7 @@ public class DadaAdapter implements AdaptableClient {
         orderParam.setLng(deliverOrder.getLng());
         orderParam.setOriginId(deliverOrder.getHdOrderCode());
         orderParam.setOriginMark("lhiot");
-        orderParam.setOriginMarkNo(deliverOrder.getApplyType());
+        orderParam.setOriginMarkNo(deliverOrder.getApplyType().replaceAll("_",""));
         orderParam.setReceiverAddress(deliverOrder.getAddress());
         orderParam.setReceiverName(deliverOrder.getReceiveUser());
         orderParam.setReceiverPhone(deliverOrder.getContactPhone());

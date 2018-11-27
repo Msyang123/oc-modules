@@ -1,11 +1,15 @@
 package com.lhiot.oc.delivery.service;
 
+import com.leon.microx.util.Jackson;
 import com.lhiot.oc.delivery.client.AdaptableClient;
 import com.lhiot.oc.delivery.entity.DeliverFlow;
 import com.lhiot.oc.delivery.entity.DeliverNote;
 import com.lhiot.oc.delivery.feign.BasicDataService;
 import com.lhiot.oc.delivery.feign.Store;
-import com.lhiot.oc.delivery.model.*;
+import com.lhiot.oc.delivery.model.DeliverOrder;
+import com.lhiot.oc.delivery.model.DeliverStatus;
+import com.lhiot.oc.delivery.model.DeliverType;
+import com.lhiot.oc.delivery.model.DeliverUpdate;
 import com.lhiot.oc.delivery.repository.DeliverBaseOrderMapper;
 import com.lhiot.oc.delivery.repository.DeliverFlowMapper;
 import com.lhiot.oc.delivery.repository.DeliverNoteMapper;
@@ -52,6 +56,7 @@ public class DeliveryService implements ApplicationContextAware {
         }
         return Optional.of((Store) response.getBody());
     }
+
     public Optional<Store> store(String storeCode, String applicationType) {
         ResponseEntity response = basicDataService.findStoreByCode(storeCode, applicationType);
         if (response.getStatusCode().isError() || Objects.isNull(response.getBody())) {
@@ -74,17 +79,16 @@ public class DeliveryService implements ApplicationContextAware {
         this.context = applicationContext;
     }
 
-    public void saveDeliverFlow(DeliverNote deliverNote) {
-        if (Objects.nonNull(deliverNote.getDeliverStatus())) {
-            DeliverFlow deliverFlow = new DeliverFlow();
-            deliverFlow.setCreateAt(new Date());
-            deliverFlow.setDeliverNoteId(deliverNote.getId());
-            deliverFlow.setPreStatus(null);
-            deliverFlow.setStatus(deliverNote.getDeliverStatus());
-            deliverFlowMapper.create(deliverFlow);
-            return;
+    public void saveDeliverFlow(DeliverNote deliverNote, DeliverStatus preStatus) {
+        DeliverFlow deliverFlow = new DeliverFlow();
+        deliverFlow.setCreateAt(new Date());
+        deliverFlow.setDeliverNoteId(deliverNote.getId());
+        deliverFlow.setPreStatus(preStatus);
+        deliverFlow.setStatus(deliverNote.getDeliverStatus());
+        deliverFlowMapper.create(deliverFlow);
+        if (Objects.nonNull(preStatus)) {
+            deliverNoteMapper.updateById(deliverNote);
         }
-        deliverNoteMapper.updateById(deliverNote);
     }
 
     public void saveDeliverNote(DeliverOrder deliverOrder, DeliverNote deliverNote) {
@@ -93,17 +97,18 @@ public class DeliveryService implements ApplicationContextAware {
         deliverNote.setCreateTime(new Date());
         deliverNoteMapper.create(deliverNote);
 
-        //记录配送状态流水
-        this.saveDeliverFlow(deliverNote);
+        //创建第一条（上一步状态为null）记录配送状态流水
+        this.saveDeliverFlow(deliverNote, null);
 
         //更新配送信息
-        DeliverNote updateDeliverNote = new DeliverNote();
-        updateDeliverNote.setDeliverStatus(DeliverStatus.UNRECEIVE);
-        updateDeliverNote.setId(deliverNote.getId());
-        deliverNoteMapper.updateById(deliverNote);
+//        DeliverNote updateDeliverNote = new DeliverNote();
+//        updateDeliverNote.setDeliverStatus(DeliverStatus.UNRECEIVE);
+//        updateDeliverNote.setId(deliverNote.getId());
+//        deliverNoteMapper.updateById(deliverNote);
 
         //写入配送订单流程表 如果查询到，就不新增
         if (Objects.isNull(this.deliverBaseOrderMapper.selectByHdOrderCode(deliverOrder.getHdOrderCode()))) {
+            Jackson.json(deliverOrder.getDeliverTime());
             deliverBaseOrderMapper.create(deliverOrder);
             //给配送订单商品设置配送订单id
             deliverOrder.getDeliverOrderProductList().forEach(item -> item.setDeliverBaseOrderId(deliverOrder.getId()));
@@ -115,21 +120,22 @@ public class DeliveryService implements ApplicationContextAware {
         switch (deliverNote.getDeliverStatus()) {
             // 待取货
             case WAIT_GET:
-                deliverNote.setDeliverName(deliverUpdate.getCarrierDriverName());
-                deliverNote.setDeliverPhone(deliverUpdate.getCarrierDriverPhone());
                 deliverNote.setReceiveTime(new Date());
-                this.saveDeliverFlow(deliverNote);
                 break;
             // 配送失败
             case FAILURE:
-                deliverNote.setFailureCause(deliverUpdate.getCancelReason());
                 deliverNote.setCancelTime(new Date());
-                this.saveDeliverFlow(deliverNote);
                 break;
             // 待接单 配送中 配送完成 直接修改。
             default:
-                this.saveDeliverFlow(deliverNote);
                 break;
         }
+        DeliverStatus status = deliverNote.getDeliverStatus();
+        deliverNote.setDeliverName(deliverUpdate.getCarrierDriverName());
+        deliverNote.setDeliverPhone(deliverUpdate.getCarrierDriverPhone());
+        deliverNote.setDeliverStatus(deliverUpdate.getDeliverStatus());
+        deliverNote.setFailureCause(deliverUpdate.getCancelReason());
+        this.saveDeliverFlow(deliverNote, status);
+
     }
 }
