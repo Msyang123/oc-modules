@@ -1,12 +1,8 @@
-package com.lhiot.oc.delivery.client.imitaor;
+package com.lhiot.oc.delivery.api.imitaor;
 
-import com.lhiot.oc.delivery.client.AdaptableClient;
-import com.lhiot.oc.delivery.client.imitaor.ImitatorAdaptableClient;
-import com.lhiot.oc.delivery.client.imitaor.ImitatorDeliverType;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 /**

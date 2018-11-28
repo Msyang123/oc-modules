@@ -2,8 +2,8 @@ package com.lhiot.oc.delivery.api;
 
 import com.leon.microx.web.result.Tips;
 import com.leon.microx.web.swagger.ApiParamType;
-import com.lhiot.oc.delivery.client.imitaor.ImitatorDeliverType;
-import com.lhiot.oc.delivery.client.imitaor.ImitatorDeliveryService;
+import com.lhiot.oc.delivery.api.imitaor.ImitatorDeliverType;
+import com.lhiot.oc.delivery.api.imitaor.ImitatorDeliveryService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;

@@ -1,8 +1,7 @@
-package com.lhiot.oc.delivery.client.imitaor;
+package com.lhiot.oc.delivery.api.imitaor;
 
 import com.leon.microx.web.result.Tips;
 import com.lhiot.oc.delivery.client.dada.DadaClient;
-import org.springframework.stereotype.Service;
 
 /**
  * @author zhangfeng create in 12:11 2018/11/26

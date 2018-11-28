@@ -1,6 +1,5 @@
-package com.lhiot.oc.delivery.client.imitaor;
+package com.lhiot.oc.delivery.api.imitaor;
 
-import com.lhiot.oc.delivery.client.DadaAdapter;
 import com.lhiot.oc.delivery.client.FengNiaoAdapter;
 import com.lhiot.oc.delivery.client.MeiTuanAdapter;
 import lombok.Getter;
@@ -8,7 +7,7 @@ import lombok.Getter;
 /**
  * @author zhangfeng create in 15:13 2018/11/26
  */
-public enum  ImitatorDeliverType {
+public enum ImitatorDeliverType {
     FENGNIAO(FengNiaoAdapter.class, "蜂鸟配送"),
 
     DADA(ImitatorDadaAdapter.class, "达达配送"),
