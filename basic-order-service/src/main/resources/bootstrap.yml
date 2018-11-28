@@ -5,7 +5,7 @@ spring:
     name: base-order-service-v1-0
   cloud:
     config:
-      name: basic-order-service-v1-0, rabbit-mq, application, redisson
+      name: base-order-service-v1-0, rabbit-mq, application, redisson
       profile: ${RUN_LEVEL:dev}
       label: ${RUN_LEVEL:dev}
       failFast: true
@@ -22,12 +22,3 @@ eureka:
     registry-fetch-interval-seconds: 5
     serviceUrl:
       defaultZone: ${EUREKA_REPLICAS_LIST:http://172.16.10.203:1111/eureka}
-oc-modules:
-  basic-order-service:
-    snowflake-id:
-      worker-id: 2
-      data-center-id: 2
-lhiot:
-  dictionary:
-    server:
-      base-url: http://basic-data-service-v1-0
