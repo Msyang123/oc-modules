@@ -5,4 +5,8 @@
         INSERT INTO order_refund (hd_order_code,order_id,user_id,refund_status,apply_at,dispose_at,order_product_ids,refund_type,reason)
         VALUE (#{hdOrderCode},#{orderId},#{userId},#{refundStatus},#{applyAt},#{disposeAt},#{orderProductIds},#{refundType},#{reason})
     </insert>
+
+    <update id="updateByOrderId" parameterType="map">
+        update order_refund set refund_status = #{refundStatus} , dispose_at = now() where order_id = #{orderId}
+    </update>
 </mapper>
