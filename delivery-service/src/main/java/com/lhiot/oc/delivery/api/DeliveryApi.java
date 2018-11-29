@@ -1,7 +1,12 @@
 package com.lhiot.oc.delivery.api;
 
+import com.leon.microx.id.Generator;
 import com.leon.microx.predefine.Day;
-import com.leon.microx.util.*;
+import com.leon.microx.util.DateTime;
+import com.leon.microx.util.Maps;
+import com.leon.microx.util.Position;
+import com.leon.microx.util.StringUtils;
+import com.leon.microx.web.result.Id;
 import com.leon.microx.web.result.Tips;
 import com.leon.microx.web.swagger.ApiParamType;
 import com.lhiot.oc.delivery.api.calculator.FeeCalculator;
@@ -37,10 +42,10 @@ public class DeliveryApi {
     private static final DateTimeFormatter MM_DD = DateTimeFormatter.ofPattern("MM-dd");
     private static final DateTimeFormatter FULL = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    private final SnowflakeId snowflake;
+    private final Generator<Long> snowflake;
     private final DeliveryService deliveryService;
 
-    public DeliveryApi(SnowflakeId snowflake, DeliveryService deliveryService) {
+    public DeliveryApi(Generator<Long> snowflake, DeliveryService deliveryService) {
         this.snowflake = snowflake;
         this.deliveryService = deliveryService;
     }
@@ -116,7 +121,7 @@ public class DeliveryApi {
         if (!optional.isPresent()) {
             return ResponseEntity.badRequest().body("查询门店信息失败！");
         }
-        long deliverNoteId = snowflake.longId();
+        long deliverNoteId = snowflake.get();
         AdaptableClient adapter = deliveryService.adapt(type);
         if (Objects.isNull(adapter)) {
             return ResponseEntity.badRequest().body("不支持的配送方式！");
@@ -128,7 +133,7 @@ public class DeliveryApi {
         DeliverNote deliverNote = (DeliverNote) tips.getData();
         deliverNote.setId(deliverNoteId);
         deliveryService.saveDeliverNote(deliverOrder, deliverNote);
-        return ResponseEntity.created(URI.create("/delivery-notes/" + deliverNoteId)).body(Maps.of("id", deliverNoteId));
+        return ResponseEntity.created(URI.create("/" + type.name() + "/delivery-notes/" + deliverNoteId)).body(Id.of(deliverNoteId));
     }
 
     @PutMapping("/delivery-notes/{code}")
