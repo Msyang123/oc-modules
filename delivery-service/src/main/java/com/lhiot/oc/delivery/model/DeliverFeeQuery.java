@@ -1,6 +1,5 @@
 package com.lhiot.oc.delivery.model;
 
-import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -31,7 +30,7 @@ public class DeliverFeeQuery {
     @ApiModelProperty(notes = "订单目标坐标位置-纬度", dataType = "Double")
     private Double targetLat;
 
-    @ApiModelProperty(notes = "目标坐标位置使用的坐标系",dataType = "CoordinateSystem")
+    @ApiModelProperty(notes = "目标坐标位置使用的坐标系", dataType = "CoordinateSystem")
     private CoordinateSystem coordinateSystem;
 
     @ApiModelProperty(notes = "配送时间", dataType = "DeliverTime", example = "{\"display\":\"立即配送\",\"startTime\":\"2018-08-15 11:30:00\",\"endTime\":\"2018-08-15 12:30:00\"}")

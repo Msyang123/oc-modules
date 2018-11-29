@@ -2,6 +2,7 @@ package com.lhiot.oc.delivery.client.meituan.util;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
 /**
@@ -16,10 +17,10 @@ public class SHA1Util {
      * @param s 待加密的字符串
      * @return
      */
-    public final static String Sha1(String s){
+    static String Sha1(String s){
         char hexDigits[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
         try {
-            byte[] btInput = s.getBytes("utf-8");
+            byte[] btInput = s.getBytes(StandardCharsets.UTF_8);
             // 获得MD5摘要算法的 MessageDigest 对象
             MessageDigest mdInst = MessageDigest.getInstance("sha-1");
             // 使用指定的字节更新摘要

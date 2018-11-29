@@ -1,9 +1,7 @@
 package com.lhiot.oc.delivery.client;
 
-import com.leon.microx.util.Calculator;
 import com.leon.microx.util.Position;
 import com.leon.microx.web.result.Tips;
-import com.lhiot.oc.delivery.api.calculator.FeeCalculator;
 import com.lhiot.oc.delivery.entity.DeliverNote;
 import com.lhiot.oc.delivery.feign.Store;
 import com.lhiot.oc.delivery.model.CancelReason;
@@ -56,10 +54,10 @@ public interface AdaptableClient {
     default double distance(Store store, DeliverOrder deliverOrder, CoordinateSystem coordinate) {
         Position.Coordinate storeCoordinate = Position.base(store.getLongitude().doubleValue(), store.getLatitude().doubleValue());
         Position.Coordinate deliverCoordinate;
-        if (coordinate.isNeedConvert()){
+        if (coordinate.isNeedConvert()) {
             Position.BD09 bd09 = Position.baidu(deliverOrder.getLng(), deliverOrder.getLat());
             deliverCoordinate = Position.GCJ02.of(bd09);
-        }else {
+        } else {
             deliverCoordinate = Position.base(deliverOrder.getLng(), deliverOrder.getLat());
         }
         return storeCoordinate.distance(deliverCoordinate).doubleValue();
