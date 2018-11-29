@@ -1,12 +1,10 @@
 package com.lhiot.oc.delivery.feign;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.Getter;
 import lombok.ToString;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * 门店实体类
@@ -95,37 +93,6 @@ public class Store {
     private BigDecimal longitude;
 
     private String distance;
-
-//    private Position storePosition;
-
-//    @Data
-//    @ToString
-//    public static class Position {
-//
-//        private Long id;
-//
-//        /**
-//         * 坐标位置（经度）
-//         */
-//        private Double lng;
-//
-//        /**
-//         * 坐标位置（纬度）
-//         */
-//        private Double lat;
-//
-//        /**
-//         * 应用类型
-//         */
-//        private String applicationType;
-//
-//        /**
-//         * 门店编号
-//         */
-//        private Long storeId;
-//
-//        private List<Long> storeIds;
-//    }
 
     public enum Status {
 

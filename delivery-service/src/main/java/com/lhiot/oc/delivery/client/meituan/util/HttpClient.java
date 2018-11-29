@@ -64,7 +64,6 @@ public class HttpClient {
 
         @Cleanup CloseableHttpClient httpClient = HttpClients.createDefault();
         @Cleanup CloseableHttpResponse response = httpClient.execute(httpPost);
-
         StatusLine statusLine = response.getStatusLine();
         log.info("request url: {}, params: {}, response status: {}", uri, params.toString(), statusLine.getStatusCode());
         String result = EntityUtils.toString(response.getEntity(), this.properties.getCharset());

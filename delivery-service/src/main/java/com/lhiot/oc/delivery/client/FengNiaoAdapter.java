@@ -30,7 +30,7 @@ import java.util.Objects;
 public class FengNiaoAdapter implements AdaptableClient {
 
     private static final String ACCESS_TOKEN_CACHE_NAME = "com:lhiot:oc:delivery:fengniao:access-token";
-    private static final int POSITION_SOURCE  = 3;//表示使用高德坐标系
+    private static final int POSITION_SOURCE = 3;//表示使用高德坐标系
 
     private FengNiaoClient client;
 
@@ -40,12 +40,12 @@ public class FengNiaoAdapter implements AdaptableClient {
 
     @Override
     public Tips send(CoordinateSystem coordinate, Store store, DeliverOrder deliverOrder, Long deliverNoteId) {
-        double distance = this.distance(store, deliverOrder,coordinate);
+        double distance = this.distance(store, deliverOrder, coordinate);
         if (Calculator.gt(distance, FeeCalculator.MAX_DELIVERY_RANGE)) {
             return Tips.warn("超过配送范围！");
         }
         try {
-            String response = client.deliver(this.createRequestData(coordinate,store, deliverOrder), client.accessToken(ACCESS_TOKEN_CACHE_NAME));
+            String response = client.deliver(this.createRequestData(coordinate, store, deliverOrder), client.accessToken(ACCESS_TOKEN_CACHE_NAME));
             log.info("蜂鸟配送返回结果{}", response);
             OrderAdded added = Jackson.object(response, OrderAdded.class);
             if (added.getCode() == 200) {
@@ -106,16 +106,16 @@ public class FengNiaoAdapter implements AdaptableClient {
     }
 
     @Override
-    public Tips backSignature(Map<String,String> backParam){
+    public Tips backSignature(Map<String, String> backParam) {
         String appId = backParam.get("app_id");
         String data = backParam.get("data");
         String signature = backParam.get("signature");
         String salt = backParam.get("salt");
         String calcSignature = client.backSignature(appId, data, salt, client.accessToken(ACCESS_TOKEN_CACHE_NAME));
-        log.info("---获取到的signature："+signature);
-        log.info("---得到的calcSignature："+calcSignature);
+        log.info("---获取到的signature：" + signature);
+        log.info("---得到的calcSignature：" + calcSignature);
         // 判断签名是否相等
-        return Objects.equals(calcSignature,signature)?Tips.of(HttpStatus.OK,"验证成功"):Tips.of(HttpStatus.BAD_REQUEST,"验证错误");
+        return Objects.equals(calcSignature, signature) ? Tips.of(HttpStatus.OK, "验证成功") : Tips.of(HttpStatus.BAD_REQUEST, "验证错误");
     }
 
     private DeliverNote createDeliverNote(DeliverOrder deliverOrder, double distance) {

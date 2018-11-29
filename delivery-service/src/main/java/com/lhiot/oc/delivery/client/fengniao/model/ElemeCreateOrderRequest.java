@@ -90,7 +90,7 @@ public class ElemeCreateOrderRequest extends AbstractRequest {
          * 需要代收时客户应付金额, 如需代收款 此项必填
          */
         @JsonProperty("require_payment_pay")
-        private BigDecimal requirePaymentPay = new BigDecimal(0.0);    //传个默认0.0
+        private BigDecimal requirePaymentPay = BigDecimal.valueOf(0.0);    //传个默认0.0
         /**
          * 订单货物件数
          */

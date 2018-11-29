@@ -105,11 +105,10 @@ public class FengNiaoClient {
     }
 
     public String backSignature(String appId, String data, String salt, @NonNull TokenResponse tokenResponse) {
-        StringBuffer needSignatureStr = new StringBuffer();
-
+        StringBuilder stringBuilder = new StringBuilder();
         String accessToken = tokenResponse.getData().getAccessToken();
-        needSignatureStr.append("app_id=").append(appId).append("&").append("access_token=").append(accessToken).append("&data=").append(data).append("&").append("salt=").append(salt);
-        return MD5.str(needSignatureStr.toString());
+        stringBuilder.append("app_id=").append(appId).append("&").append("access_token=").append(accessToken).append("&data=").append(data).append("&").append("salt=").append(salt);
+        return MD5.str(stringBuilder.toString());
     }
 
     /**

@@ -100,12 +100,6 @@ public class DeliveryService implements ApplicationContextAware {
         //创建第一条（上一步状态为null）记录配送状态流水
         this.saveDeliverFlow(deliverNote, null);
 
-        //更新配送信息
-//        DeliverNote updateDeliverNote = new DeliverNote();
-//        updateDeliverNote.setDeliverStatus(DeliverStatus.UNRECEIVE);
-//        updateDeliverNote.setId(deliverNote.getId());
-//        deliverNoteMapper.updateById(deliverNote);
-
         //写入配送订单流程表 如果查询到，就不新增
         if (Objects.isNull(this.deliverBaseOrderMapper.selectByHdOrderCode(deliverOrder.getHdOrderCode()))) {
             Jackson.json(deliverOrder.getDeliverTime());
