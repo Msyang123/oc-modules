@@ -69,6 +69,8 @@ public class OrderService {
         String orderCode = snowflakeId.stringId();
         baseOrder.setCode(orderCode);
         baseOrder.setHdOrderCode(orderCode);
+        baseOrder.setHdStatus(HdStatus.NOT_SEND);
+        baseOrder.setStatus(OrderStatus.WAIT_PAYMENT);
         baseOrderMapper.insert(baseOrder);
 
         List<OrderProduct> productList = param.getOrderProducts();
@@ -97,7 +99,6 @@ public class OrderService {
      * @return Tips
      */
     public Tips validationParam(CreateOrderParam param) {
-
         //验证订单类型 和 应用类型是否符合
         if (!param.validateDictionary(client)) {
             return Tips.warn("字典项不存在");
@@ -154,6 +155,10 @@ public class OrderService {
         orderRefund.setOrderId(order.getId());
         orderRefund.setUserId(order.getUserId());
         orderRefund.setRefundStatus(pair.getFirst());
+        orderRefund.setApplyAt(Date.from(Instant.now()));
+        if (Objects.equals(OrderRefundStatus.ALREADY_RETURN,pair.getFirst())){
+            orderRefund.setDisposeAt(Date.from(Instant.now()));
+        }
 
         int result = this.baseOrderMapper.updateOrderStatusByCode(baseOrder);
         if (result > 0) {
@@ -201,6 +206,9 @@ public class OrderService {
      * @return Tips
      */
     public Tips validateUpdateStatus(OrderStatus modifyStatus, OrderStatus nowStatus) {
+        Tips<BaseOrder> tips = Tips.empty();
+        BaseOrder order = new BaseOrder();
+        order.setStatus(modifyStatus);
         switch (modifyStatus) {
             case FAILURE:
                 if (!Objects.equals(nowStatus, OrderStatus.WAIT_PAYMENT)) {
@@ -211,6 +219,7 @@ public class OrderService {
                 if (!Objects.equals(nowStatus, OrderStatus.WAIT_SEND_OUT)) {
                     return Tips.warn(nowStatus.getDescription() + "状态不可进行发货");
                 }
+                order.setHdStockAt(Date.from(Instant.now()));
                 break;
             case DISPATCHING:
                 if (!Objects.equals(nowStatus, OrderStatus.SEND_OUT)) {
@@ -222,16 +231,21 @@ public class OrderService {
                         !Objects.equals(nowStatus, OrderStatus.DISPATCHING)) {
                     return Tips.warn(nowStatus.getDescription() + "状态不可更改为已收货");
                 }
+                if (Objects.equals(nowStatus, WAIT_SEND_OUT)){
+                    order.setHdStockAt(Date.from(Instant.now()));
+                }
                 break;
             case WAIT_SEND_OUT:
-                return Tips.empty();
+                order.setHdStatus(HdStatus.SEND_OUT);
+                break;
             case RETURNING:
             case ALREADY_RETURN:
                 return Tips.warn(nowStatus.getDescription() + "状态不可直接修改为" + modifyStatus.getDescription() + "状态");
             default:
                 break;
         }
-        return Tips.empty();
+        tips.setData(order);
+        return tips;
     }
 
     /**
@@ -246,9 +260,8 @@ public class OrderService {
         if (tips.err()) {
             return tips;
         }
-        BaseOrder baseOrder = new BaseOrder();
+        BaseOrder baseOrder = (BaseOrder) tips.getData();
         baseOrder.setCode(orderDetailResult.getCode());
-        baseOrder.setStatus(orderStatus);
         int result = baseOrderMapper.updateOrderStatusByCode(baseOrder);
         if (result > 0) {
             publisher.publishEvent(new OrderFlowEvent(orderDetailResult.getStatus(), orderStatus, orderDetailResult.getId()));
@@ -283,6 +296,21 @@ public class OrderService {
             return Tips.warn("只允许待发货/已发货的订单退货，当前订单状态为:" + order.getStatus().getDescription());
         }
         return Tips.empty().data(order);
+    }
+
+    /**
+     * 处理确认退货，修改退货状态
+     * @param orderId 订单Id
+     * @param orderCode 订单编号
+     * @return boolean
+     */
+    public boolean disposeRefund(Long orderId,String orderCode){
+        int count = baseOrderMapper.updateStatusByDisposeRefund(Maps.of("code", orderCode, "status", OrderStatus.ALREADY_RETURN));
+        if (count >0){
+            orderRefundMapper.updateByOrderId(Maps.of("refundStatus",OrderRefundStatus.ALREADY_RETURN,"orderId",orderId));
+            return true;
+        }
+        return false;
     }
 
     /**

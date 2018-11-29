@@ -4,7 +4,6 @@ import com.leon.microx.probe.annotation.Sniffer;
 import com.leon.microx.probe.collector.ProbeEventPublisher;
 import com.leon.microx.probe.event.ProbeEvent;
 import com.leon.microx.util.*;
-import com.leon.microx.web.result.Multiple;
 import com.leon.microx.web.result.Tips;
 import com.leon.microx.web.result.Tuple;
 import com.leon.microx.web.swagger.ApiParamType;
@@ -15,7 +14,10 @@ import com.lhiot.oc.order.event.OrderFlowEvent;
 import com.lhiot.oc.order.feign.BaseServiceFeign;
 import com.lhiot.oc.order.feign.HaiDingService;
 import com.lhiot.oc.order.mapper.BaseOrderMapper;
-import com.lhiot.oc.order.model.*;
+import com.lhiot.oc.order.model.CreateOrderParam;
+import com.lhiot.oc.order.model.OrderDetailResult;
+import com.lhiot.oc.order.model.ReturnOrderParam;
+import com.lhiot.oc.order.model.Store;
 import com.lhiot.oc.order.service.OrderService;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -107,7 +109,7 @@ public class OrderApi {
     })
     @GetMapping("/user/{userId}")
     public ResponseEntity ordersByUserId(@PathVariable("userId") Long userId, @RequestParam(value = "orderType", required = false) String orderType) {
-        //TODO
+        //XXX 是否分页？
         List<OrderDetailResult> results = baseOrderMapper.selectListByUserIdAndOrderType(Maps.of("userId", userId, "orderType", orderType));
         return ResponseEntity.ok(CollectionUtils.isEmpty(results) ? Tuple.of(new ArrayList<>()) : Tuple.of(results));
     }
@@ -115,7 +117,7 @@ public class OrderApi {
     @ApiOperation(value = "修改订单状态", response = ResponseEntity.class)
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = ApiParamType.PATH, name = "orderCode", value = "订单Code", required = true, dataType = "String"),
-            @ApiImplicitParam(paramType = ApiParamType.QUERY, name = "orderStatus", value = "修改后订单状态", required = true, dataType = "OrderStatus")
+            @ApiImplicitParam(paramType = ApiParamType.QUERY, name = "orderStatus", value = "修改后订单状态", required = true, dataTypeClass = OrderStatus.class)
     })
     @PutMapping("/{orderCode}/status")
     public ResponseEntity cancelOrder(@PathVariable("orderCode") String orderCode, @RequestParam("orderStatus") OrderStatus orderStatus) {
@@ -177,6 +179,27 @@ public class OrderApi {
         return ResponseEntity.ok().build();
     }
 
+    @ApiOperation("海鼎备货退货处理")
+    @ApiImplicitParam(paramType = ApiParamType.PATH,name = "orderCode",value = "订单编号",dataType = "String",required = true)
+    @PutMapping("/{orderCode}/refund/disposal")
+    public ResponseEntity refundDispose(@PathVariable("orderCode") String orderCode) {
+        OrderDetailResult orderDetailResult = orderService.findByCode(orderCode);
+        if (Objects.isNull(orderDetailResult)) {
+            return ResponseEntity.badRequest().body("订单不存在！");
+        }
+        if (!Objects.equals(OrderStatus.RETURNING, orderDetailResult.getStatus())) {
+            log.info("status :{}" + orderDetailResult.getStatus());
+            return ResponseEntity.badRequest().body(orderDetailResult.getStatus() + "状态不可处理");
+        }
+        if (!orderService.disposeRefund(orderDetailResult.getId(),orderCode)) {
+            log.info("code : {}" + orderCode);
+            return ResponseEntity.badRequest().body("处理确认退货失败！");
+        }
+        this.publisher.publishEvent(
+                new OrderFlowEvent(orderDetailResult.getStatus(), OrderStatus.ALREADY_RETURN, orderDetailResult.getId())
+        );
+        return ResponseEntity.ok().build();
+    }
 
     @ApiOperation(value = "海鼎订单调货", response = ResponseEntity.class)
     @ApiImplicitParams({

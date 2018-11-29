@@ -31,8 +31,8 @@ public class BaseOrder {
     private Integer amountPayable;
     private Integer deliveryAmount;
     private Integer couponAmount;
-    private HdStatus hdStatus = HdStatus.NOT_SEND;
-    private OrderStatus status = OrderStatus.WAIT_PAYMENT;
+    private HdStatus hdStatus;
+    private OrderStatus status;
     private Date createAt = Date.from(Instant.now());
     @ApiModelProperty(notes = "收货人", dataType = "String")
     private String receiveUser;
@@ -51,5 +51,5 @@ public class BaseOrder {
     @ApiModelProperty(notes = "配送时间段", dataType = "String")
     private String deliverAt;
     @ApiModelProperty(notes = "是否允许退款YES是NO否", dataType = "AllowRefund")
-    private AllowRefund allowRefund = AllowRefund.YES;
+    private AllowRefund allowRefund;
 }

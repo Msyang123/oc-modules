@@ -45,4 +45,11 @@ public interface BaseOrderMapper {
     OrderDetailResult selectById(Long id);
 
     List<OrderDetailResult> selectListByUserIdAndOrderType(Map<String,Object> map);
+
+    /**
+     * 退货中订单处理
+     * @param map code 和状态
+     * @return int
+     */
+    int updateStatusByDisposeRefund(Map<String,Object> map);
 }

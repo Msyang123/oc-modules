@@ -15,7 +15,16 @@
 
     <update id="updateOrderStatusByCode" parameterType="com.lhiot.oc.order.entity.BaseOrder">
         update base_order set status = #{status}
+        <trim suffixOverrides=",">
+            <if test="hdStockAt != null"> ,hd_stock_at = #{hdStockAt}</if>
+            <if test="hdStatus != null">,hd_status = #{hdStatus}</if>
+        </trim>
         where order_code=#{code}
+    </update>
+
+    <update id="updateStatusByDisposeRefund" parameterType="map">
+        update base_order set status = #{status}
+        where order_code=#{code} and status = 'RETURNING'
     </update>
 
     <update id="updateHdOrderCodeById" parameterType="com.lhiot.oc.order.entity.BaseOrder">
@@ -46,7 +55,8 @@
         from base_order a
         left join order_product b on a.id = b.order_id
         left join order_store c on a.hd_order_code = c.hd_order_code
-        where a.user_id = #{userId} and a.order_type = #{orderType}
+        inner join (select id from base_order where user_id = #{userId} and order_type = #{orderType}) bo
+        where a.id = bo.id
     </select>
 
 

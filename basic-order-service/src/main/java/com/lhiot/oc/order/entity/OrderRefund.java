@@ -4,7 +4,6 @@ import com.lhiot.oc.order.entity.type.OrderRefundStatus;
 import com.lhiot.oc.order.entity.type.RefundType;
 import lombok.Data;
 
-import java.time.Instant;
 import java.util.Date;
 
 /**
@@ -20,6 +19,6 @@ public class OrderRefund {
     private String reason;
     private OrderRefundStatus refundStatus;
     private RefundType refundType;
-    private Date applyAt = Date.from(Instant.now());
+    private Date applyAt;
     private Date disposeAt;
 }
