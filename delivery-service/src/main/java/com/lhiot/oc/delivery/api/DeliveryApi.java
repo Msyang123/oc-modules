@@ -130,7 +130,7 @@ public class DeliveryApi {
         DeliverNote deliverNote = (DeliverNote) tips.getData();
         deliverNote.setId(deliverNoteId);
         deliveryService.saveDeliverNote(deliverOrder, deliverNote);
-        return ResponseEntity.created(URI.create("/delivery-notes/" + deliverNoteId)).body(Maps.of("id", deliverNoteId));
+        return ResponseEntity.created(URI.create("/" + type.name() + "/delivery-notes/" + deliverNoteId)).body(Id.of(deliverNoteId));
     }
 
     @PutMapping("/delivery-notes/{code}")
