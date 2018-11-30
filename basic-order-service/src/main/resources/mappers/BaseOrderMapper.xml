@@ -55,7 +55,8 @@
         from base_order a
         left join order_product b on a.id = b.order_id
         left join order_store c on a.hd_order_code = c.hd_order_code
-        inner join (select id from base_order where user_id = #{userId} and order_type = #{orderType}) bo
+        inner join (select id from base_order where user_id = #{userId}
+        <if test="orderType != null and orderType !=''">and order_type = #{orderType}</if>) bo
         where a.id = bo.id
     </select>
 

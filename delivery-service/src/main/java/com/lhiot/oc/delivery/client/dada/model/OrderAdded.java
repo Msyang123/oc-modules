@@ -15,7 +15,7 @@ public class OrderAdded {
     private Result result;
 
     @Data
-    private class Result {
+    public class Result {
         private double distance;
         private double fee;
         private double deliverFee;

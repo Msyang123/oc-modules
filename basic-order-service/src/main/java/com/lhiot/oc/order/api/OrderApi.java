@@ -1,5 +1,6 @@
 package com.lhiot.oc.order.api;
 
+import com.leon.microx.id.Generator;
 import com.leon.microx.probe.annotation.Sniffer;
 import com.leon.microx.probe.collector.ProbeEventPublisher;
 import com.leon.microx.probe.event.ProbeEvent;
@@ -18,6 +19,7 @@ import com.lhiot.oc.order.model.CreateOrderParam;
 import com.lhiot.oc.order.model.OrderDetailResult;
 import com.lhiot.oc.order.model.ReturnOrderParam;
 import com.lhiot.oc.order.model.Store;
+import com.lhiot.oc.order.model.type.ApplicationType;
 import com.lhiot.oc.order.service.OrderService;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -29,6 +31,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
@@ -46,6 +49,7 @@ import static com.lhiot.oc.order.entity.type.OrderStatus.WAIT_SEND_OUT;
 @Slf4j
 @RequestMapping("/orders")
 @Transactional
+@Validated
 public class OrderApi {
 
     private OrderService orderService;
@@ -55,10 +59,10 @@ public class OrderApi {
     private ApplicationEventPublisher publisher;
     private ProbeEventPublisher probeEventPublisher;
     private HaiDingService haiDingService;
-    private SnowflakeId snowflakeId;
+    private Generator<Long> generator;
     private static final String HD_CANCEL_ORDER_SUCCESS_RESULT_STRING = "{\"success\":true}";
 
-    public OrderApi(OrderService orderService, BaseOrderMapper baseOrderMapper, RedissonClient redissonClient, BaseServiceFeign baseServiceFeign, ApplicationEventPublisher publisher, ProbeEventPublisher probeEventPublisher, HaiDingService haiDingService, SnowflakeId snowflakeId) {
+    public OrderApi(OrderService orderService, BaseOrderMapper baseOrderMapper, RedissonClient redissonClient, BaseServiceFeign baseServiceFeign, ApplicationEventPublisher publisher, ProbeEventPublisher probeEventPublisher, HaiDingService haiDingService, Generator<Long> generator) {
         this.orderService = orderService;
         this.baseOrderMapper = baseOrderMapper;
         this.redissonClient = redissonClient;
@@ -66,7 +70,7 @@ public class OrderApi {
         this.publisher = publisher;
         this.probeEventPublisher = probeEventPublisher;
         this.haiDingService = haiDingService;
-        this.snowflakeId = snowflakeId;
+        this.generator = generator;
     }
 
     @PostMapping({"/", ""})
@@ -230,7 +234,7 @@ public class OrderApi {
         }
         Store storeInfo = Objects.requireNonNull((Store) response.getBody());
         //重新生成海鼎订单编号
-        String newHdOrderCode = snowflakeId.stringId();
+        String newHdOrderCode = generator.get(0, ApplicationType.ref(order.getApplicationType()));
         //发送海鼎
         Tips tips = orderService.hdReduce(order, storeInfo, newHdOrderCode);
         if (tips.err()) {
