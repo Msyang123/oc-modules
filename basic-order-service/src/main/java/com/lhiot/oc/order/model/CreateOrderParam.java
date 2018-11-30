@@ -2,6 +2,7 @@ package com.lhiot.oc.order.model;
 
 import com.leon.microx.util.BeanUtils;
 import com.lhiot.dc.dictionary.DictionaryClient;
+import com.lhiot.dc.dictionary.HasEntries;
 import com.lhiot.oc.order.entity.BaseOrder;
 import com.lhiot.oc.order.entity.OrderProduct;
 import com.lhiot.oc.order.entity.OrderStore;
@@ -20,8 +21,10 @@ public class CreateOrderParam {
 
     @ApiModelProperty(notes = "业务用户Id", dataType = "Long")
     private Long userId;
-    @ApiModelProperty(notes = "应用类型", dataType = "Long")
+    @HasEntries(from = "applications",message = "不存在该字典项")
+    @ApiModelProperty(notes = "应用类型", dataType = "String")
     private String applicationType;
+    @HasEntries(from = "orderTypes",message = "不存在该字典项")
     private String orderType;
     private ReceivingWay receivingWay;
     private Integer couponAmount = 0;

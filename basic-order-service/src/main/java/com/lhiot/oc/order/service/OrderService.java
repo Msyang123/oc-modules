@@ -1,5 +1,7 @@
 package com.lhiot.oc.order.service;
 
+import com.leon.microx.id.Generator;
+import com.leon.microx.id.Snowflake;
 import com.leon.microx.util.*;
 import com.leon.microx.web.result.Tips;
 import com.lhiot.dc.dictionary.DictionaryClient;
@@ -12,6 +14,7 @@ import com.lhiot.oc.order.event.OrderFlowEvent;
 import com.lhiot.oc.order.feign.HaiDingService;
 import com.lhiot.oc.order.mapper.*;
 import com.lhiot.oc.order.model.*;
+import com.lhiot.oc.order.model.type.ApplicationType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
@@ -40,18 +43,18 @@ public class OrderService {
     private OrderProductMapper orderProductMapper;
     private OrderStoreMapper orderStoreMapper;
     private OrderFlowMapper orderFlowMapper;
-    private SnowflakeId snowflakeId;
+    private Generator<Long> generator;
     private OrderRefundMapper orderRefundMapper;
     private ApplicationEventPublisher publisher;
     private DictionaryClient client;
     private HaiDingService haiDingService;
 
-    public OrderService(BaseOrderMapper baseOrderMapper, OrderProductMapper orderProductMapper, OrderStoreMapper orderStoreMapper, OrderFlowMapper orderFlowMapper, SnowflakeId snowflakeId, OrderRefundMapper orderRefundMapper, ApplicationEventPublisher publisher, DictionaryClient client, HaiDingService haiDingService) {
+    public OrderService(BaseOrderMapper baseOrderMapper, OrderProductMapper orderProductMapper, OrderStoreMapper orderStoreMapper, OrderFlowMapper orderFlowMapper, Generator<Long> generator, OrderRefundMapper orderRefundMapper, ApplicationEventPublisher publisher, DictionaryClient client, HaiDingService haiDingService) {
         this.baseOrderMapper = baseOrderMapper;
         this.orderProductMapper = orderProductMapper;
         this.orderStoreMapper = orderStoreMapper;
         this.orderFlowMapper = orderFlowMapper;
-        this.snowflakeId = snowflakeId;
+        this.generator = generator;
         this.orderRefundMapper = orderRefundMapper;
         this.publisher = publisher;
         this.client = client;
@@ -66,7 +69,7 @@ public class OrderService {
      */
     public OrderDetailResult createOrder(CreateOrderParam param) {
         BaseOrder baseOrder = param.toOrderObject();
-        String orderCode = snowflakeId.stringId();
+        String orderCode = generator.get(0, ApplicationType.ref(param.getApplicationType()));
         baseOrder.setCode(orderCode);
         baseOrder.setHdOrderCode(orderCode);
         baseOrder.setHdStatus(HdStatus.NOT_SEND);
@@ -99,10 +102,6 @@ public class OrderService {
      * @return Tips
      */
     public Tips validationParam(CreateOrderParam param) {
-        //验证订单类型 和 应用类型是否符合
-        if (!param.validateDictionary(client)) {
-            return Tips.warn("字典项不存在");
-        }
         //应付金额为空或者小于零
         if (param.getAmountPayable() < 0) {
             return Tips.warn("应付金额为空或者小于零");

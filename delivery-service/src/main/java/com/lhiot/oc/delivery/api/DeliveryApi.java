@@ -2,10 +2,7 @@ package com.lhiot.oc.delivery.api;
 
 import com.leon.microx.id.Generator;
 import com.leon.microx.predefine.Day;
-import com.leon.microx.util.DateTime;
-import com.leon.microx.util.Maps;
-import com.leon.microx.util.Position;
-import com.leon.microx.util.StringUtils;
+import com.leon.microx.util.*;
 import com.leon.microx.web.result.Id;
 import com.leon.microx.web.result.Tips;
 import com.leon.microx.web.swagger.ApiParamType;
@@ -41,12 +38,13 @@ public class DeliveryApi {
 
     private static final DateTimeFormatter MM_DD = DateTimeFormatter.ofPattern("MM-dd");
     private static final DateTimeFormatter FULL = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-    private final Generator<Long> snowflake;
+    private static final String NOT_FIND_DELIVERY_WAY_MESSAGE = "不支持的配送方式！";
+    private static final String NOT_FIND_DELIVERY_ORDER_MESSAGE = "未找到配送单！";
     private final DeliveryService deliveryService;
+    private final Generator<Long> generator;
 
-    public DeliveryApi(Generator<Long> snowflake, DeliveryService deliveryService) {
-        this.snowflake = snowflake;
+    public DeliveryApi( DeliveryService deliveryService, Generator<Long> generator) {
+        this.generator = generator;
         this.deliveryService = deliveryService;
     }
 
@@ -121,10 +119,10 @@ public class DeliveryApi {
         if (!optional.isPresent()) {
             return ResponseEntity.badRequest().body("查询门店信息失败！");
         }
-        long deliverNoteId = snowflake.get();
+        long deliverNoteId = generator.get();
         AdaptableClient adapter = deliveryService.adapt(type);
         if (Objects.isNull(adapter)) {
-            return ResponseEntity.badRequest().body("不支持的配送方式！");
+            return ResponseEntity.badRequest().body(NOT_FIND_DELIVERY_WAY_MESSAGE);
         }
         Tips tips = adapter.send(coordinate, optional.get(), deliverOrder, deliverNoteId);
         if (tips.err()) {
@@ -141,7 +139,7 @@ public class DeliveryApi {
     public ResponseEntity update(@PathVariable("code") String code, @RequestBody DeliverUpdate deliverUpdate) {
         DeliverNote deliverNote = deliveryService.deliverNote(code);
         if (Objects.isNull(deliverNote)) {
-            return ResponseEntity.badRequest().body("未找到配送单！");
+            return ResponseEntity.badRequest().body(NOT_FIND_DELIVERY_ORDER_MESSAGE);
         }
         deliveryService.updateDeliverNote(deliverNote, deliverUpdate);
         return ResponseEntity.ok().build();
@@ -152,11 +150,11 @@ public class DeliveryApi {
     public ResponseEntity cancel(@PathVariable("deliverType") DeliverType type, @PathVariable("hdOrderCode") String hdOrderCode, CancelReason reason) {
         DeliverNote deliverNote = deliveryService.deliverNote(hdOrderCode);
         if (Objects.isNull(deliverNote)) {
-            return ResponseEntity.badRequest().body("未找到配送单！");
+            return ResponseEntity.badRequest().body(NOT_FIND_DELIVERY_ORDER_MESSAGE);
         }
         AdaptableClient adapter = deliveryService.adapt(type);
         if (Objects.isNull(adapter)) {
-            return ResponseEntity.badRequest().body("不支持的配送方式！");
+            return ResponseEntity.badRequest().body(NOT_FIND_DELIVERY_WAY_MESSAGE);
         }
         Tips tips = adapter.cancel(deliverNote, reason);
         if (tips.err()) {
@@ -176,7 +174,7 @@ public class DeliveryApi {
     public ResponseEntity cancelReasons(@PathVariable("deliverType") DeliverType type) {
         AdaptableClient adapter = deliveryService.adapt(type);
         if (Objects.isNull(adapter)) {
-            return ResponseEntity.badRequest().body("不支持的配送方式！");
+            return ResponseEntity.badRequest().body(NOT_FIND_DELIVERY_WAY_MESSAGE);
         }
         Tips tips = adapter.cancelReasons();
         if (tips.err()) {
@@ -190,11 +188,11 @@ public class DeliveryApi {
     public ResponseEntity detail(@PathVariable("deliverType") DeliverType type, @PathVariable("code") String code) {
         DeliverNote deliverNote = deliveryService.deliverNote(code);
         if (Objects.isNull(deliverNote)) {
-            return ResponseEntity.badRequest().body("未找到配送单！");
+            return ResponseEntity.badRequest().body(NOT_FIND_DELIVERY_ORDER_MESSAGE);
         }
         AdaptableClient adapter = deliveryService.adapt(type);
         if (Objects.isNull(adapter)) {
-            return ResponseEntity.badRequest().body("不支持的配送方式！");
+            return ResponseEntity.badRequest().body(NOT_FIND_DELIVERY_WAY_MESSAGE);
         }
         Tips tips = adapter.deliverNoteDetail(deliverNote);
         if (tips.err()) {
@@ -208,7 +206,7 @@ public class DeliveryApi {
     public ResponseEntity backSignature(@PathVariable("deliverType") DeliverType type, @RequestBody Map<String, String> params) {
         AdaptableClient adapter = deliveryService.adapt(type);
         if (Objects.isNull(adapter)) {
-            return ResponseEntity.badRequest().body("不支持的配送方式！");
+            return ResponseEntity.badRequest().body(NOT_FIND_DELIVERY_WAY_MESSAGE);
         }
         Tips tips = adapter.backSignature(params);
         if (tips.err()) {
