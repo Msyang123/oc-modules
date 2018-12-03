@@ -109,12 +109,16 @@ public class OrderApi {
     @ApiOperation("根据用户Id获取订单列表")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = ApiParamType.PATH, name = "userId", value = "业务用户Id", dataType = "Long", required = true),
-            @ApiImplicitParam(paramType = ApiParamType.QUERY, name = "orderType", value = "订单类型", dataType = "String")
+            @ApiImplicitParam(paramType = ApiParamType.QUERY, name = "orderType", value = "订单类型", dataType = "String"),
+            @ApiImplicitParam(paramType = ApiParamType.QUERY, name = "orderStatus", value = "订单状态", dataTypeClass = OrderStatus.class)
     })
     @GetMapping("/user/{userId}")
-    public ResponseEntity ordersByUserId(@PathVariable("userId") Long userId, @RequestParam(value = "orderType", required = false) String orderType) {
+    public ResponseEntity ordersByUserId(
+            @PathVariable("userId") Long userId,
+            @RequestParam(value = "orderType", required = false) String orderType,
+            @RequestParam(value = "orderStatus", required = false) OrderStatus orderStatus) {
         //XXX 是否分页？
-        List<OrderDetailResult> results = baseOrderMapper.selectListByUserIdAndOrderType(Maps.of("userId", userId, "orderType", orderType));
+        List<OrderDetailResult> results = baseOrderMapper.selectListByUserIdAndParam(Maps.of("userId", userId, "orderType", orderType, "orderStatus", orderStatus != null ? orderStatus.toString() : null));
         return ResponseEntity.ok(CollectionUtils.isEmpty(results) ? Tuple.of(new ArrayList<>()) : Tuple.of(results));
     }
 
@@ -184,7 +188,7 @@ public class OrderApi {
     }
 
     @ApiOperation("海鼎备货退货处理")
-    @ApiImplicitParam(paramType = ApiParamType.PATH,name = "orderCode",value = "订单编号",dataType = "String",required = true)
+    @ApiImplicitParam(paramType = ApiParamType.PATH, name = "orderCode", value = "订单编号", dataType = "String", required = true)
     @PutMapping("/{orderCode}/refund/disposal")
     public ResponseEntity refundDispose(@PathVariable("orderCode") String orderCode) {
         OrderDetailResult orderDetailResult = orderService.findByCode(orderCode);
@@ -195,7 +199,7 @@ public class OrderApi {
             log.info("status :{}" + orderDetailResult.getStatus());
             return ResponseEntity.badRequest().body(orderDetailResult.getStatus() + "状态不可处理");
         }
-        if (!orderService.disposeRefund(orderDetailResult.getId(),orderCode)) {
+        if (!orderService.disposeRefund(orderDetailResult.getId(), orderCode)) {
             log.info("code : {}" + orderCode);
             return ResponseEntity.badRequest().body("处理确认退货失败！");
         }

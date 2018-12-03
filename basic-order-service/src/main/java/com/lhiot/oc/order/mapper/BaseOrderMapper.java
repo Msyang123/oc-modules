@@ -44,7 +44,7 @@ public interface BaseOrderMapper {
 
     OrderDetailResult selectById(Long id);
 
-    List<OrderDetailResult> selectListByUserIdAndOrderType(Map<String,Object> map);
+    List<OrderDetailResult> selectListByUserIdAndParam(Map<String,Object> map);
 
     /**
      * 退货中订单处理
