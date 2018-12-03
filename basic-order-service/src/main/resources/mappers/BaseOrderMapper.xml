@@ -45,7 +45,7 @@
         WHERE order_code = #{0}
     </select>
 
-    <select id="selectListByUserIdAndOrderType" resultMap="orderDetails" parameterType="map">
+    <select id="selectListByUserIdAndParam" resultMap="orderDetails" parameterType="map">
         select a.id, order_code as code, application_type, user_id, order_type, nickname, total_amount, delivery_amount, coupon_amount,
             amount_payable, receiving_way, status, receive_user, contact_phone, address, hd_status, remark, delivery_end_at, hd_stock_at,
             a.hd_order_code, deliver_at, allow_refund, a.create_at,
@@ -56,7 +56,9 @@
         left join order_product b on a.id = b.order_id
         left join order_store c on a.hd_order_code = c.hd_order_code
         inner join (select id from base_order where user_id = #{userId}
-        <if test="orderType != null and orderType !=''">and order_type = #{orderType}</if>) bo
+        <if test="orderType != null and orderType !=''">and order_type = #{orderType}</if>
+        <if test="orderStatus != null and orderStatus !=''">and status = #{orderStatus}</if>
+        ) bo
         where a.id = bo.id
     </select>
 
