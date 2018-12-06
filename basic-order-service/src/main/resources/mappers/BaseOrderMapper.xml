@@ -3,28 +3,14 @@
 <mapper namespace="com.lhiot.oc.order.mapper.BaseOrderMapper">
     <insert id="insert" parameterType="com.lhiot.oc.order.entity.BaseOrder" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO base_order (order_code,application_type,user_id,nickname,total_amount,delivery_amount,coupon_amount,amount_payable,receiving_way,status
-        ,receive_user,contact_phone,address,hd_status,remark,delivery_end_at,hd_order_code,deliver_at,allow_refund,create_at,order_type)
+        ,receive_user,contact_phone,address,remark,delivery_end_at,hd_order_code,deliver_at,allow_refund,create_at,order_type)
         VALUE (#{code},#{applicationType},#{userId},#{nickname},#{totalAmount},#{deliveryAmount},#{couponAmount},#{amountPayable},#{receivingWay},#{status}
-        ,#{receiveUser},#{contactPhone},#{address},#{hdStatus},#{remark},#{deliveryEndAt},#{hdOrderCode},#{deliverAt},#{allowRefund},#{createAt},#{orderType})
+        ,#{receiveUser},#{contactPhone},#{address},#{remark},#{deliveryEndAt},#{hdOrderCode},#{deliverAt},#{allowRefund},#{createAt},#{orderType})
     </insert>
 
     <update id="updateOrderStatusById" parameterType="com.lhiot.oc.order.entity.BaseOrder">
         update base_order set status = #{status}
         where id=#{id}
-    </update>
-
-    <update id="updateOrderStatusByCode" parameterType="com.lhiot.oc.order.entity.BaseOrder">
-        update base_order set status = #{status}
-        <trim suffixOverrides=",">
-            <if test="hdStockAt != null"> ,hd_stock_at = #{hdStockAt}</if>
-            <if test="hdStatus != null">,hd_status = #{hdStatus}</if>
-        </trim>
-        where order_code=#{code}
-    </update>
-
-    <update id="updateStatusByDisposeRefund" parameterType="map">
-        update base_order set status = #{status}
-        where order_code=#{code} and status = 'RETURNING'
     </update>
 
     <update id="updateHdOrderCodeById" parameterType="com.lhiot.oc.order.entity.BaseOrder">
@@ -47,7 +33,7 @@
 
     <select id="selectListByUserIdAndParam" resultMap="orderDetails" parameterType="map">
         select a.id, order_code as code, application_type, user_id, order_type, nickname, total_amount, delivery_amount, coupon_amount,
-            amount_payable, receiving_way, status, receive_user, contact_phone, address, hd_status, remark, delivery_end_at, hd_stock_at,
+            amount_payable, receiving_way, status, receive_user, contact_phone, address, remark, delivery_end_at, hd_stock_at,
             a.hd_order_code, deliver_at, allow_refund, a.create_at,
             b.id as opid,b.order_id,b.barcode,b.total_price,b.product_name,b.specification_id,b.product_qty,b.shelf_qty,b.refund_status,b.discount_price,
             b.image,b.total_weight,b.shelf_id,
@@ -80,14 +66,14 @@
             receive_user,
             contact_phone,
             address,
-            hd_status,
             remark,
             delivery_end_at,
             hd_stock_at,
             hd_order_code,
             deliver_at,
             allow_refund,
-            create_at
+            create_at,
+            pay_id
         </trim>
     </sql>
 
@@ -107,7 +93,6 @@
         <result column="receive_user" property="receiveUser" />
         <result column="contact_phone" property="contactPhone" />
         <result column="address" property="address" />
-        <result column="hd_status" property="hdStatus" />
         <result column="remark" property="remark" />
         <result column="delivery_end_at" property="deliveryEndAt" />
         <result column="hd_stock_at" property="hdStockAt" />
@@ -136,4 +121,21 @@
             <result column="shelf_id" property="shelfId" />
         </collection>
     </resultMap>
+
+    <update id="updateStatusByCode" parameterType="map">
+        update base_order set status = #{modifyStatus}
+        <trim suffixOverrides=",">
+            <if test="hdStockAt != null"> ,hd_stock_at = #{hdStockAt}</if>
+            <if test="payId != null and payId !=''">,pay_id = #{payId}</if>
+        </trim>
+        where
+          <if test="nowStatus != null"> status = #{nowStatus}</if>
+          <if test="nowStatus == null">(status = 'SEND_OUTING' or status = 'DISPATCHING')</if>
+        and order_code = #{orderCode}
+    </update>
+
+    <update id="updateStatusToReturning" parameterType="String">
+        update base_order set status = 'RETURNING'
+        where (status = 'WAIT_DISPATCHING' or status = 'RECEIVED') AND order_code = #{0}
+    </update>
 </mapper>

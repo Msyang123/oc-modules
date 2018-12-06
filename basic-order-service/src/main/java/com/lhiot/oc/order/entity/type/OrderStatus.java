@@ -7,8 +7,9 @@ import lombok.Getter;
  */
 public enum OrderStatus {
     WAIT_PAYMENT("待支付"),
-    WAIT_SEND_OUT("待发货"),
-    SEND_OUT("已发货"),
+    WAIT_SEND_OUT("待出库"),
+    SEND_OUTING("出库中"),
+    WAIT_DISPATCHING("待配送"),
     DISPATCHING("配送中"),
     RECEIVED("已收货"),
     RETURNING("退货中"),

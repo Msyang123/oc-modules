@@ -64,21 +64,4 @@ public class CreateOrderParam {
         BeanUtils.of(baseOrder).populate(BeanUtils.of(this).toMap());
         return baseOrder;
     }
-
-    /**
-     * 验证入参数据字典
-     *
-     * @return Tips
-     */
-    public boolean validateDictionary(DictionaryClient client) {
-        boolean hasApplicationType = client.dictionary("applications")
-                .map(dictionary -> dictionary.hasEntry(this.applicationType))
-                .orElse(false);
-
-        boolean hasOrderType = client.dictionary("orderTypes")
-                .map(dictionary -> dictionary.hasEntry(this.orderType))
-                .orElse(false);
-
-        return hasApplicationType && hasOrderType;
-    }
 }

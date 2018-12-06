@@ -1,7 +1,7 @@
 package com.lhiot.oc.order.entity;
 
-import com.lhiot.oc.order.model.common.PagerRequestObject;
 import com.lhiot.oc.order.entity.type.OrderStatus;
+import com.lhiot.oc.order.model.common.PagerRequestObject;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

@@ -20,4 +20,10 @@ public class ReturnOrderParam {
 
     @ApiModelProperty(notes = "订单商品主键ID（一个或者多个）多个以,分割", dataType = "String")
     private String orderProductIds;
+
+    @ApiModelProperty(notes = "退款回调地址",dataType = "String")
+    private String notifyUrl;
+
+    @ApiModelProperty(notes = "退款金额",dataType = "Integer")
+    private Integer fee;
 }
