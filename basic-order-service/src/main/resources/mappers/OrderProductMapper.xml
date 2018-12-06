@@ -31,10 +31,13 @@
 
     <update id="updateOrderProductByIds" parameterType="map">
         UPDATE order_product SET refund_status = #{refundStatus}
-        WHERE order_id = #{orderId} AND id IN
+        WHERE order_id = #{orderId}
+        <if test="orderProductIds != null">
+        AND id IN
         <foreach collection="orderProductIds" item="item" separator="," close=")" open="(">
             #{item}
         </foreach>
+        </if>
     </update>
 
     <sql id="columns">

@@ -34,12 +34,10 @@ public class OrderDetailResult {
     private Integer deliveryAmount;
     @ApiModelProperty(notes = "优惠金额", dataType = "Integer")
     private Integer couponAmount;
-    @ApiModelProperty(notes = "海鼎状态", dataType = "HdStatus")
-    private HdStatus hdStatus = HdStatus.NOT_SEND;
     @ApiModelProperty(notes = "海鼎备货时间",dataType = "Date")
     private Date hdStockAt;
     @ApiModelProperty(notes = "订单状态", dataType = "OrderStatus")
-    private OrderStatus status = OrderStatus.WAIT_PAYMENT;
+    private OrderStatus status;
     @ApiModelProperty(notes = "收货人", dataType = "String")
     private String receiveUser;
     @ApiModelProperty(notes = "收货人联系方式", dataType = "String")
@@ -60,6 +58,8 @@ public class OrderDetailResult {
     private AllowRefund allowRefund = AllowRefund.YES;
     @ApiModelProperty(notes = "订单创建时间",dataType = "Date")
     private Date createAt;
+    @ApiModelProperty(notes = "支付Id",dataType = "String")
+    private String payId;
     @ApiModelProperty(notes = "订单商品", dataType = "java.util.list")
     private List<OrderProduct> orderProductList;
     @ApiModelProperty(notes = "订单门店信息", dataType = "OrderStore")

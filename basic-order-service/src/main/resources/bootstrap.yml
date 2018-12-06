@@ -2,7 +2,7 @@ server:
   port: 8111
 spring:
   application:
-    name: base-order-service-v1-0
+    name: base-order-service-v1-0-ZF
   cloud:
     config:
       name: base-order-service-v1-0, rabbit-mq, application, redisson

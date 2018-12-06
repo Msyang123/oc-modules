@@ -3,7 +3,6 @@ package com.lhiot.oc.order.entity;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.lhiot.oc.order.entity.type.AllowRefund;
-import com.lhiot.oc.order.entity.type.HdStatus;
 import com.lhiot.oc.order.entity.type.OrderStatus;
 import com.lhiot.oc.order.entity.type.ReceivingWay;
 import io.swagger.annotations.ApiModel;
@@ -31,7 +30,6 @@ public class BaseOrder {
     private Integer amountPayable;
     private Integer deliveryAmount;
     private Integer couponAmount;
-    private HdStatus hdStatus;
     private OrderStatus status;
     private Date createAt = Date.from(Instant.now());
     @ApiModelProperty(notes = "收货人", dataType = "String")
