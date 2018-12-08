@@ -3,6 +3,7 @@ package com.lhiot.oc.order.service;
 import com.leon.microx.id.Generator;
 import com.leon.microx.openfeign.CustomFeignException;
 import com.leon.microx.util.*;
+import com.leon.microx.web.result.Pages;
 import com.leon.microx.web.result.Tips;
 import com.lhiot.oc.order.entity.BaseOrder;
 import com.lhiot.oc.order.entity.OrderProduct;
@@ -370,4 +371,18 @@ public class OrderService {
             searchBaseOrderInfo.setOrderFlowList(orderFlowMapper.selectFlowByOrderId(searchBaseOrderInfo.getId()));
         }
     }
+
+    /**
+     * 查询订单列表
+     *
+     * @param param 参数
+     * @return 分页订单数据
+     */
+    public Pages<OrderDetailResult> findList(BaseOrderParam param) {
+        List<OrderDetailResult> list = baseOrderMapper.findList(param);
+        boolean pageFlag = Objects.nonNull(param.getPage()) && Objects.nonNull(param.getRows()) && param.getPage() > 0 && param.getRows() > 0;
+        int total = pageFlag ? baseOrderMapper.findCount(param) : list.size();
+        return Pages.of(total, list);
+    }
+
 }
