@@ -5,6 +5,7 @@ import com.leon.microx.probe.annotation.Sniffer;
 import com.leon.microx.probe.collector.ProbeEventPublisher;
 import com.leon.microx.probe.event.ProbeEvent;
 import com.leon.microx.util.Maps;
+import com.leon.microx.web.result.Pages;
 import com.leon.microx.web.result.Tips;
 import com.leon.microx.web.result.Tuple;
 import com.leon.microx.web.swagger.ApiParamType;
@@ -14,10 +15,7 @@ import com.lhiot.oc.order.feign.BaseServiceFeign;
 import com.lhiot.oc.order.feign.HaiDingService;
 import com.lhiot.oc.order.feign.Payed;
 import com.lhiot.oc.order.mapper.BaseOrderMapper;
-import com.lhiot.oc.order.model.CreateOrderParam;
-import com.lhiot.oc.order.model.DeliverParam;
-import com.lhiot.oc.order.model.OrderDetailResult;
-import com.lhiot.oc.order.model.Store;
+import com.lhiot.oc.order.model.*;
 import com.lhiot.oc.order.model.type.ApplicationType;
 import com.lhiot.oc.order.service.OrderService;
 import io.swagger.annotations.ApiImplicitParam;
@@ -225,4 +223,16 @@ public class OrderApi {
         List<OrderDetailResult> results = baseOrderMapper.selectListByUserIdAndParam(Maps.of("userId", userId, "orderType", orderType, "orderStatus", orderStatus != null ? orderStatus.toString() : null));
         return ResponseEntity.ok(CollectionUtils.isEmpty(results) ? Tuple.of(new ArrayList<>()) : Tuple.of(results));
     }
+
+    @ApiOperation(value = "根据条件分页获取订单列表", response = OrderDetailResult.class, responseContainer = "Set")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = ApiParamType.BODY, name = "param", value = "查询条件", dataType = "BaseOrderParam")
+    })
+    @PostMapping("/pages")
+    public ResponseEntity search(@RequestBody BaseOrderParam param) {
+        log.debug("获取订单列表\t param:{}", param);
+        Pages<OrderDetailResult> pages = orderService.findList(param);
+        return ResponseEntity.ok(pages);
+    }
+
 }

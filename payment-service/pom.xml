@@ -59,17 +59,16 @@
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
         </dependency>
-        <!--alipay-->
+        <!--dictionary-->
         <dependency>
-            <groupId>com.alipay</groupId>
-            <artifactId>alipay-sdk-java</artifactId>
+            <groupId>com.lhiot.dc</groupId>
+            <artifactId>dictionary-client</artifactId>
             <version>1.0</version>
         </dependency>
-        <!--httpClient-->
+        <!--payment-sdk-->
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.2</version>
+            <groupId>com.leon.microx.common</groupId>
+            <artifactId>microx-pay-core</artifactId>
         </dependency>
     </dependencies>
 
