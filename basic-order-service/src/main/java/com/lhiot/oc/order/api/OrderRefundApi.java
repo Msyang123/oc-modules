@@ -41,7 +41,7 @@ public class OrderRefundApi {
     @PutMapping("orders/{orderCode}/not-send-hd/refund")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = ApiParamType.PATH, name = "orderCode", value = "订单编号", dataType = "String", required = true),
-            @ApiImplicitParam(paramType = ApiParamType.BODY, name = "param", value = "退款传入参数", dataTypeClass = ReturnOrderParam.class)
+            @ApiImplicitParam(paramType = ApiParamType.BODY, name = "param", value = "退款传入参数", dataType =  "ReturnOrderParam")
     })
     @ApiHideBodyProperty("orderProductIds")
     @DistributedLock(name = "'order-flow-lock-' + #orderCode")
@@ -62,7 +62,7 @@ public class OrderRefundApi {
     @ApiOperation("订单发送海鼎，未备货退货")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = ApiParamType.PATH, name = "orderCode", value = "订单编号", dataType = "String", required = true),
-            @ApiImplicitParam(paramType = ApiParamType.BODY, name = "param", value = "退款传入参数", dataTypeClass = ReturnOrderParam.class)
+            @ApiImplicitParam(paramType = ApiParamType.BODY, name = "param", value = "退款传入参数", dataType = "ReturnOrderParam")
     })
     @PutMapping("orders/{orderCode}/send-hd/refund")
     @DistributedLock(name = "'order-flow-lock-' + #orderCode")
@@ -83,7 +83,7 @@ public class OrderRefundApi {
     @ApiOperation("海鼎备货后提交退货")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = ApiParamType.PATH, name = "orderCode", value = "订单编号", dataType = "String", required = true),
-            @ApiImplicitParam(paramType = ApiParamType.BODY, name = "param", value = "退款传入参数", dataTypeClass = ReturnOrderParam.class)
+            @ApiImplicitParam(paramType = ApiParamType.BODY, name = "param", value = "退款传入参数", dataType="ReturnOrderParam")
     })
     @ApiHideBodyProperty({"notifyUrl", "fee"})
     @PutMapping("orders/{orderCode}/returns")
@@ -105,7 +105,7 @@ public class OrderRefundApi {
     @ApiOperation("备货退货，确认收到货，进行退款")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = ApiParamType.PATH, name = "orderCode", value = "订单编号", dataType = "String", required = true),
-            @ApiImplicitParam(paramType = ApiParamType.BODY, name = "param", value = "退款传入参数", dataTypeClass = ReturnOrderParam.class)
+            @ApiImplicitParam(paramType = ApiParamType.BODY, name = "param", value = "退款传入参数",dataType ="ReturnOrderParam" ,dataTypeClass = ReturnOrderParam.class)
     })
     @ApiHideBodyProperty({"notifyUrl", "fee"})
     @PutMapping("orders/{orderCode}/refund")
