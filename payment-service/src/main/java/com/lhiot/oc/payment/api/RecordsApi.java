@@ -2,7 +2,7 @@ package com.lhiot.oc.payment.api;
 
 import com.leon.microx.web.swagger.ApiParamType;
 import com.lhiot.oc.payment.entity.Record;
-import com.lhiot.oc.payment.model.PayedModel;
+import com.lhiot.oc.payment.model.PaidModel;
 import com.lhiot.oc.payment.service.PaymentService;
 import com.lhiot.oc.payment.type.PayStep;
 import io.swagger.annotations.Api;
@@ -43,10 +43,16 @@ public class RecordsApi {
         return ResponseEntity.ok().body(service.myRecords(userId, page, rows, step));
     }
 
-    @PutMapping("/records/{outTradeNo}/completed")
     @ApiOperation("修改支付单为完成状态")
-    public ResponseEntity completed(@PathVariable("outTradeNo") Long outTradeNo, @Valid @RequestBody PayedModel payed) {
-        boolean updated = service.completed(outTradeNo, payed);
+    @PutMapping("/records/{outTradeNo}/completed")
+    public ResponseEntity completed(@PathVariable("outTradeNo") Long outTradeNo, @Valid @RequestBody PaidModel paid) {
+        boolean updated = service.completed(outTradeNo, paid);
         return updated ? ResponseEntity.ok().build() : ResponseEntity.badRequest().body("修改失败");
+    }
+
+    @GetMapping("/records/{outTradeNo}")
+    @ApiOperation("按支付单号查询一个支付记录")
+    public ResponseEntity one(@Valid @PathVariable("outTradeNo") Long outTradeNo) {
+        return ResponseEntity.ok(service.record(outTradeNo));
     }
 }

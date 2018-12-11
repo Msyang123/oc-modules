@@ -11,10 +11,9 @@ import com.lhiot.oc.payment.feign.*;
 import com.lhiot.oc.payment.mapper.RecordMapper;
 import com.lhiot.oc.payment.model.AliPayModel;
 import com.lhiot.oc.payment.model.BalancePayModel;
-import com.lhiot.oc.payment.model.PayedModel;
+import com.lhiot.oc.payment.model.PaidModel;
 import com.lhiot.oc.payment.model.WxPayModel;
 import com.lhiot.oc.payment.type.PayStep;
-import com.lhiot.oc.payment.type.SourceType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,17 +35,20 @@ public class PaymentService {
 
     private BaseDataService dataService;
 
+    private BaseUserService userService;
+
     private RecordMapper recordMapper;
 
     private Generator<Long> idGenerator;
 
-    private BaseUserService userService;
+    private PaymentTimeout timeout;
 
-    public PaymentService(BaseDataService dataService, RecordMapper recordMapper, Generator<Long> idGenerator, BaseUserService userService) {
+    public PaymentService(BaseDataService dataService, RecordMapper recordMapper, Generator<Long> idGenerator, BaseUserService userService, PaymentTimeout timeout) {
         this.dataService = dataService;
         this.recordMapper = recordMapper;
         this.idGenerator = idGenerator;
         this.userService = userService;
+        this.timeout = timeout;
     }
 
     public PaymentConfig findPaymentConfig(String configName) {
@@ -78,7 +80,7 @@ public class PaymentService {
         Record record = Record.from(idGenerator.get(), payUser, balancePay);
         record.setOrderCode(balancePay.getOrderCode());
         record.setSignAt(null);             // 余额支付时，签名时间为空
-        record.setPayStep(PayStep.PAYED);   // 余额支付直接为支付完成状态
+        record.setPayStep(PayStep.PAID);   // 余额支付直接为支付完成状态
         record.setTradeType(TradeType.OTHER_PAY);
         record.setPayAt(Date.from(Instant.now()));
         if (recordMapper.insert(record) == 1) {
@@ -87,8 +89,8 @@ public class PaymentService {
             balance.setApplicationType(balancePay.getApplicationType());
             balance.setOperation(Balance.Operation.SUBTRACT);
             balance.setPassword(balancePay.getPassword());
-            balance.setSourceId(balancePay.getOrderCode());
-            balance.setSourceType(SourceType.ORDER.name());
+            balance.setSourceId(String.valueOf(record.getId()));
+            balance.setMemo("订单余额支付");
             ResponseEntity response = userService.updateBalance(balancePay.getUserId(), balance);
             if (response.getStatusCode().isError()) {
                 throw new ServiceException("扣除用户鲜果币失败");
@@ -135,6 +137,7 @@ public class PaymentService {
         if (recordMapper.insert(record) < 1) {
             throw new ServiceException("创建支付记录失败");
         }
+        timeout.delay(record.getId(), DEFAULT_SIGN_TTL - 1); // 发延时队列，检查超时
         return SignAttrs.builder()
                 .outTradeNo(String.valueOf(record.getId()))
                 .title(record.getMemo())
@@ -165,15 +168,19 @@ public class PaymentService {
         return recordMapper.one(id);
     }
 
-    public boolean completed(Long outTradeNo, PayedModel payed) {
+    public boolean completed(Long outTradeNo, PaidModel paid) {
         return recordMapper.completed(
                 Maps.of(
                         "id", outTradeNo,
-                        "tradeId", payed.getTradeId(),
-                        "bankType", payed.getBankType(),
-                        "payAt", payed.getPayAt(),
-                        "payStep", PayStep.PAYED
+                        "tradeId", paid.getTradeId(),
+                        "bankType", paid.getBankType(),
+                        "payAt", paid.getPayAt(),
+                        "payStep", PayStep.PAID
                 )
         ) == 1;
+    }
+
+    public boolean timeout(Long id) {
+        return recordMapper.timeout(id) == 1;
     }
 }

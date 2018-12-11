@@ -8,6 +8,8 @@ public enum SourceType {
 
     ORDER("订单"),
 
+    CUSTOM_PLAN("定制计划"),
+
     ACTIVITY("活动");
 
     @Getter

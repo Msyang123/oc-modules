@@ -54,7 +54,7 @@ public class AntFinancialApi {
                 .orElse(ResponseEntity.badRequest().body("签名失败"));
     }
 
-    @PostMapping("/payed/{outTradeNo}/verification")
+    @PostMapping("/paid/{outTradeNo}/verification")
     @ApiOperation(value = "支付完成 - 验签", notes = "第三方回调参数请解析为Map后原样传递到此接口完成签名校验")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = ApiParamType.PATH, name = "outTradeNo", value = "支付ID", dataType = "Long", required = true),
@@ -65,7 +65,7 @@ public class AntFinancialApi {
         if (Objects.isNull(record)) {
             return ResponseEntity.badRequest().body("支付单号错误！验签失败。");
         }
-        if (Objects.equals(PayStep.PAYED, record.getPayStep())) {
+        if (Objects.equals(PayStep.PAID, record.getPayStep())) {
             return ResponseEntity.badRequest().body("支付订单为完成状态，请勿重复操作。");
         }
         PaymentConfig config = service.findPaymentConfig(record.getConfigName());
@@ -79,7 +79,7 @@ public class AntFinancialApi {
                 : ResponseEntity.badRequest().body("验签失败！");
     }
 
-    @DeleteMapping("/payed/{outTradeNo}")
+    @DeleteMapping("/paid/{outTradeNo}")
     @ApiOperation(value = "支付完成 - 撤销支付", notes = "【】一般用于回调异常】 如果已支付成功，则第三方自动退款，如果未支付，则第三方取消本次支付。")
     @ApiImplicitParam(paramType = ApiParamType.PATH, name = "outTradeNo", value = "支付ID", dataType = "Long", required = true)
     public ResponseEntity cancel(@PathVariable("outTradeNo") Long outTradeNo) {

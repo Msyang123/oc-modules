@@ -5,6 +5,5 @@ package com.lhiot.oc.payment.type;
  */
 public enum PayStep {
     SIGN,
-    PAYED,
-    REFUND
+    PAID
 }

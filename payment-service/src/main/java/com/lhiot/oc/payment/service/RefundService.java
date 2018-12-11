@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 
 @Service
 @Transactional
@@ -45,8 +46,8 @@ public class RefundService {
         balance.setMoney(refund.getFee());
         balance.setApplicationType(record.getApplicationType());
         balance.setOperation(Balance.Operation.ADD);
-        balance.setSourceId(record.getOrderCode());
-        balance.setSourceType(SourceType.ORDER.name()); // 充值不给退款！！
+        balance.setSourceId(String.valueOf(record.getId()));
+        balance.setMemo("订单退款");
         ResponseEntity response = userService.updateBalance(record.getUserId(), balance);
         return response.getStatusCode().is2xxSuccessful();
     }
@@ -72,5 +73,9 @@ public class RefundService {
                 "step", RefundStep.COMPLETED,
                 "completedAt", Date.from(Instant.now())
         )) == 1;
+    }
+
+    public List<Refund> findByRecordId(Long outTradeNo) {
+        return refundMapper.selectByRecordId(outTradeNo);
     }
 }

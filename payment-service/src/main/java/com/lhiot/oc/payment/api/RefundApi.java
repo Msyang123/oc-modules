@@ -42,7 +42,7 @@ public class RefundApi {
         this.resourceLoader = resourceLoader;
     }
 
-    @PostMapping("/payed/{outTradeNo}/refunds")
+    @PostMapping("/paid/{outTradeNo}/refunds")
     @ApiOperation("支付 - 退款（支持部分、多次退款）")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = ApiParamType.PATH, name = "outTradeNo", value = "支付ID", dataType = "Long", required = true),
@@ -54,7 +54,7 @@ public class RefundApi {
             return ResponseEntity.badRequest().body("支付单号错误！退款失败。");
         }
 
-        if (!record.getPayStep().equals(PayStep.PAYED)) {
+        if (!record.getPayStep().equals(PayStep.PAID)) {
             return ResponseEntity.badRequest().body("第三方尚未通知完成支付，请稍后再尝试。");
         }
 
@@ -100,6 +100,12 @@ public class RefundApi {
     public ResponseEntity completed(@PathVariable("refundId") Long refundId) {
         boolean updated = refundService.refundCompleted(refundId);
         return updated ? ResponseEntity.ok().build() : ResponseEntity.badRequest().body("修改失败");
+    }
+
+    @GetMapping("/paid/{outTradeNo}/refunds")
+    @ApiOperation("按支付单号查询退款记录列表")
+    public ResponseEntity refunds(@Valid @PathVariable("outTradeNo") Long outTradeNo) {
+        return ResponseEntity.ok(refundService.findByRecordId(outTradeNo));
     }
 
     // 微信有密退款 - 读取pkcs12文件
