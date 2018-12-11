@@ -28,7 +28,7 @@ public class TimeoutConsumer {
 
     @RabbitHandler
     @Transactional
-    @RabbitListener(queues = PaymentTimeout.DEFAULT_PAY_TIMEOUT_DLX_RECEIVE_NAME)
+    @RabbitListener(queues = PaymentService.DEFAULT_PAY_TIMEOUT_DLX_RECEIVE_NAME)
     public void timeout(String outTradeId) {
         Record record = service.record(Long.valueOf(outTradeId));
         if (Objects.isNull(record)) {
