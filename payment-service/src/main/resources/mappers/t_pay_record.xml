@@ -3,7 +3,7 @@
 <mapper namespace="com.lhiot.oc.payment.mapper.RecordMapper">
 
     <update id="completed" parameterType="map">
-        update t_pay_record set trade_id = #{tradeId}, bank_type = #{bankType}, pay_at = #{payAt}, pay_step = #{payStep} where id = #{id}
+        update t_pay_record set trade_id = #{tradeId}, bank_type = #{bankType}, pay_at = #{payAt}, pay_step = #{payStep} where id = #{id} and pay_step = 'SIGN'
     </update>
 
     <select id="count" parameterType="map" resultType="long">

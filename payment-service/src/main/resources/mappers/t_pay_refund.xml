@@ -7,7 +7,7 @@
     </select>
 
     <update id="completed" parameterType="map">
-        update t_pay_refund set refund_step = #{step}, completed_at = #{completedAt} where id = #{id}
+        update t_pay_refund set refund_step = #{step}, completed_at = #{completedAt} where id = #{id} and refund_step = 'SENT'
     </update>
 
     <select id="historicalAmount" parameterType="long" resultType="long">
