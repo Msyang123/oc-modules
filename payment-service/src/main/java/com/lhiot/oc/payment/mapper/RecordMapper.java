@@ -22,4 +22,6 @@ public interface RecordMapper {
     int count(Map<String, Object> param);
 
     int completed(Map<String,Object> map);
+
+    int timeout(Long id);
 }

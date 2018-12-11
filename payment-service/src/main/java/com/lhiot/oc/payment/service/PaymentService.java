@@ -35,17 +35,20 @@ public class PaymentService {
 
     private BaseDataService dataService;
 
+    private BaseUserService userService;
+
     private RecordMapper recordMapper;
 
     private Generator<Long> idGenerator;
 
-    private BaseUserService userService;
+    private PaymentTimeout timeout;
 
-    public PaymentService(BaseDataService dataService, RecordMapper recordMapper, Generator<Long> idGenerator, BaseUserService userService) {
+    public PaymentService(BaseDataService dataService, RecordMapper recordMapper, Generator<Long> idGenerator, BaseUserService userService, PaymentTimeout timeout) {
         this.dataService = dataService;
         this.recordMapper = recordMapper;
         this.idGenerator = idGenerator;
         this.userService = userService;
+        this.timeout = timeout;
     }
 
     public PaymentConfig findPaymentConfig(String configName) {
@@ -134,6 +137,7 @@ public class PaymentService {
         if (recordMapper.insert(record) < 1) {
             throw new ServiceException("创建支付记录失败");
         }
+        timeout.delay(record.getId(), DEFAULT_SIGN_TTL - 1); // 发延时队列，检查超时
         return SignAttrs.builder()
                 .outTradeNo(String.valueOf(record.getId()))
                 .title(record.getMemo())
@@ -174,5 +178,9 @@ public class PaymentService {
                         "payStep", PayStep.PAID
                 )
         ) == 1;
+    }
+
+    public boolean timeout(Long id) {
+        return recordMapper.timeout(id) == 1;
     }
 }
