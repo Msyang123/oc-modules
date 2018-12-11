@@ -2,6 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.lhiot.oc.payment.mapper.RefundMapper">
 
+    <select id="selectByRecordId" parameterType="long" resultType="com.lhiot.oc.payment.entity.Refund">
+        select * from t_pay_refund where record_id = #{0}
+    </select>
+
     <update id="completed" parameterType="map">
         update t_pay_refund set refund_step = #{step}, completed_at = #{completedAt} where id = #{id}
     </update>

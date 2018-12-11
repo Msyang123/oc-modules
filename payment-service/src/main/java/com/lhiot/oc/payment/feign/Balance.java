@@ -16,7 +16,7 @@ public class Balance {
 
     private Operation operation;
 
-    private String sourceType;
+    private String memo;
 
     private String sourceId;
 
