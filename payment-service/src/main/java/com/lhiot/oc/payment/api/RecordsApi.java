@@ -43,10 +43,16 @@ public class RecordsApi {
         return ResponseEntity.ok().body(service.myRecords(userId, page, rows, step));
     }
 
-    @PutMapping("/records/{outTradeNo}/completed")
     @ApiOperation("修改支付单为完成状态")
+    @PutMapping("/records/{outTradeNo}/completed")
     public ResponseEntity completed(@PathVariable("outTradeNo") Long outTradeNo, @Valid @RequestBody PayedModel payed) {
         boolean updated = service.completed(outTradeNo, payed);
         return updated ? ResponseEntity.ok().build() : ResponseEntity.badRequest().body("修改失败");
+    }
+
+    @GetMapping("/records/{outTradeNo}")
+    @ApiOperation("按支付单号查询一个支付记录")
+    public ResponseEntity one(@Valid @PathVariable("outTradeNo") Long outTradeNo) {
+        return ResponseEntity.ok(service.record(outTradeNo));
     }
 }
