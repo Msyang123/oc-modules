@@ -45,7 +45,7 @@ public class BaseOrder {
     private String hdOrderCode;
     @ApiModelProperty(notes = "用户昵称", dataType = "String")
     private String nickname;
-
+    private String payId;
     @ApiModelProperty(notes = "配送时间段", dataType = "String")
     private String deliverAt;
     @ApiModelProperty(notes = "是否允许退款YES是NO否", dataType = "AllowRefund")

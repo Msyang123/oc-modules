@@ -69,6 +69,7 @@
         <dependency>
             <groupId>com.leon.microx.common</groupId>
             <artifactId>microx-pay-core</artifactId>
+            <version>2.0-20180620</version>
         </dependency>
     </dependencies>
 

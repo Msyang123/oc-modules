@@ -101,15 +101,16 @@ public class OrderService {
     /**
      * 添加订单信息
      *
-     * @param param CreateOrderParam
+     * @param param       CreateOrderParam
+     * @param orderStatus 插入时，订单的状态（已支付 WAIT_SEND_OUT,未支付 WAIT_PAYMENT）
      * @return OrderDetailResult
      */
-    public OrderDetailResult createOrder(CreateOrderParam param) {
+    public OrderDetailResult createOrder(CreateOrderParam param, OrderStatus orderStatus) {
         BaseOrder baseOrder = param.toOrderObject();
         String orderCode = generator.get(0, ApplicationType.ref(param.getApplicationType()));
         baseOrder.setCode(orderCode);
         baseOrder.setHdOrderCode(orderCode);
-        baseOrder.setStatus(OrderStatus.WAIT_PAYMENT);
+        baseOrder.setStatus(orderStatus);
         baseOrderMapper.insert(baseOrder);
 
         List<OrderProduct> productList = param.getOrderProducts();
