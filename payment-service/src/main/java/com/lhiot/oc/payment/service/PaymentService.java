@@ -25,6 +25,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Leon (234239150@qq.com) created in 9:20 18.12.3
@@ -155,7 +156,8 @@ public class PaymentService {
         }
         // 发延时队列，检查超时
         rabbit.convertAndSend(DEFAULT_PAY_TIMEOUT_EXCHANGE_NAME, DEFAULT_PAY_TIMEOUT_DLX_QUEUE_NAME, String.valueOf(record.getId()), message -> {
-            message.getMessageProperties().setExpiration(String.valueOf(DEFAULT_SIGN_TTL - 1));
+            long ms = TimeUnit.MILLISECONDS.convert(DEFAULT_SIGN_TTL - 1, TimeUnit.MINUTES);
+            message.getMessageProperties().setExpiration(String.valueOf(ms));
             return message;
         });
         return SignAttrs.builder()
