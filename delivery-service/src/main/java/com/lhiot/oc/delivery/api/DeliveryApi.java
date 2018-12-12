@@ -49,32 +49,6 @@ public class DeliveryApi {
     }
 
 
-    @PostMapping("/delivery/fee/search")
-    @ApiOperation("获取（计算）配送费")
-    @ApiImplicitParam(paramType = ApiParamType.BODY, name = "feeQuery", dataType = "DeliverFeeQuery", required = true, value = "配送费计算传入参数")
-    public ResponseEntity fee(@RequestBody DeliverFeeQuery feeQuery) {
-        Optional<Store> store = deliveryService.store(feeQuery.getStoreId(), feeQuery.getApplicationType());
-        if (!store.isPresent()) {
-            return ResponseEntity.badRequest().body("查询门店信息失败！");
-        }
-        DeliverTime time = feeQuery.getDeliveryTime();
-        //传入经纬度是否需要转换坐标系
-        if (feeQuery.getCoordinateSystem().isNeedConvert()) {
-            Position.BD09 bd09 = Position.baidu(feeQuery.getTargetLng(), feeQuery.getTargetLat());
-            Position.GCJ02 amap = Position.GCJ02.of(bd09);
-            feeQuery.setTargetLng(amap.getLongitude());
-            feeQuery.setTargetLat(amap.getLatitude());
-        }
-        Optional<Long> deliverFee = FeeCalculator.of(feeQuery.getOrderFee(), feeQuery.getWeight())
-                .distance(Position.base(store.get().getLatitude().doubleValue(), store.get().getLongitude().doubleValue()),
-                        Position.base(feeQuery.getTargetLng(), feeQuery.getTargetLat()))
-                .period(time.getStartTime(), time.getEndTime())
-                .completed();
-
-        return deliverFee.<ResponseEntity>map(fee -> ResponseEntity.ok(Tips.info("查询成功").data(fee)))
-                .orElseGet(() -> ResponseEntity.badRequest().body("超过配送范围！"));
-    }
-
     @GetMapping("/delivery/times")
     @ApiOperation(value = "获取订单配送时间列表")
     public ResponseEntity deliverTimes(@RequestParam(value = "date", required = false) Day day) {

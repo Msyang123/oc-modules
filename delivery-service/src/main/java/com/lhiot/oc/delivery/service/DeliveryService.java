@@ -49,14 +49,6 @@ public class DeliveryService implements ApplicationContextAware {
         this.deliverOrderProductMapper = deliverOrderProductMapper;
     }
 
-    public Optional<Store> store(Long storeId, String applicationType) {
-        ResponseEntity response = basicDataService.findStoreById(storeId, applicationType);
-        if (response.getStatusCode().isError() || Objects.isNull(response.getBody())) {
-            return Optional.empty();
-        }
-        return Optional.of((Store) response.getBody());
-    }
-
     public Optional<Store> store(String storeCode, String applicationType) {
         ResponseEntity response = basicDataService.findStoreByCode(storeCode, applicationType);
         if (response.getStatusCode().isError() || Objects.isNull(response.getBody())) {
