@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public interface PaymentService {
 
     @RequestMapping(value = "/records/{outTradeNo}/completed", method = RequestMethod.PUT)
-    ResponseEntity updatePaymentLog(@PathVariable("outTradeNo") String payId, @RequestBody Payed payed);
+    ResponseEntity updatePaymentLog(@PathVariable("outTradeNo") String payId, @RequestBody PaidModel paidModel);
 
     @RequestMapping(value = "/payed/{outTradeNo}/refunds", method = RequestMethod.PUT)
     ResponseEntity refund(@PathVariable("outTradeNo") String payId, @RequestBody RefundParam refundParam);

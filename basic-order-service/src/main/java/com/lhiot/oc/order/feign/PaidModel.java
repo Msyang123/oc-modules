@@ -9,7 +9,7 @@ import java.util.Date;
  * @author zhangfeng create in 8:45 2018/12/5
  */
 @Data
-public class Payed {
+public class PaidModel {
 
     @ApiModelProperty(notes = "第三方支付产生的商户单号",dataType = "String")
     private String payId;

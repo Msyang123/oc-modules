@@ -13,7 +13,7 @@ import com.lhiot.oc.order.entity.type.OrderStatus;
 import com.lhiot.oc.order.event.OrderFlowEvent;
 import com.lhiot.oc.order.feign.BaseServiceFeign;
 import com.lhiot.oc.order.feign.HaiDingService;
-import com.lhiot.oc.order.feign.Payed;
+import com.lhiot.oc.order.feign.PaidModel;
 import com.lhiot.oc.order.feign.PaymentService;
 import com.lhiot.oc.order.mapper.BaseOrderMapper;
 import com.lhiot.oc.order.model.*;
@@ -107,12 +107,12 @@ public class OrderApi {
     @ApiOperation("支付回调修改订单状态为WAIT_SEND_OUT")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = ApiParamType.PATH, name = "orderCode", value = "订单编号", required = true, dataType = "String"),
-            @ApiImplicitParam(paramType = ApiParamType.BODY, name = "payed", value = "支付信息", required = true, dataType = "Payed")
+            @ApiImplicitParam(paramType = ApiParamType.BODY, name = "paidModel", value = "支付信息", required = true, dataType = "PaidModel")
     })
     @PutMapping("/{orderCode}/payed")
-    public ResponseEntity waitSendOut(@PathVariable("orderCode") String orderCode, @RequestBody Payed payed) {
+    public ResponseEntity waitSendOut(@PathVariable("orderCode") String orderCode, @RequestBody PaidModel paidModel) {
         try {
-            orderService.updateWaitPaymentToWaitSendOut(orderCode, payed);
+            orderService.updateWaitPaymentToWaitSendOut(orderCode, paidModel);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return ResponseEntity.badRequest().body("支付回掉修改状态失败");
