@@ -69,7 +69,7 @@ public class WeChatPayApi {
                 .orElse(ResponseEntity.badRequest().body("签名失败"));
     }
 
-    @PostMapping("/payed/{outTradeNo}/verification")
+    @PostMapping("/paid/{outTradeNo}/verification")
     @ApiOperation("支付完成 - 验签")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = ApiParamType.PATH, name = "outTradeNo", value = "支付ID", dataType = "Long", required = true),

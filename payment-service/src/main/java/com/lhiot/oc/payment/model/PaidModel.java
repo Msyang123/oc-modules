@@ -13,7 +13,7 @@ import java.util.Date;
  */
 @Data
 @ApiModel(description = "支付成功后修改支付记录")
-public class PayedModel {
+public class PaidModel {
 
     @NotBlank(message = "支付平台交易号不能为空")
     @ApiModelProperty(value = "支付平台交易号(第三方生成)", dataType = "String", required = true)
