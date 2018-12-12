@@ -1,5 +1,6 @@
 package com.lhiot.oc.payment.feign;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
 
@@ -14,6 +15,11 @@ public class PaymentConfig {
      * 配置ID（客户端使用此ID获取配置信息）
      */
     private String id;
+
+    /**
+     * 配置名称
+     */
+    private String configName;
 
     /**
      * 应用ID
@@ -39,53 +45,4 @@ public class PaymentConfig {
      * 第三方密钥（支付宝私钥 / 微信pkcs12文件URL）
      */
     private String thirdPartyKey;
-
-    /**
-     * 支付完成 - 回调地址
-     */
-    private String payedNotifyUrl;
-
-    /**
-     * 支付异常 - 取消本次支付
-     */
-    private String cancelNotifyUrl;
-
-    /**
-     * 退款 - 回调地址
-     */
-    private String refundNotifyUrl;
-
-//    /**
-//     * 备注
-//     */
-//    private String remark;
-//
-//    public com.lhiot.oc.payment.alipay.Config toAliPayConfig(){
-//        return com.lhiot.oc.payment.alipay.Config.builder()
-//                .appId(this.appId)
-//                .appPrivateKey(this.appSecretKey)
-//                .merchantId(this.merchantId)
-//                .aliPublicKey(this.thirdPartyKey)
-//                .payedNotifyUrl(this.payedNotifyUrl)
-//                .cancelNotifyUrl(this.cancelNotifyUrl)
-//                .refundNotifyUrl(this.refundNotifyUrl)
-//                .build();
-//    }
-//
-//    public com.lhiot.oc.payment.wxpay.Config toWxPayConfig(){
-//        return com.lhiot.oc.payment.wxpay.Config.builder()
-//                .appId(this.appId)
-//                .appSecret(this.appSecretKey)
-//                .partnerId(this.merchantId)
-//                .partnerKey(this.merchantSecretKey)
-//                .certificate(loadCertificate(this.thirdPartyKey))
-//                .payedNotifyUrl(this.payedNotifyUrl)
-//                .refundNotifyUrl(this.refundNotifyUrl)
-//                .build();
-//    }
-//
-//    private InputStream loadCertificate(String pkcs12){
-//
-//        return null;
-//    }
 }
