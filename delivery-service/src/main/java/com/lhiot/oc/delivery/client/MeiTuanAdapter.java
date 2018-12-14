@@ -34,17 +34,17 @@ public class MeiTuanAdapter implements AdaptableClient {
     }
 
     @Override
-    public Tips send(CoordinateSystem coordinate, Store store, DeliverOrder deliverOrder, Long deliverNoteId) {
-        double distance = this.distance(store, deliverOrder,coordinate);
+    public Tips send(CoordinateSystem coordinate, Store store, DeliverOrderParam deliverOrderParam, Long deliverNoteId) {
+        double distance = this.distance(store, deliverOrderParam,coordinate);
         if (Calculator.gt(distance, FeeCalculator.MAX_DELIVERY_RANGE)) {
             return Tips.warn("超过配送范围！");
         }
-        CreateOrderByShopRequest request = createOrderByShopRequest(coordinate, deliverNoteId, deliverOrder);
+        CreateOrderByShopRequest request = createOrderByShopRequest(coordinate, deliverNoteId, deliverOrderParam);
         try {
             String response = client.deliver(request);
             CreateOrderResponse added = Jackson.object(response, CreateOrderResponse.class);
             if (Objects.equals(added.getCode(), "0")) {
-                return Tips.info("发送美团配送成功").data(this.createDeliverNote(distance, deliverOrder));
+                return Tips.info("发送美团配送成功").data(this.deliverNote(deliverOrderParam,distance, DeliverType.MEITUAN));
             }
         } catch (IOException e) {
             log.error(e.getMessage(), e);
@@ -98,23 +98,11 @@ public class MeiTuanAdapter implements AdaptableClient {
         return Objects.equals(backParam.get("sign"),client.backSignature(backParam))?Tips.of(HttpStatus.OK,"验证成功"):Tips.of(HttpStatus.BAD_REQUEST,"验证错误");
     }
 
-    private DeliverNote createDeliverNote(double distance, DeliverOrder deliverOrder) {
-        DeliverNote deliverNote = new DeliverNote();
-        deliverNote.setOrderCode(deliverOrder.getOrderCode());//订单号
-        deliverNote.setDeliverCode(deliverOrder.getHdOrderCode());//配送单单号
-        deliverNote.setDeliverType(DeliverType.MEITUAN);
-        deliverNote.setStoreCode(deliverOrder.getStoreCode());
-        deliverNote.setRemark(deliverOrder.getRemark());
-        deliverNote.setFee(deliverOrder.getDeliveryFee());//自己传递过来的配送费
-        deliverNote.setDistance(distance);//自己计算的直线距离
-        return deliverNote;
-    }
-
-    private CreateOrderByShopRequest createOrderByShopRequest(CoordinateSystem coordinate, Long deliverNoteId, DeliverOrder deliverOrder) {
+    private CreateOrderByShopRequest createOrderByShopRequest(CoordinateSystem coordinate, Long deliverNoteId, DeliverOrderParam deliverOrderParam) {
         CreateOrderByShopRequest createOrderByShopRequest = new CreateOrderByShopRequest();
         createOrderByShopRequest.setDeliveryId(deliverNoteId);
-        createOrderByShopRequest.setOrderId(deliverOrder.getHdOrderCode());
-        createOrderByShopRequest.setShopId(deliverOrder.getStoreCode());//测试环境为"test_0001" 正式环境要换成真正的门店编码 deliverOrder.getStoreCode()
+        createOrderByShopRequest.setOrderId(deliverOrderParam.getHdOrderCode());
+        createOrderByShopRequest.setShopId(deliverOrderParam.getStoreCode());//测试环境为"test_0001" 正式环境要换成真正的门店编码 deliverOrderParam.getStoreCode()
         //配送服务代码，详情见合同
         //飞速达:4002
         //快速达:4011
@@ -122,24 +110,24 @@ public class MeiTuanAdapter implements AdaptableClient {
         //集中送:4013
         createOrderByShopRequest.setDeliveryServiceCode(4011);
 
-        createOrderByShopRequest.setReceiverName(deliverOrder.getReceiveUser());
-        createOrderByShopRequest.setReceiverAddress(deliverOrder.getAddress());
-        createOrderByShopRequest.setReceiverPhone(deliverOrder.getContactPhone());
-        createOrderByShopRequest.setReceiverLng((int) (deliverOrder.getLng() * 1000000));
-        createOrderByShopRequest.setReceiverLat((int) (deliverOrder.getLat() * 1000000));
+        createOrderByShopRequest.setReceiverName(deliverOrderParam.getReceiveUser());
+        createOrderByShopRequest.setReceiverAddress(deliverOrderParam.getAddress());
+        createOrderByShopRequest.setReceiverPhone(deliverOrderParam.getContactPhone());
+        createOrderByShopRequest.setReceiverLng((int) (deliverOrderParam.getLng() * 1000000));
+        createOrderByShopRequest.setReceiverLat((int) (deliverOrderParam.getLat() * 1000000));
 
         createOrderByShopRequest.setCoordinateType(coordinate.getPositionSource() == 2 ? 1 : 0);//	坐标类型，0：火星坐标（高德，腾讯地图均采用火星坐标） 1：百度坐标 （默认值为0）
-        createOrderByShopRequest.setGoodsValue(BigDecimal.valueOf(Calculator.round(deliverOrder.getTotalAmount() / 100.0, 2)));//分转元,四舍五入精确两位小数
+        createOrderByShopRequest.setGoodsValue(BigDecimal.valueOf(Calculator.round(deliverOrderParam.getTotalAmount() / 100.0, 2)));//分转元,四舍五入精确两位小数
         //重量计算 所有商品的份数*重量*基础重量
-        deliverOrder.getDeliverOrderProductList().forEach(item ->
-                createOrderByShopRequest.setGoodsWeight(createOrderByShopRequest.getGoodsWeight().add(BigDecimal.valueOf(Calculator.mul(Calculator.mul(item.getProductQty(), item.getStandardQty()), item.getBaseWeight()))))
+        deliverOrderParam.getDeliverOrderProductList().forEach(item ->
+                createOrderByShopRequest.setGoodsWeight(createOrderByShopRequest.getGoodsWeight().add(BigDecimal.valueOf(item.getTotalWeight())))
         );
         createOrderByShopRequest.setGoodsWeight(createOrderByShopRequest.getGoodsWeight().setScale(2, RoundingMode.UP));
 
         //具体商品信息
         OpenApiGoods openApiGoods = new OpenApiGoods();
-        List<OpenApiGood> openApiGoodList = new ArrayList<>(deliverOrder.getDeliverOrderProductList().size());
-        deliverOrder.getDeliverOrderProductList().forEach(item -> {
+        List<OpenApiGood> openApiGoodList = new ArrayList<>(deliverOrderParam.getDeliverOrderProductList().size());
+        deliverOrderParam.getDeliverOrderProductList().forEach(item -> {
             OpenApiGood openApiGood = new OpenApiGood();
             openApiGood.setGoodCount(item.getProductQty());
             openApiGood.setGoodName(item.getProductName());
@@ -149,10 +137,10 @@ public class MeiTuanAdapter implements AdaptableClient {
         openApiGoods.setGoods(openApiGoodList);
         createOrderByShopRequest.setGoodsDetail(openApiGoods);
 
-        createOrderByShopRequest.setGoodsPickupInfo(deliverOrder.getRemark());
-        createOrderByShopRequest.setGoodsDeliveryInfo(deliverOrder.getRemark());
+        createOrderByShopRequest.setGoodsPickupInfo(deliverOrderParam.getRemark());
+        createOrderByShopRequest.setGoodsDeliveryInfo(deliverOrderParam.getRemark());
 
-        DeliverTime deliverTime = deliverOrder.getDeliverTime();
+        DeliverTime deliverTime = deliverOrderParam.getDeliverTime();
 
         createOrderByShopRequest.setExpectedPickupTime(deliverTime.getStartTime().getTime());
         createOrderByShopRequest.setExpectedDeliveryTime(deliverTime.getEndTime().getTime());
@@ -164,9 +152,9 @@ public class MeiTuanAdapter implements AdaptableClient {
         } else {
             createOrderByShopRequest.setOrderType(OrderType.NORMAL.getCode());
         }
-        int hdOrderCodeLength = deliverOrder.getHdOrderCode().length();
-        createOrderByShopRequest.setPoiSeq(deliverOrder.getHdOrderCode().substring(hdOrderCodeLength - 4, hdOrderCodeLength));//骑手取货单号
-        createOrderByShopRequest.setNote(deliverOrder.getRemark());
+        int hdOrderCodeLength = deliverOrderParam.getHdOrderCode().length();
+        createOrderByShopRequest.setPoiSeq(deliverOrderParam.getHdOrderCode().substring(hdOrderCodeLength - 4, hdOrderCodeLength));//骑手取货单号
+        createOrderByShopRequest.setNote(deliverOrderParam.getRemark());
         return createOrderByShopRequest;
     }
 }

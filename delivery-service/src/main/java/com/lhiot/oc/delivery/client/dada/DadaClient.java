@@ -90,7 +90,7 @@ public class DadaClient {
                         .put("origin_id", orderParam.getOriginId())
                         .put("city_code", orderParam.getCityCode())
                         .put("cargo_price", orderParam.getCargoPrice() / 100.0)
-                        .put("is_prepay", 0)
+                        .put("is_prepay", 0) //是否需要垫付 1:是 0:否 (垫付订单金额，非运费)
                         .put("receiver_name", orderParam.getReceiverName())
                         .put("receiver_address", orderParam.getReceiverAddress())
                         .put("receiver_lat", converted.getLatitude())
@@ -98,9 +98,9 @@ public class DadaClient {
                         .put("callback", orderParam.getBackUrl())
                         .put("receiver_phone", orderParam.getReceiverPhone())
                         .put("receiver_tel", orderParam.getReceiverTel())
-                        .put("tips", 0.0)
+                        .put("tips", 0.0) //小费（单位：元，精确小数点后一位）
                         .put("info", orderParam.getInfo())
-                        .put("cargo_type", 9)
+                        .put("cargo_type", 13)//订单商品类型：食品小吃-1,饮料-2,鲜花-3,文印票务-8,便利店-9,水果生鲜-13,同城电商-19, 医药-20,蛋糕-21,酒品-24,小商品市场-25,服装-26,汽修零配-27,数码-28,小龙虾-29, 其他-5
                         .put("cargo_num", orderParam.getCargoNum())
                         .put("origin_mark", orderParam.getOriginMark())
                         .put("origin_mark_no", orderParam.getOriginMarkNo())

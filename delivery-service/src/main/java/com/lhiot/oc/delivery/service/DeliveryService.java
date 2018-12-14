@@ -1,19 +1,15 @@
 package com.lhiot.oc.delivery.service;
 
-import com.leon.microx.util.Jackson;
 import com.lhiot.oc.delivery.client.AdaptableClient;
 import com.lhiot.oc.delivery.entity.DeliverFlow;
 import com.lhiot.oc.delivery.entity.DeliverNote;
 import com.lhiot.oc.delivery.feign.BasicDataService;
 import com.lhiot.oc.delivery.feign.Store;
-import com.lhiot.oc.delivery.model.DeliverOrder;
 import com.lhiot.oc.delivery.model.DeliverStatus;
 import com.lhiot.oc.delivery.model.DeliverType;
 import com.lhiot.oc.delivery.model.DeliverUpdate;
-import com.lhiot.oc.delivery.repository.DeliverBaseOrderMapper;
 import com.lhiot.oc.delivery.repository.DeliverFlowMapper;
 import com.lhiot.oc.delivery.repository.DeliverNoteMapper;
-import com.lhiot.oc.delivery.repository.DeliverOrderProductMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -37,16 +33,12 @@ public class DeliveryService implements ApplicationContextAware {
     private final BasicDataService basicDataService;
     private final DeliverNoteMapper deliverNoteMapper;
     private final DeliverFlowMapper deliverFlowMapper;
-    private final DeliverBaseOrderMapper deliverBaseOrderMapper;
-    private final DeliverOrderProductMapper deliverOrderProductMapper;
 
     @Autowired
-    public DeliveryService(BasicDataService basicDataService, DeliverNoteMapper deliverNoteMapper, DeliverFlowMapper deliverFlowMapper, DeliverBaseOrderMapper deliverBaseOrderMapper, DeliverOrderProductMapper deliverOrderProductMapper) {
+    public DeliveryService(BasicDataService basicDataService, DeliverNoteMapper deliverNoteMapper, DeliverFlowMapper deliverFlowMapper) {
         this.basicDataService = basicDataService;
         this.deliverNoteMapper = deliverNoteMapper;
         this.deliverFlowMapper = deliverFlowMapper;
-        this.deliverBaseOrderMapper = deliverBaseOrderMapper;
-        this.deliverOrderProductMapper = deliverOrderProductMapper;
     }
 
     public Optional<Store> store(String storeCode, String applicationType) {
@@ -83,23 +75,15 @@ public class DeliveryService implements ApplicationContextAware {
         }
     }
 
-    public void saveDeliverNote(DeliverOrder deliverOrder, DeliverNote deliverNote) {
+    public void saveDeliverNote(DeliverNote deliverNote) {
         //创建配送单
-        deliverNote.setDeliverStatus(DeliverStatus.CREATE);
+        deliverNote.setDeliverStatus(DeliverStatus.UNRECEIVE);
         deliverNote.setCreateTime(new Date());
         deliverNoteMapper.create(deliverNote);
 
         //创建第一条（上一步状态为null）记录配送状态流水
         this.saveDeliverFlow(deliverNote, null);
 
-        //写入配送订单流程表 如果查询到，就不新增
-        if (Objects.isNull(this.deliverBaseOrderMapper.selectByHdOrderCode(deliverOrder.getHdOrderCode()))) {
-            Jackson.json(deliverOrder.getDeliverTime());
-            deliverBaseOrderMapper.create(deliverOrder);
-            //给配送订单商品设置配送订单id
-            deliverOrder.getDeliverOrderProductList().forEach(item -> item.setDeliverBaseOrderId(deliverOrder.getId()));
-            deliverOrderProductMapper.createInBatch(deliverOrder.getDeliverOrderProductList());
-        }
     }
 
     public void updateDeliverNote(DeliverNote deliverNote, DeliverUpdate deliverUpdate) {
@@ -120,8 +104,7 @@ public class DeliveryService implements ApplicationContextAware {
         deliverNote.setDeliverName(deliverUpdate.getCarrierDriverName());
         deliverNote.setDeliverPhone(deliverUpdate.getCarrierDriverPhone());
         deliverNote.setDeliverStatus(deliverUpdate.getDeliverStatus());
-        deliverNote.setFailureCause(deliverUpdate.getCancelReason());
+        deliverNote.setFailureCause(deliverUpdate.getFailureCause());
         this.saveDeliverFlow(deliverNote, status);
-
     }
 }
