@@ -296,10 +296,10 @@
 
 
     <!--查询配送单信息列表-->
-    <select id="pageDeliverNotes" resultMap="BaseResultMap"
+    <select id="pageDeliverNotes" resultMap="deliveryNote"
             parameterType="com.lhiot.oc.delivery.entity.DeliverNote">
         select
-        <include refid="Base_Column_List"/>
+        <include refid="columns"/>
         from deliver_note
         <include refid="filter"/>
         <include refid="common.pager"/>
