@@ -45,8 +45,8 @@
             store_code,
             remark,
             ext,
-            receiveUser,
-            contactPhone,
+            receive_user,
+            contact_phone,
             address,
         </trim>
     </sql>
