@@ -11,7 +11,7 @@ import com.lhiot.oc.delivery.entity.DeliverNote;
 import com.lhiot.oc.delivery.feign.Store;
 import com.lhiot.oc.delivery.model.CancelReason;
 import com.lhiot.oc.delivery.model.CoordinateSystem;
-import com.lhiot.oc.delivery.model.DeliverOrder;
+import com.lhiot.oc.delivery.model.DeliverOrderParam;
 import com.lhiot.oc.delivery.model.DeliverType;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,12 +33,12 @@ public class DadaAdapter implements AdaptableClient {
     }
 
     @Override
-    public Tips send(CoordinateSystem coordinate, Store store, DeliverOrder deliverOrder, Long deliverNoteId) {
-        double distance = this.distance(store, deliverOrder,coordinate);
+    public Tips send(CoordinateSystem coordinate, Store store, DeliverOrderParam deliverOrderParam, Long deliverNoteId) {
+        double distance = this.distance(store, deliverOrderParam,coordinate);
         if (Calculator.gt(distance, FeeCalculator.MAX_DELIVERY_RANGE)) {
             return Tips.warn("超过配送范围！");
         }
-        OrderParam orderParam = this.createDeliverParam(deliverOrder);
+        OrderParam orderParam = this.createDeliverParam(deliverOrderParam);
         //在测试环境，使用统一商户和门店进行发单。其中，商户id：73753，门店编号：11047059
         OrderAdded added;
         try {
@@ -57,7 +57,7 @@ public class DadaAdapter implements AdaptableClient {
             log.error(e.getMessage(), e);
             return Tips.error("达达发送配送失败 - " + e.getMessage(), e);
         }
-        return Tips.info("发送达达成功").data(this.createDeliverNote(deliverOrder, added));
+        return Tips.info("发送达达成功").data(this.deliverNote(deliverOrderParam,distance,DeliverType.DADA));
     }
 
     @Override
@@ -100,41 +100,28 @@ public class DadaAdapter implements AdaptableClient {
         return verifyResult?Tips.info("验证成功"):Tips.error("验证失败",new IllegalArgumentException());
     }
 
-    private OrderParam createDeliverParam(DeliverOrder deliverOrder) {
+    private OrderParam createDeliverParam(DeliverOrderParam deliverOrderParam) {
         OrderParam orderParam = new OrderParam();
-        orderParam.setBackUrl(deliverOrder.getBackUrl()); // 设置业务回调地址
-        orderParam.setCargoNum(deliverOrder.getDeliverOrderProductList().size());
-        orderParam.setCargoPrice(deliverOrder.getTotalAmount());
+        orderParam.setBackUrl(deliverOrderParam.getBackUrl()); // 设置业务回调地址
+        orderParam.setCargoNum(deliverOrderParam.getDeliverOrderProductList().size());
+        orderParam.setCargoPrice(deliverOrderParam.getAmountPayable()+ deliverOrderParam.getDeliveryFee());//订单实付金额（包括配送费）
         // 重量计算 所有商品的份数*重量*基础重量
-        deliverOrder.getDeliverOrderProductList().forEach(item ->
+        deliverOrderParam.getDeliverOrderProductList().forEach(item ->
                 orderParam.setCargoWeight(
-                        Calculator.sub(orderParam.getCargoWeight(), Calculator.mul(Calculator.mul(item.getProductQty(), item.getStandardQty()), item.getBaseWeight()))
+                        Calculator.add(orderParam.getCargoWeight(), item.getTotalWeight())
                 )
         );
         orderParam.setCityCode("0731");
-        orderParam.setInfo(deliverOrder.getRemark());
-        orderParam.setLat(deliverOrder.getLat());
-        orderParam.setLng(deliverOrder.getLng());
-        orderParam.setOriginId(deliverOrder.getHdOrderCode());
+        orderParam.setInfo(deliverOrderParam.getRemark());
+        orderParam.setLat(deliverOrderParam.getLat());
+        orderParam.setLng(deliverOrderParam.getLng());
+        orderParam.setOriginId(deliverOrderParam.getHdOrderCode());
         orderParam.setOriginMark("lhiot");
-        orderParam.setOriginMarkNo(deliverOrder.getApplyType().replaceAll("_",""));
-        orderParam.setReceiverAddress(deliverOrder.getAddress());
-        orderParam.setReceiverName(deliverOrder.getReceiveUser());
-        orderParam.setReceiverPhone(deliverOrder.getContactPhone());
-        orderParam.setShopNo(deliverOrder.getStoreCode());
+        orderParam.setOriginMarkNo(deliverOrderParam.getApplyType().replaceAll("_",""));
+        orderParam.setReceiverAddress(deliverOrderParam.getAddress());
+        orderParam.setReceiverName(deliverOrderParam.getReceiveUser());
+        orderParam.setReceiverPhone(deliverOrderParam.getContactPhone());
+        orderParam.setShopNo(deliverOrderParam.getStoreCode());
         return orderParam;
-    }
-
-    private DeliverNote createDeliverNote(DeliverOrder deliverOrder, OrderAdded added) {
-        DeliverNote deliverNote = new DeliverNote();
-        deliverNote.setOrderId(deliverOrder.getOrderId());
-        deliverNote.setOrderCode(deliverOrder.getOrderCode());//订单号
-        deliverNote.setDeliverCode(deliverOrder.getHdOrderCode());//配送单号与海鼎订单号一致
-        deliverNote.setDeliverType(DeliverType.matches(this.getClass()));
-        deliverNote.setStoreCode(deliverOrder.getStoreCode());
-        deliverNote.setRemark(deliverOrder.getRemark());
-        deliverNote.setFee(Calculator.toInt(Calculator.mul(added.getResult().getDeliverFee(), 100.0)));
-        deliverNote.setDistance(added.getResult().getDistance());
-        return deliverNote;
     }
 }

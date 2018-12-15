@@ -22,11 +22,6 @@ public class DeliverNote {
     private String deliverCode;
 
     /**
-     * 订单id
-     */
-    private Long orderId;
-
-    /**
      * 创建时间
      */
     private Date createTime;
@@ -98,4 +93,22 @@ public class DeliverNote {
      */
     private String ext;
 
+    /**
+     * 收货人
+     */
+    private String receiveUser;
+
+    /**
+     * 收货人联系方式
+     */
+    private String contactPhone;
+
+    /**
+     * 收货地址
+     */
+    private String address;
+    /**
+     * 配送时间段
+     */
+    private String deliverAt;
 }

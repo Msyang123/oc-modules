@@ -11,7 +11,6 @@ import lombok.ToString;
  */
 @Data
 @ApiModel
-@ToString
 public class DeliverFeeQuery {
 
     @ApiModelProperty(notes = "订单费用", dataType = "Integer")

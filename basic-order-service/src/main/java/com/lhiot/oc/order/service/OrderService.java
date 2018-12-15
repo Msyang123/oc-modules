@@ -18,6 +18,7 @@ import com.lhiot.oc.order.mapper.OrderProductMapper;
 import com.lhiot.oc.order.mapper.OrderStoreMapper;
 import com.lhiot.oc.order.model.*;
 import com.lhiot.oc.order.model.type.ApplicationType;
+import com.lhiot.oc.order.model.type.PayType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
@@ -136,11 +137,14 @@ public class OrderService {
      * 支付回调修改订单状态，修改支付记录
      *
      * @param orderCode 订单编号
-     * @param paidModel     支付信息
+     * @param paidModel 支付信息
      */
     public void updateWaitPaymentToWaitSendOut(String orderCode, PaidModel paidModel) {
         int count = baseOrderMapper.updateStatusByCode(Maps.of("modifyStatus", OrderStatus.WAIT_SEND_OUT,
                 "nowStatus", OrderStatus.WAIT_PAYMENT, "orderCode", orderCode, "payId", paidModel.getPayId()));
+        if (Objects.equals(PayType.BALANCE, paidModel.getPayType())) {
+            return;
+        }
         if (count == 1) {
             //修改支付日志
             ResponseEntity response = paymentService.updatePaymentLog(paidModel.getPayId(), paidModel);
@@ -288,6 +292,11 @@ public class OrderService {
                     map.put("hdStockAt", Date.from(Instant.now()));
                 }
                 break;
+            case FAILURE:
+                if (Objects.equals(nowStatus, OrderStatus.WAIT_PAYMENT)) {
+                    map.put("nowStatus", OrderStatus.WAIT_PAYMENT);
+                    break;
+                }
             default:
                 return Tips.warn(nowStatus.getDescription() + "状态不可直接修改为" + modifyStatus.getDescription() + "状态");
         }

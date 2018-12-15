@@ -4,8 +4,6 @@ import lombok.Getter;
 
 public enum DeliverStatus {
 
-    CREATE("创建"),
-
     UNRECEIVE("未接单"),
 
     WAIT_GET("待取货"),

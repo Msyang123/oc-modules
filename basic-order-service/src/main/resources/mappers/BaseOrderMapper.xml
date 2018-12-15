@@ -64,8 +64,11 @@
                 </foreach>
             </if>
             <if test="orderType != null and orderType != ''">and order_type = #{orderType}</if>
-            <if test="orderStatus != null">and status = #{orderStatus}</if>
-            and status not in ('SEND_OUT')
+            <if test="orderStatuses != null">and status in
+                <foreach collection="orderStatuses" item="status" close=")" open="(" separator=",">
+                    #{status}
+                </foreach>
+            </if>
         </trim>
     </sql>
 
@@ -87,11 +90,10 @@
         select id from base_order
         <include refid="filter"/>
         <if test="rows != null and rows > 0 ">
-            order by id desc
             limit #{startRow} , #{rows}
         </if>
         ) bo
-        where a.id = bo.id
+        where a.id = bo.id order by a.id desc
     </select>
 
     <!--查询订单集合总数-->
