@@ -61,9 +61,10 @@ public class DeliveryFeeApi {
     @PutMapping("/delivery-fee-rule/{id}")
     public ResponseEntity updateRules(@PathVariable("id") Long ruleId, @RequestBody DeliverFeeRuleParam deliverFeeRuleParam) {
         deliverFeeRuleParam.setId(ruleId);
-        if (!ruleService.updateRules(deliverFeeRuleParam)) {
-            return ResponseEntity.badRequest().body("修改规则错误");
+        if (!CollectionUtils.isEmpty(deliverFeeRuleParam.getDeleteIds())){
+            deliveryFeeRuleDetailMapper.batchDelete(deliverFeeRuleParam.getDeleteIds());
         }
+        ruleService.updateRules(deliverFeeRuleParam);
         return ResponseEntity.ok().build();
     }
 

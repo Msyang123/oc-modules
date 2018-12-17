@@ -24,4 +24,6 @@ public class DeliverFeeRuleDetail {
     private BigDecimal additionalWeight;
 
     private Integer additionalFee;
+
+    private UpdateWay updateWay;
 }

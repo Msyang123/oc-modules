@@ -27,6 +27,8 @@ public class DeliverFeeRuleParam {
 
     private String createBy;
 
+    private List<String> deleteIds;
+
     private List<DeliverFeeRuleDetail> detailList;
 
 }

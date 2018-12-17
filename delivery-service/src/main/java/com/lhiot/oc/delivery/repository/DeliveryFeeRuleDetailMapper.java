@@ -20,4 +20,6 @@ public interface DeliveryFeeRuleDetailMapper {
     int deleteById(Long id);
 
     int deleteByRuleId(Long ruleId);
+
+    void batchDelete(List<String> list);
 }

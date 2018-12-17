@@ -68,5 +68,13 @@
         delete from delivery_fee_rules_detail
         where delivery_fee_rule_id = #{0}
     </delete>
+
+    <delete id="batchDelete" parameterType="list">
+        delete from delivery_fee_rules_detail
+        where id in
+        <foreach collection="list" separator="," open="(" close=")" item="item">
+            #{item}
+        </foreach>
+    </delete>
     
 </mapper>
