@@ -302,7 +302,6 @@
         <include refid="columns"/>
         from deliver_note
         <include refid="filter"/>
-        <include refid="common.pager"/>
     </select>
 
     <!--查询配送单信息总记录-->
@@ -310,7 +309,7 @@
             parameterType="com.lhiot.oc.delivery.entity.DeliverNote">
         select count(1)
         from deliver_note
-        <include refid="Base_Where_Condition"/>
+        <include refid="filter"/>
     </select>
 
 </mapper>
