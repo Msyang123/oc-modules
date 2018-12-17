@@ -6,6 +6,7 @@ import com.leon.microx.web.result.Tips;
 import com.lhiot.oc.delivery.api.calculator.FeeCalculator;
 import com.lhiot.oc.delivery.entity.DeliverFeeRule;
 import com.lhiot.oc.delivery.entity.DeliverFeeRuleDetail;
+import com.lhiot.oc.delivery.entity.UpdateWay;
 import com.lhiot.oc.delivery.feign.BasicDataService;
 import com.lhiot.oc.delivery.feign.Store;
 import com.lhiot.oc.delivery.model.DeliverFeeRuleParam;
@@ -18,8 +19,10 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author zhangfeng create in 12:27 2018/12/11
@@ -65,15 +68,22 @@ public class DeliveryFeeRuleService {
      * @param param 规则参数
      * @return boolean
      */
-    public boolean updateRules(DeliverFeeRuleParam param) {
+    public void updateRules(DeliverFeeRuleParam param) {
         DeliverFeeRule deliverFeeRule = new DeliverFeeRule();
         BeanUtils.of(deliverFeeRule).populate(param);
         deliverFeeRule.setUpdateAt(Date.from(Instant.now()));
-        boolean flag = deliveryFeeRuleMapper.updateById(deliverFeeRule) > 0;
-        if (flag) {
-            flag = deliveryFeeRuleDetailMapper.updateBatch(param.getDetailList()) > 0;
+        deliveryFeeRuleMapper.updateById(deliverFeeRule);
+
+       List<DeliverFeeRuleDetail> insertList = param.getDetailList().stream().filter(detail -> Objects.equals(detail.getUpdateWay(), UpdateWay.INSERT))
+                            .collect(Collectors.toList());
+       if (!CollectionUtils.isEmpty(insertList)){
+           deliveryFeeRuleDetailMapper.batchInsert(insertList);
+       }
+        List<DeliverFeeRuleDetail> updateList = param.getDetailList().stream().filter(detail -> Objects.equals(detail.getUpdateWay(), UpdateWay.UPDATE))
+                .collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(updateList)){
+            deliveryFeeRuleDetailMapper.updateBatch(updateList);
         }
-        return flag;
     }
 
     public Optional<Store> store(Long storeId, String applicationType) {
