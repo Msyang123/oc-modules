@@ -23,5 +23,5 @@ public class OrderParam{
     private int cargoNum;
     private String originMark;
     private String originMarkNo;
-    private double cargoWeight;
+    private double cargoWeight = 0.0;
 }

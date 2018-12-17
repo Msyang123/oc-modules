@@ -18,6 +18,7 @@ import com.lhiot.oc.order.mapper.OrderProductMapper;
 import com.lhiot.oc.order.mapper.OrderStoreMapper;
 import com.lhiot.oc.order.model.*;
 import com.lhiot.oc.order.model.type.ApplicationType;
+import com.lhiot.oc.order.model.type.PayType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
@@ -101,15 +102,16 @@ public class OrderService {
     /**
      * 添加订单信息
      *
-     * @param param CreateOrderParam
+     * @param param       CreateOrderParam
+     * @param orderStatus 插入时，订单的状态（已支付 WAIT_SEND_OUT,未支付 WAIT_PAYMENT）
      * @return OrderDetailResult
      */
-    public OrderDetailResult createOrder(CreateOrderParam param) {
+    public OrderDetailResult createOrder(CreateOrderParam param, OrderStatus orderStatus) {
         BaseOrder baseOrder = param.toOrderObject();
         String orderCode = generator.get(0, ApplicationType.ref(param.getApplicationType()));
         baseOrder.setCode(orderCode);
         baseOrder.setHdOrderCode(orderCode);
-        baseOrder.setStatus(OrderStatus.WAIT_PAYMENT);
+        baseOrder.setStatus(orderStatus);
         baseOrderMapper.insert(baseOrder);
 
         List<OrderProduct> productList = param.getOrderProducts();
@@ -135,14 +137,17 @@ public class OrderService {
      * 支付回调修改订单状态，修改支付记录
      *
      * @param orderCode 订单编号
-     * @param payed     支付信息
+     * @param paidModel 支付信息
      */
-    public void updateWaitPaymentToWaitSendOut(String orderCode, Payed payed) {
+    public void updateWaitPaymentToWaitSendOut(String orderCode, PaidModel paidModel) {
         int count = baseOrderMapper.updateStatusByCode(Maps.of("modifyStatus", OrderStatus.WAIT_SEND_OUT,
-                "nowStatus", OrderStatus.WAIT_PAYMENT, "orderCode", orderCode, "payId", payed.getPayId()));
+                "nowStatus", OrderStatus.WAIT_PAYMENT, "orderCode", orderCode, "payId", paidModel.getPayId()));
+        if (Objects.equals(PayType.BALANCE, paidModel.getPayType())) {
+            return;
+        }
         if (count == 1) {
             //修改支付日志
-            ResponseEntity response = paymentService.updatePaymentLog(payed.getPayId(), payed);
+            ResponseEntity response = paymentService.updatePaymentLog(paidModel.getPayId(), paidModel);
             if (response.getStatusCode().isError()) {
                 throw new CustomFeignException(response);
             }
@@ -287,6 +292,11 @@ public class OrderService {
                     map.put("hdStockAt", Date.from(Instant.now()));
                 }
                 break;
+            case FAILURE:
+                if (Objects.equals(nowStatus, OrderStatus.WAIT_PAYMENT)) {
+                    map.put("nowStatus", OrderStatus.WAIT_PAYMENT);
+                    break;
+                }
             default:
                 return Tips.warn(nowStatus.getDescription() + "状态不可直接修改为" + modifyStatus.getDescription() + "状态");
         }

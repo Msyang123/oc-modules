@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.validation.constraints.Min;
 import java.math.BigDecimal;
 
 /**
@@ -22,10 +23,13 @@ public class OrderProduct {
     @ApiModelProperty(notes = "规格Id对应的条码", dataType = "String")
     private String barcode;
     @ApiModelProperty(notes = "单个商品总价值", dataType = "Integer")
+    @Min(1)
     private Integer totalPrice;
     @ApiModelProperty(notes = "购买份数", dataType = "Integer")
+    @Min(1)
     private Integer productQty;
     @ApiModelProperty(notes = "规格数量", dataType = "BigDecimal")
+    @Min(0)
     private BigDecimal shelfQty;
     @ApiModelProperty(notes = "除去优惠金额后单个商品总价", dataType = "Integer")
     private Integer discountPrice;

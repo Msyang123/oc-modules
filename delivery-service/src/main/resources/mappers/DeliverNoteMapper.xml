@@ -3,33 +3,34 @@
 <mapper namespace="com.lhiot.oc.delivery.repository.DeliverNoteMapper">
 
     <!-- 数据库字段对象关系映射 -->
-    <resultMap id="BaseResultMap"
-        type="com.lhiot.oc.delivery.entity.DeliverNote" >
+    <resultMap id="deliveryNote"
+               type="com.lhiot.oc.delivery.entity.DeliverNote">
         <id column="id" property="id"/>
-        <result column="deliver_code" property="deliverCode" />
-        <result column="order_id" property="orderId" />
-        <result column="create_time" property="createTime" />
-        <result column="deliver_name" property="deliverName" />
-        <result column="deliver_phone" property="deliverPhone" />
-        <result column="distance" property="distance" />
-        <result column="fee" property="fee" />
-        <result column="order_code" property="orderCode" />
-        <result column="deliver_type" property="deliverType" />
-        <result column="failure_cause" property="failureCause" />
-        <result column="cancel_time" property="cancelTime" />
-        <result column="receive_time" property="receiveTime" />
-        <result column="deliver_status" property="deliverStatus" />
-        <result column="store_code" property="storeCode" />
-        <result column="remark" property="remark" />
-        <result column="ext" property="ext" />
+        <result column="deliver_code" property="deliverCode"/>
+        <result column="create_time" property="createTime"/>
+        <result column="deliver_name" property="deliverName"/>
+        <result column="deliver_phone" property="deliverPhone"/>
+        <result column="distance" property="distance"/>
+        <result column="fee" property="fee"/>
+        <result column="order_code" property="orderCode"/>
+        <result column="deliver_type" property="deliverType"/>
+        <result column="failure_cause" property="failureCause"/>
+        <result column="cancel_time" property="cancelTime"/>
+        <result column="receive_time" property="receiveTime"/>
+        <result column="deliver_status" property="deliverStatus"/>
+        <result column="store_code" property="storeCode"/>
+        <result column="remark" property="remark"/>
+        <result column="ext" property="ext"/>
+        <result column="receive_user" property="receiveUser"/>
+        <result column="contact_phone" property="contactPhone"/>
+        <result column="address" property="address"/>
     </resultMap>
 
     <!-- base查询字段  -->
-    <sql id="Base_Column_List" >
-        <trim suffixOverrides="," >
+    <sql id="columns">
+        <trim suffixOverrides=",">
             id,
             deliver_code,
-            order_id,
             create_time,
             deliver_name,
             deliver_phone,
@@ -44,21 +45,22 @@
             store_code,
             remark,
             ext,
+            receive_user,
+            contact_phone,
+            address,
         </trim>
     </sql>
 
     <!--新增配送单信息-->
-    <insert id="create" parameterType="com.lhiot.oc.delivery.entity.DeliverNote" useGeneratedKeys="true" keyProperty="id">
+    <insert id="create" parameterType="com.lhiot.oc.delivery.entity.DeliverNote" useGeneratedKeys="true"
+            keyProperty="id">
         insert into deliver_note
-        <trim prefix="(" suffix=")" suffixOverrides="," >
+        <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="id != null ">
                 id,
             </if>
             <if test="deliverCode != null ">
                 deliver_code,
-            </if>
-            <if test="orderId != null ">
-                order_id,
             </if>
             <if test="createTime != null ">
                 create_time,
@@ -102,16 +104,16 @@
             <if test="ext != null ">
                 ext,
             </if>
+            <if test="address != null">address,</if>
+            <if test="receiveUser != null">receive_user,</if>
+            <if test="contactPhone != null">contact_phone,</if>
         </trim>
-        <trim prefix="values (" suffix=")" suffixOverrides="," >
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null ">
                 #{id},
             </if>
             <if test="deliverCode != null ">
                 #{deliverCode},
-            </if>
-            <if test="orderId != null ">
-                #{orderId},
             </if>
             <if test="createTime != null ">
                 #{createTime},
@@ -155,25 +157,16 @@
             <if test="ext != null ">
                 #{ext},
             </if>
+            <if test="address != null">#{address},</if>
+            <if test="receiveUser != null">#{receiveUser},</if>
+            <if test="contactPhone != null">#{contactPhone},</if>
         </trim>
     </insert>
 
     <!--根据id修改配送单信息-->
     <update id="updateById" parameterType="com.lhiot.oc.delivery.entity.DeliverNote">
         update deliver_note
-        <set>
-            <if test="id != null ">
-                id = #{id},
-            </if>
-            <if test="deliverCode != null ">
-                deliver_code = #{deliverCode},
-            </if>
-            <if test="orderId != null ">
-                order_id = #{orderId},
-            </if>
-            <if test="createTime != null ">
-                create_time = #{createTime},
-            </if>
+        <trim prefix="set" suffixOverrides=",">
             <if test="deliverName != null ">
                 deliver_name = #{deliverName},
             </if>
@@ -213,7 +206,10 @@
             <if test="ext != null ">
                 ext = #{ext},
             </if>
-        </set>
+            <if test="address != null">address = #{address},</if>
+            <if test="receiveUser != null">receive_user = #{receiveUser},</if>
+            <if test="contactPhone != null">contact_phone = #{contactPhone},</if>
+        </trim>
         where id=#{id}
     </update>
 
@@ -221,38 +217,28 @@
     <delete id="deleteByIds" parameterType="java.util.List">
         delete from deliver_note where id in
         <foreach collection="list" item="item" open="("
-            separator="," close=")">
+                 separator="," close=")">
             #{item}
         </foreach>
     </delete>
 
 
     <!-- 根据id查找配送单信息 -->
-	<select id="selectById" resultMap="BaseResultMap"
-		parameterType="long"> select <include refid="Base_Column_List" />
-		from deliver_note where id = #{id}
-	</select>
+    <select id="selectById" resultMap="deliveryNote"
+            parameterType="long">select
+        <include refid="columns"/>
+        from deliver_note where id = #{id}
+    </select>
     <!--依据配送单编码查询-->
-    <select id="selectByDeliverCode" resultMap="BaseResultMap"
-            parameterType="String"> select <include refid="Base_Column_List" />
+    <select id="selectByDeliverCode" resultMap="deliveryNote" parameterType="String">
+        select
+        <include refid="columns"/>
         from deliver_note where deliver_code = #{0}
     </select>
 
 
-    <!-- 根据id查找配送单信息 -->
-    <select id="selectByOrderId" resultMap="BaseResultMap"
-            parameterType="long">
-        select <include refid="Base_Column_List" />
-        from deliver_note where order_id = #{id} order by id desc
-    </select>
-
-    <select id="selectLastByOrderId" resultMap="BaseResultMap"
-            parameterType="long">
-        select <include refid="Base_Column_List" />
-        from deliver_note where order_id = #{id} order by id desc limit 1
-    </select>
     <!-- base where条件  -->
-    <sql id="Base_Where_Condition" >
+    <sql id="filter">
         <where>
             <if test="id != null ">
                 and id = #{id}
@@ -310,20 +296,20 @@
 
 
     <!--查询配送单信息列表-->
-     <select id="pageDeliverNotes" resultMap="BaseResultMap"
-        parameterType="com.lhiot.oc.delivery.entity.DeliverNote">
-	        select <include refid="Base_Column_List" />
-	        from deliver_note
-	        <include refid="Base_Where_Condition" />
-	        <include refid="common.pager" />
+    <select id="pageDeliverNotes" resultMap="deliveryNote"
+            parameterType="com.lhiot.oc.delivery.entity.DeliverNote">
+        select
+        <include refid="columns"/>
+        from deliver_note
+        <include refid="filter"/>
     </select>
 
     <!--查询配送单信息总记录-->
     <select id="pageDeliverNoteCounts" resultType="long"
-        parameterType="com.lhiot.oc.delivery.entity.DeliverNote">
-            select count(1)
-            from deliver_note
-            <include refid="Base_Where_Condition" />
+            parameterType="com.lhiot.oc.delivery.entity.DeliverNote">
+        select count(1)
+        from deliver_note
+        <include refid="filter"/>
     </select>
 
 </mapper>

@@ -49,9 +49,4 @@ public interface DeliverNoteMapper {
     * Description: 查询配送单信息总记录数
     */
     long pageDeliverNoteCounts(DeliverNote deliverNote);
-
-    List<DeliverNote> selectByOrderId(Long id);
-
-
-    DeliverNote selectLastByOrderId(Long orderId);
 }

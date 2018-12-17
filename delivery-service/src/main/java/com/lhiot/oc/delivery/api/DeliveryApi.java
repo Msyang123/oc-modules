@@ -5,15 +5,12 @@ import com.leon.microx.predefine.Day;
 import com.leon.microx.util.*;
 import com.leon.microx.web.result.Id;
 import com.leon.microx.web.result.Tips;
-import com.leon.microx.web.swagger.ApiParamType;
-import com.lhiot.oc.delivery.api.calculator.FeeCalculator;
 import com.lhiot.oc.delivery.client.AdaptableClient;
 import com.lhiot.oc.delivery.entity.DeliverNote;
 import com.lhiot.oc.delivery.feign.Store;
 import com.lhiot.oc.delivery.model.*;
 import com.lhiot.oc.delivery.service.DeliveryService;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -48,32 +45,6 @@ public class DeliveryApi {
         this.deliveryService = deliveryService;
     }
 
-
-    @PostMapping("/delivery/fee/search")
-    @ApiOperation("获取（计算）配送费")
-    @ApiImplicitParam(paramType = ApiParamType.BODY, name = "feeQuery", dataType = "DeliverFeeQuery", required = true, value = "配送费计算传入参数")
-    public ResponseEntity fee(@RequestBody DeliverFeeQuery feeQuery) {
-        Optional<Store> store = deliveryService.store(feeQuery.getStoreId(), feeQuery.getApplicationType());
-        if (!store.isPresent()) {
-            return ResponseEntity.badRequest().body("查询门店信息失败！");
-        }
-        DeliverTime time = feeQuery.getDeliveryTime();
-        //传入经纬度是否需要转换坐标系
-        if (feeQuery.getCoordinateSystem().isNeedConvert()) {
-            Position.BD09 bd09 = Position.baidu(feeQuery.getTargetLng(), feeQuery.getTargetLat());
-            Position.GCJ02 amap = Position.GCJ02.of(bd09);
-            feeQuery.setTargetLng(amap.getLongitude());
-            feeQuery.setTargetLat(amap.getLatitude());
-        }
-        Optional<Long> deliverFee = FeeCalculator.of(feeQuery.getOrderFee(), feeQuery.getWeight())
-                .distance(Position.base(store.get().getLatitude().doubleValue(), store.get().getLongitude().doubleValue()),
-                        Position.base(feeQuery.getTargetLng(), feeQuery.getTargetLat()))
-                .period(time.getStartTime(), time.getEndTime())
-                .completed();
-
-        return deliverFee.<ResponseEntity>map(fee -> ResponseEntity.ok(Tips.info("查询成功").data(fee)))
-                .orElseGet(() -> ResponseEntity.badRequest().body("超过配送范围！"));
-    }
 
     @GetMapping("/delivery/times")
     @ApiOperation(value = "获取订单配送时间列表")
@@ -114,8 +85,8 @@ public class DeliveryApi {
 
     @ApiOperation(value = "发送配送单")
     @PostMapping("/{deliverType}/delivery-notes")
-    public ResponseEntity create(@PathVariable("deliverType") DeliverType type, @RequestParam("coordinate") CoordinateSystem coordinate, @RequestBody DeliverOrder deliverOrder) {
-        Optional<Store> optional = deliveryService.store(deliverOrder.getStoreCode(), deliverOrder.getApplyType());
+    public ResponseEntity create(@PathVariable("deliverType") DeliverType type, @RequestParam("coordinate") CoordinateSystem coordinate, @RequestBody DeliverOrderParam deliverOrderParam) {
+        Optional<Store> optional = deliveryService.store(deliverOrderParam.getStoreCode(), deliverOrderParam.getApplyType());
         if (!optional.isPresent()) {
             return ResponseEntity.badRequest().body("查询门店信息失败！");
         }
@@ -124,13 +95,13 @@ public class DeliveryApi {
         if (Objects.isNull(adapter)) {
             return ResponseEntity.badRequest().body(NOT_FIND_DELIVERY_WAY_MESSAGE);
         }
-        Tips tips = adapter.send(coordinate, optional.get(), deliverOrder, deliverNoteId);
+        Tips tips = adapter.send(coordinate, optional.get(), deliverOrderParam, deliverNoteId);
         if (tips.err()) {
             return ResponseEntity.badRequest().body(tips.getMessage());
         }
         DeliverNote deliverNote = (DeliverNote) tips.getData();
         deliverNote.setId(deliverNoteId);
-        deliveryService.saveDeliverNote(deliverOrder, deliverNote);
+        deliveryService.saveDeliverNote(deliverNote);
         return ResponseEntity.created(URI.create("/" + type.name() + "/delivery-notes/" + deliverNoteId)).body(Id.of(deliverNoteId));
     }
 
@@ -199,6 +170,16 @@ public class DeliveryApi {
             return ResponseEntity.badRequest().body(tips.getMessage());
         }
         return ResponseEntity.ok(tips.getData());
+    }
+
+    @GetMapping("/delivery-notes/{code}")
+    @ApiOperation(value = "查询本地配送单详情",response = DeliverNote.class)
+    public ResponseEntity localDetail(@PathVariable("code") String code){
+       DeliverNote deliverNote =  deliveryService.deliverNote(code);
+       if (Objects.isNull(deliverNote)){
+           return ResponseEntity.badRequest().body("该配送单不存在");
+       }
+       return ResponseEntity.ok().body(deliverNote);
     }
 
     @ApiOperation(value = "配送单回调验签")

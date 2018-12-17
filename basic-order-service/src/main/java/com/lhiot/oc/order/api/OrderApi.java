@@ -13,7 +13,8 @@ import com.lhiot.oc.order.entity.type.OrderStatus;
 import com.lhiot.oc.order.event.OrderFlowEvent;
 import com.lhiot.oc.order.feign.BaseServiceFeign;
 import com.lhiot.oc.order.feign.HaiDingService;
-import com.lhiot.oc.order.feign.Payed;
+import com.lhiot.oc.order.feign.PaidModel;
+import com.lhiot.oc.order.feign.PaymentService;
 import com.lhiot.oc.order.mapper.BaseOrderMapper;
 import com.lhiot.oc.order.model.*;
 import com.lhiot.oc.order.model.type.ApplicationType;
@@ -50,9 +51,10 @@ public class OrderApi {
     private ProbeEventPublisher probeEventPublisher;
     private HaiDingService haiDingService;
     private Generator<Long> generator;
+    private PaymentService paymentService;
     private static final String HD_CANCEL_ORDER_SUCCESS_RESULT_STRING = "{\"success\":true}";
 
-    public OrderApi(OrderService orderService, BaseOrderMapper baseOrderMapper, BaseServiceFeign baseServiceFeign, ApplicationEventPublisher publisher, ProbeEventPublisher probeEventPublisher, HaiDingService haiDingService, Generator<Long> generator) {
+    public OrderApi(OrderService orderService, BaseOrderMapper baseOrderMapper, BaseServiceFeign baseServiceFeign, ApplicationEventPublisher publisher, ProbeEventPublisher probeEventPublisher, HaiDingService haiDingService, Generator<Long> generator, PaymentService paymentService) {
         this.orderService = orderService;
         this.baseOrderMapper = baseOrderMapper;
         this.baseServiceFeign = baseServiceFeign;
@@ -60,6 +62,7 @@ public class OrderApi {
         this.probeEventPublisher = probeEventPublisher;
         this.haiDingService = haiDingService;
         this.generator = generator;
+        this.paymentService = paymentService;
     }
 
     @PostMapping({"/", ""})
@@ -73,7 +76,29 @@ public class OrderApi {
             return ResponseEntity.badRequest().body(backMsg.getMessage());
         }
         //写库
-        OrderDetailResult result = orderService.createOrder(orderParam);
+        OrderDetailResult result = orderService.createOrder(orderParam, OrderStatus.WAIT_PAYMENT);
+        //写订单流水
+        publisher.publishEvent(new OrderFlowEvent(null, result.getStatus(), result.getId()));
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/paid")
+    @ApiOperation(value = "创建订单", response = OrderDetailResult.class)
+    @ApiImplicitParam(paramType = "body", name = "orderParam", dataType = "CreateOrderParam", required = true, value = "创建订单传入参数")
+    @Transactional
+    public ResponseEntity createPaidOrder(@RequestBody CreateOrderParam orderParam) {
+
+        ResponseEntity response = paymentService.findPaymentLog(orderParam.getPayId());
+        if (response.getStatusCode().isError()) {
+            return ResponseEntity.badRequest().body("未找到该支付Id的支付记录");
+        }
+        //验证参数中优惠金额及商品
+        Tips backMsg = orderService.validationParam(orderParam);
+        if (backMsg.err()) {
+            return ResponseEntity.badRequest().body(backMsg.getMessage());
+        }
+        //写库
+        OrderDetailResult result = orderService.createOrder(orderParam, OrderStatus.WAIT_SEND_OUT);
         //写订单流水
         publisher.publishEvent(new OrderFlowEvent(null, result.getStatus(), result.getId()));
         return ResponseEntity.ok(result);
@@ -82,12 +107,12 @@ public class OrderApi {
     @ApiOperation("支付回调修改订单状态为WAIT_SEND_OUT")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = ApiParamType.PATH, name = "orderCode", value = "订单编号", required = true, dataType = "String"),
-            @ApiImplicitParam(paramType = ApiParamType.BODY, name = "payed", value = "支付信息", required = true, dataType = "Payed")
+            @ApiImplicitParam(paramType = ApiParamType.BODY, name = "paidModel", value = "支付信息", required = true, dataType = "PaidModel")
     })
     @PutMapping("/{orderCode}/payed")
-    public ResponseEntity waitSendOut(@PathVariable("orderCode") String orderCode, @RequestBody Payed payed) {
+    public ResponseEntity waitSendOut(@PathVariable("orderCode") String orderCode, @RequestBody PaidModel paidModel) {
         try {
-            orderService.updateWaitPaymentToWaitSendOut(orderCode, payed);
+            orderService.updateWaitPaymentToWaitSendOut(orderCode, paidModel);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return ResponseEntity.badRequest().body("支付回掉修改状态失败");
@@ -160,10 +185,9 @@ public class OrderApi {
         if (Objects.isNull(order)) {
             return ResponseEntity.badRequest().body("订单不存在！");
         }
-//        if (!Objects.equals(WAIT_SEND_OUT, order.getStatus()) || !Objects.equals(HdStatus.SEND_OUT, order.getHdStatus())) {
-//            log.info("订单状态：" + order.getStatus() + "----海鼎状态：" + order.getHdStatus());
-//            return ResponseEntity.badRequest().body("当前订单状态不可调货！");
-//        }
+        if (!Objects.equals(OrderStatus.WAIT_SEND_OUT, order.getStatus())) {
+            return ResponseEntity.badRequest().body("当前订单状态不可调货！");
+        }
         //远程查找调货门店 不需要查询门店位置
         ResponseEntity response = baseServiceFeign.findStoreById(storeId);
         if (response.getStatusCode().isError()) {
@@ -225,9 +249,7 @@ public class OrderApi {
     }
 
     @ApiOperation(value = "根据条件分页获取订单列表", response = OrderDetailResult.class, responseContainer = "Set")
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = ApiParamType.BODY, name = "param", value = "查询条件", dataType = "BaseOrderParam")
-    })
+    @ApiImplicitParam(paramType = ApiParamType.BODY, name = "param", value = "查询条件", dataType = "BaseOrderParam")
     @PostMapping("/pages")
     public ResponseEntity search(@RequestBody BaseOrderParam param) {
         log.debug("获取订单列表\t param:{}", param);

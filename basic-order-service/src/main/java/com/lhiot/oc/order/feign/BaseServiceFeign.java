@@ -5,6 +5,7 @@ import com.lhiot.oc.order.model.ProductShelfResult;
 import com.lhiot.oc.order.model.Store;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * Created by yj
  */
 @FeignClient("basic-data-service-v1-0")
+@Component
 public interface BaseServiceFeign {
 
 

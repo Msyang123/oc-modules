@@ -17,13 +17,7 @@ import java.util.List;
 @Data
 @ApiModel
 @ToString
-public class DeliverOrder {
-
-    @ApiModelProperty(value = "id", dataType = "Long")
-    private Long id;
-
-    @ApiModelProperty(value = "订单id", dataType = "Long")
-    private Long orderId;
+public class DeliverOrderParam {
 
     @ApiModelProperty(value = "订单编码", dataType = "String")
     private String orderCode;
@@ -44,14 +38,10 @@ public class DeliverOrder {
     @ApiModelProperty(value = "业务回调地址", dataType = "String")
     private String backUrl;
 
-    @ApiModelProperty(value = "订单用户", dataType = "Long")
-    private Long userId;
     @ApiModelProperty(value = "订单总价", dataType = "Integer")
     private Integer totalAmount;
     @ApiModelProperty(value = "实收用户配送费", dataType = "Integer")
     private Integer deliveryFee;
-    @ApiModelProperty(value = "优惠金额", dataType = "Integer")
-    private Integer couponAmount;
     @ApiModelProperty(value = "应付金额", dataType = "Integer")
     private Integer amountPayable;
     @ApiModelProperty(value = "收货人", dataType = "String")
@@ -68,14 +58,10 @@ public class DeliverOrder {
     private Double lng;
     @ApiModelProperty(value = "纬度", dataType = "Double")
     private Double lat;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @ApiModelProperty(value = "配送时间", dataType = "Date")
-    private java.util.Date deliveryTime;
-
     @ApiModelProperty(value = "配送订单商品", dataType = "List")
     private List<DeliverProduct> deliverOrderProductList;
 
-    private String getDeliverTimeString() {
+    public String getDeliverTimeString() {
         return Jackson.json(this.deliverTime);
     }
 

@@ -1,5 +1,6 @@
 package com.lhiot.oc.payment.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -24,5 +25,6 @@ public class PaidModel {
 
     @NotEmpty
     @ApiModelProperty(value = "付款时间", dataType = "Date", required = true)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date payAt;
 }
