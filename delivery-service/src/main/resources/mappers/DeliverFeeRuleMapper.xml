@@ -38,6 +38,15 @@
         on a.id = dr.id
     </select>
 
+    <select id="count" parameterType="com.lhiot.oc.delivery.model.DeliverFeeSearchParam" resultType="int">
+        select count(id) from delivery_fee_rules
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="minOrderAmount !=null"> and min_order_amount &gt;= #{minOrderAmount}</if>
+            <if test="maxOrderAmount !=null">and max_order_amount &lt;= #{maxOrderAmount}</if>
+            <if test="deliveryAtType != null">and delivery_at_type = #{deliveryAtType}</if>
+        </trim>
+    </select>
+
     <resultMap id="rules" type="com.lhiot.oc.delivery.model.DeliverFeeRulesResult">
         <id column="id" property="id"/>
         <result column="min_order_amount" property="minOrderAmount"/>

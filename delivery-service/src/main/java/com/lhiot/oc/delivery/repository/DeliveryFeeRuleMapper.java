@@ -19,4 +19,6 @@ public interface DeliveryFeeRuleMapper {
     List<DeliverFeeRulesResult> query(DeliverFeeSearchParam param);
 
     int deleteById(Long id);
+
+    int count(DeliverFeeSearchParam param);
 }

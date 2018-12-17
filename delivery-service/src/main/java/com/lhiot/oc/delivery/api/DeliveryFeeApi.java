@@ -2,6 +2,7 @@ package com.lhiot.oc.delivery.api;
 
 import com.leon.microx.util.Maps;
 import com.leon.microx.util.Position;
+import com.leon.microx.web.result.Pages;
 import com.leon.microx.web.result.Tips;
 import com.leon.microx.web.result.Tuple;
 import com.leon.microx.web.swagger.ApiParamType;
@@ -71,8 +72,12 @@ public class DeliveryFeeApi {
     @PostMapping("/delivery-fee-rule/query")
     public ResponseEntity query(@RequestBody DeliverFeeSearchParam param) {
         List<DeliverFeeRulesResult> resultList = deliveryFeeRuleMapper.query(param);
-        return CollectionUtils.isEmpty(resultList) ? ResponseEntity.ok(Tuple.of(new ArrayList<>()))
-                : ResponseEntity.ok(Tuple.of(resultList));
+        int count = 0;
+        if (Objects.nonNull(param.getStartRows())){
+            count = deliveryFeeRuleMapper.count(param);
+        }
+        return ResponseEntity.ok(Pages.of(count,resultList));
+
     }
 
     @ApiOperation("根据配送费详细规则Id删除")
