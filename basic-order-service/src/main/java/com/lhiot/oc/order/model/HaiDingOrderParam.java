@@ -28,7 +28,6 @@ public class HaiDingOrderParam {
     private Integer amountPayable;
     private Integer deliveryAmount;
     private Integer couponAmount;
-    private String hdStatus;
     private String orderStatus;
     @ApiModelProperty(notes = "收货地址：门店自提订单填写门店地址", dataType = "String")
     private String address;
