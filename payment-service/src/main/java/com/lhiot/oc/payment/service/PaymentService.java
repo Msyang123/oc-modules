@@ -1,5 +1,6 @@
 package com.lhiot.oc.payment.service;
 
+import com.leon.microx.amqp.RabbitInitializer;
 import com.leon.microx.exception.ServiceException;
 import com.leon.microx.id.Generator;
 import com.leon.microx.pay.model.SignAttrs;
@@ -14,6 +15,7 @@ import com.lhiot.oc.payment.model.BalancePayModel;
 import com.lhiot.oc.payment.model.PaidModel;
 import com.lhiot.oc.payment.model.WxPayModel;
 import com.lhiot.oc.payment.type.PayStep;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Leon (234239150@qq.com) created in 9:20 18.12.3
@@ -33,6 +36,14 @@ public class PaymentService {
 
     private static final int DEFAULT_SIGN_TTL = 6;
 
+    private static final String DEFAULT_PAY_TIMEOUT_EXCHANGE_NAME = "oc-payment-timeout-exchange";
+
+    private static final String DEFAULT_PAY_TIMEOUT_DLX_QUEUE_NAME = "oc-payment-timeout-dlx-queue";
+
+    static final String DEFAULT_PAY_TIMEOUT_DLX_RECEIVE_NAME = "oc-payment-timeout-receive-queue";
+
+    private final RabbitTemplate rabbit;
+
     private BaseDataService dataService;
 
     private BaseUserService userService;
@@ -41,14 +52,20 @@ public class PaymentService {
 
     private Generator<Long> idGenerator;
 
-    private PaymentTimeout timeout;
-
-    public PaymentService(BaseDataService dataService, RecordMapper recordMapper, Generator<Long> idGenerator, BaseUserService userService, PaymentTimeout timeout) {
+    public PaymentService(
+            RabbitInitializer initializer, RabbitTemplate rabbit,
+            BaseDataService dataService, BaseUserService userService,
+            RecordMapper recordMapper, Generator<Long> idGenerator) {
+        initializer.delay(
+                DEFAULT_PAY_TIMEOUT_EXCHANGE_NAME,
+                DEFAULT_PAY_TIMEOUT_DLX_QUEUE_NAME,
+                DEFAULT_PAY_TIMEOUT_DLX_RECEIVE_NAME
+        );
+        this.rabbit = rabbit;
         this.dataService = dataService;
+        this.userService = userService;
         this.recordMapper = recordMapper;
         this.idGenerator = idGenerator;
-        this.userService = userService;
-        this.timeout = timeout;
     }
 
     public PaymentConfig findPaymentConfig(String configName) {
@@ -137,7 +154,12 @@ public class PaymentService {
         if (recordMapper.insert(record) < 1) {
             throw new ServiceException("创建支付记录失败");
         }
-        timeout.delay(record.getId(), DEFAULT_SIGN_TTL - 1); // 发延时队列，检查超时
+        // 发延时队列，检查超时
+        rabbit.convertAndSend(DEFAULT_PAY_TIMEOUT_EXCHANGE_NAME, DEFAULT_PAY_TIMEOUT_DLX_QUEUE_NAME, String.valueOf(record.getId()), message -> {
+            long ms = TimeUnit.MILLISECONDS.convert(DEFAULT_SIGN_TTL - 1, TimeUnit.MINUTES);
+            message.getMessageProperties().setExpiration(String.valueOf(ms));
+            return message;
+        });
         return SignAttrs.builder()
                 .outTradeNo(String.valueOf(record.getId()))
                 .title(record.getMemo())

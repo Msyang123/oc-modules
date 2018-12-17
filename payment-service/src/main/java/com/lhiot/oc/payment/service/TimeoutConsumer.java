@@ -28,7 +28,7 @@ public class TimeoutConsumer {
 
     @RabbitHandler
     @Transactional
-    @RabbitListener(queues = PaymentTimeout.DEFAULT_PAY_TIMEOUT_DLX_RECEIVE_NAME)
+    @RabbitListener(queues = PaymentService.DEFAULT_PAY_TIMEOUT_DLX_RECEIVE_NAME)
     public void timeout(String outTradeId) {
         Record record = service.record(Long.valueOf(outTradeId));
         if (Objects.isNull(record)) {
@@ -46,7 +46,7 @@ public class TimeoutConsumer {
         }
 
         boolean updated = service.timeout(Long.valueOf(outTradeId));
-        if (updated) {
+        if (!updated) {
             log.error("修改支付单 " + outTradeId + " 超时失败，不调用第三方关单接口");
             return;
         }
