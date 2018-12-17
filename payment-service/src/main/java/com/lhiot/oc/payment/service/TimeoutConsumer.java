@@ -46,7 +46,7 @@ public class TimeoutConsumer {
         }
 
         boolean updated = service.timeout(Long.valueOf(outTradeId));
-        if (updated) {
+        if (!updated) {
             log.error("修改支付单 " + outTradeId + " 超时失败，不调用第三方关单接口");
             return;
         }
