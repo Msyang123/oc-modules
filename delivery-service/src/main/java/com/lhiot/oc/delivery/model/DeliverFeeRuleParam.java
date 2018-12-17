@@ -13,7 +13,6 @@ import java.util.List;
  */
 @Data
 public class DeliverFeeRuleParam {
-    @Min(1)
     private Long id;
 
     @Min(0)
