@@ -5,16 +5,14 @@ import com.leon.microx.probe.annotation.Sniffer;
 import com.leon.microx.probe.collector.ProbeEventPublisher;
 import com.leon.microx.probe.event.ProbeEvent;
 import com.leon.microx.util.Maps;
+import com.leon.microx.util.StringUtils;
 import com.leon.microx.web.result.Pages;
 import com.leon.microx.web.result.Tips;
 import com.leon.microx.web.result.Tuple;
 import com.leon.microx.web.swagger.ApiParamType;
 import com.lhiot.oc.order.entity.type.OrderStatus;
 import com.lhiot.oc.order.event.OrderFlowEvent;
-import com.lhiot.oc.order.feign.BaseServiceFeign;
-import com.lhiot.oc.order.feign.HaiDingService;
-import com.lhiot.oc.order.feign.PaidModel;
-import com.lhiot.oc.order.feign.PaymentService;
+import com.lhiot.oc.order.feign.*;
 import com.lhiot.oc.order.mapper.BaseOrderMapper;
 import com.lhiot.oc.order.model.*;
 import com.lhiot.oc.order.model.type.ApplicationType;
@@ -33,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * zhangfeng created in 2018/9/19 9:42
@@ -52,9 +51,10 @@ public class OrderApi {
     private HaiDingService haiDingService;
     private Generator<Long> generator;
     private PaymentService paymentService;
+    private UserService userService;
     private static final String HD_CANCEL_ORDER_SUCCESS_RESULT_STRING = "{\"success\":true}";
 
-    public OrderApi(OrderService orderService, BaseOrderMapper baseOrderMapper, BaseServiceFeign baseServiceFeign, ApplicationEventPublisher publisher, ProbeEventPublisher probeEventPublisher, HaiDingService haiDingService, Generator<Long> generator, PaymentService paymentService) {
+    public OrderApi(OrderService orderService, BaseOrderMapper baseOrderMapper, BaseServiceFeign baseServiceFeign, ApplicationEventPublisher publisher, ProbeEventPublisher probeEventPublisher, HaiDingService haiDingService, Generator<Long> generator, PaymentService paymentService, UserService userService) {
         this.orderService = orderService;
         this.baseOrderMapper = baseOrderMapper;
         this.baseServiceFeign = baseServiceFeign;
@@ -63,6 +63,7 @@ public class OrderApi {
         this.haiDingService = haiDingService;
         this.generator = generator;
         this.paymentService = paymentService;
+        this.userService = userService;
     }
 
     @PostMapping({"/", ""})
@@ -253,6 +254,18 @@ public class OrderApi {
     @PostMapping("/pages")
     public ResponseEntity search(@RequestBody BaseOrderParam param) {
         log.debug("获取订单列表\t param:{}", param);
+        if (StringUtils.isNotBlank(param.getPhone())) {
+            ResponseEntity response = userService.findUsersByPhone(param.getPhone());
+            if (response.getStatusCode().isError()) {
+                return ResponseEntity.badRequest().body(response.getBody());
+            }
+            Tuple<?> tuple = (Tuple<?>) response.getBody();
+            if (Objects.isNull(tuple) || Objects.isNull(tuple.getArray())) {
+                return ResponseEntity.ok(Pages.empty());
+            }
+            String userIds = tuple.getArray().stream().map(obj -> (String) obj).collect(Collectors.joining(","));
+            param.setUserIds(userIds);
+        }
         Pages<OrderDetailResult> pages = orderService.findList(param);
         return ResponseEntity.ok(pages);
     }

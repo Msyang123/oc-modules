@@ -69,6 +69,8 @@
                     #{status}
                 </foreach>
             </if>
+            <if test="orderCode !=null and orderCode != ''">and order_code like concat('%',#{orderCode},'%')</if>
+            <if test="applicationTypes != null">and application_type = #{applicationType}</if>
         </trim>
     </sql>
 
