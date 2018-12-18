@@ -5,16 +5,14 @@ import com.leon.microx.probe.annotation.Sniffer;
 import com.leon.microx.probe.collector.ProbeEventPublisher;
 import com.leon.microx.probe.event.ProbeEvent;
 import com.leon.microx.util.Maps;
+import com.leon.microx.util.StringUtils;
 import com.leon.microx.web.result.Pages;
 import com.leon.microx.web.result.Tips;
 import com.leon.microx.web.result.Tuple;
 import com.leon.microx.web.swagger.ApiParamType;
 import com.lhiot.oc.order.entity.type.OrderStatus;
 import com.lhiot.oc.order.event.OrderFlowEvent;
-import com.lhiot.oc.order.feign.BaseServiceFeign;
-import com.lhiot.oc.order.feign.HaiDingService;
-import com.lhiot.oc.order.feign.PaidModel;
-import com.lhiot.oc.order.feign.PaymentService;
+import com.lhiot.oc.order.feign.*;
 import com.lhiot.oc.order.mapper.BaseOrderMapper;
 import com.lhiot.oc.order.model.*;
 import com.lhiot.oc.order.model.type.ApplicationType;
@@ -33,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * zhangfeng created in 2018/9/19 9:42
@@ -52,9 +51,10 @@ public class OrderApi {
     private HaiDingService haiDingService;
     private Generator<Long> generator;
     private PaymentService paymentService;
+    private UserService userService;
     private static final String HD_CANCEL_ORDER_SUCCESS_RESULT_STRING = "{\"success\":true}";
 
-    public OrderApi(OrderService orderService, BaseOrderMapper baseOrderMapper, BaseServiceFeign baseServiceFeign, ApplicationEventPublisher publisher, ProbeEventPublisher probeEventPublisher, HaiDingService haiDingService, Generator<Long> generator, PaymentService paymentService) {
+    public OrderApi(OrderService orderService, BaseOrderMapper baseOrderMapper, BaseServiceFeign baseServiceFeign, ApplicationEventPublisher publisher, ProbeEventPublisher probeEventPublisher, HaiDingService haiDingService, Generator<Long> generator, PaymentService paymentService, UserService userService) {
         this.orderService = orderService;
         this.baseOrderMapper = baseOrderMapper;
         this.baseServiceFeign = baseServiceFeign;
@@ -63,6 +63,7 @@ public class OrderApi {
         this.haiDingService = haiDingService;
         this.generator = generator;
         this.paymentService = paymentService;
+        this.userService = userService;
     }
 
     @PostMapping({"/", ""})
@@ -75,8 +76,13 @@ public class OrderApi {
         if (backMsg.err()) {
             return ResponseEntity.badRequest().body(backMsg.getMessage());
         }
+        ResponseEntity response = userService.findUserById(orderParam.getUserId());
+        if (response.getStatusCode().isError() || Objects.isNull(response.getBody())){
+            return ResponseEntity.badRequest().body("查询用户失败");
+        }
+        User user = (User) response.getBody();
         //写库
-        OrderDetailResult result = orderService.createOrder(orderParam, OrderStatus.WAIT_PAYMENT);
+        OrderDetailResult result = orderService.createOrder(orderParam, OrderStatus.WAIT_PAYMENT,user);
         //写订单流水
         publisher.publishEvent(new OrderFlowEvent(null, result.getStatus(), result.getId()));
         return ResponseEntity.ok(result);
@@ -97,8 +103,13 @@ public class OrderApi {
         if (backMsg.err()) {
             return ResponseEntity.badRequest().body(backMsg.getMessage());
         }
+        ResponseEntity userResponse = userService.findUserById(orderParam.getUserId());
+        if (userResponse.getStatusCode().isError() || Objects.isNull(userResponse.getBody())){
+            return ResponseEntity.badRequest().body("查询用户失败");
+        }
+        User user = (User) userResponse.getBody();
         //写库
-        OrderDetailResult result = orderService.createOrder(orderParam, OrderStatus.WAIT_SEND_OUT);
+        OrderDetailResult result = orderService.createOrder(orderParam, OrderStatus.WAIT_SEND_OUT,user);
         //写订单流水
         publisher.publishEvent(new OrderFlowEvent(null, result.getStatus(), result.getId()));
         return ResponseEntity.ok(result);

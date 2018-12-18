@@ -22,6 +22,12 @@ public class BaseOrderParam {
     private Integer rows;
     @ApiModelProperty(notes = "当前页", dataType = "Integer")
     private Integer page;
+    @ApiModelProperty(notes = "订单编号",dataType = "String")
+    private String orderCode;
+    @ApiModelProperty(notes = "phone",dataType = "String")
+    private String phone;
+
+    private String applicationType;
 
     @ApiModelProperty(hidden = true)
     private Integer startRow;

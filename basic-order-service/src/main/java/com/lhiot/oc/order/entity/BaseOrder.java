@@ -23,6 +23,7 @@ public class BaseOrder {
     private Long id;
     private String code;
     private Long userId;
+    private String userPhone;
     private String orderType;
     private String applicationType;
     private ReceivingWay receivingWay;

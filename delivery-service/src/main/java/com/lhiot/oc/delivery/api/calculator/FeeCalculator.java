@@ -3,8 +3,6 @@ package com.lhiot.oc.delivery.api.calculator;
 import com.leon.microx.util.Calculator;
 import com.leon.microx.util.Pair;
 import com.leon.microx.util.Position;
-import com.lhiot.oc.delivery.entity.DeliverFeeRuleDetail;
-import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Date;
@@ -103,7 +101,7 @@ public class FeeCalculator {
      * 设置配送时间段
      *
      * @param begin 配送开始时间
-     * @param end 配送结束时间
+     * @param end   配送结束时间
      * @return this
      */
     public FeeCalculator period(Date begin, Date end) {
