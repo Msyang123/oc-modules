@@ -76,8 +76,13 @@ public class OrderApi {
         if (backMsg.err()) {
             return ResponseEntity.badRequest().body(backMsg.getMessage());
         }
+        ResponseEntity response = userService.findUserById(orderParam.getUserId());
+        if (response.getStatusCode().isError() || Objects.isNull(response.getBody())){
+            return ResponseEntity.badRequest().body("查询用户失败");
+        }
+        User user = (User) response.getBody();
         //写库
-        OrderDetailResult result = orderService.createOrder(orderParam, OrderStatus.WAIT_PAYMENT);
+        OrderDetailResult result = orderService.createOrder(orderParam, OrderStatus.WAIT_PAYMENT,user);
         //写订单流水
         publisher.publishEvent(new OrderFlowEvent(null, result.getStatus(), result.getId()));
         return ResponseEntity.ok(result);
@@ -98,8 +103,13 @@ public class OrderApi {
         if (backMsg.err()) {
             return ResponseEntity.badRequest().body(backMsg.getMessage());
         }
+        ResponseEntity userResponse = userService.findUserById(orderParam.getUserId());
+        if (userResponse.getStatusCode().isError() || Objects.isNull(userResponse.getBody())){
+            return ResponseEntity.badRequest().body("查询用户失败");
+        }
+        User user = (User) userResponse.getBody();
         //写库
-        OrderDetailResult result = orderService.createOrder(orderParam, OrderStatus.WAIT_SEND_OUT);
+        OrderDetailResult result = orderService.createOrder(orderParam, OrderStatus.WAIT_SEND_OUT,user);
         //写订单流水
         publisher.publishEvent(new OrderFlowEvent(null, result.getStatus(), result.getId()));
         return ResponseEntity.ok(result);
@@ -254,18 +264,6 @@ public class OrderApi {
     @PostMapping("/pages")
     public ResponseEntity search(@RequestBody BaseOrderParam param) {
         log.debug("获取订单列表\t param:{}", param);
-        if (StringUtils.isNotBlank(param.getPhone())) {
-            ResponseEntity response = userService.findUsersByPhone(param.getPhone());
-            if (response.getStatusCode().isError()) {
-                return ResponseEntity.badRequest().body(response.getBody());
-            }
-            Tuple<?> tuple = (Tuple<?>) response.getBody();
-            if (Objects.isNull(tuple) || Objects.isNull(tuple.getArray())) {
-                return ResponseEntity.ok(Pages.empty());
-            }
-            String userIds = tuple.getArray().stream().map(obj -> (String) obj).collect(Collectors.joining(","));
-            param.setUserIds(userIds);
-        }
         Pages<OrderDetailResult> pages = orderService.findList(param);
         return ResponseEntity.ok(pages);
     }

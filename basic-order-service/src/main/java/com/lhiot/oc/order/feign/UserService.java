@@ -12,6 +12,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Component
 public interface UserService {
 
-    @RequestMapping(value = "/users/phone/{phone}/ids",method = RequestMethod.GET)
-    ResponseEntity<Tuple<String>> findUsersByPhone(@PathVariable("phone") String phone);
+    @RequestMapping(value = "/users/{id}", method = RequestMethod.GET)
+    ResponseEntity<User> findUserById(@PathVariable("id") Long userId);
 }

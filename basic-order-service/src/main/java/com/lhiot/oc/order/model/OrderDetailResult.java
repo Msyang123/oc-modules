@@ -21,6 +21,8 @@ public class OrderDetailResult {
     private String code;
     @ApiModelProperty(notes = "用户Id", dataType = "Long")
     private Long userId;
+    @ApiModelProperty(notes = "用户手机号码",dataType = "String")
+    private String userPhone;
     @ApiModelProperty(notes = "应用类型", dataType = "ApplicationTypeEnum")
     private String applicationType;
     private String orderType;

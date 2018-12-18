@@ -44,8 +44,6 @@ public class CreateOrderParam {
     private String address;
     @ApiModelProperty(notes = "收货人", dataType = "String")
     private String receiveUser;
-    @ApiModelProperty(notes = "收货人昵称", dataType = "String")
-    private String nickname;
     @ApiModelProperty(notes = "收货人联系方式", dataType = "String")
     private String contactPhone;
     private String remark;
