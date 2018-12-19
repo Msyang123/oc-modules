@@ -136,6 +136,7 @@ public class MeiTuanDeliveryService implements IDelivery {
         createOrderByShopRequest.setPoiSeq(deliverBaseOrder.getHdOrderCode().substring(hdOrderCodeLength - 4, hdOrderCodeLength));//骑手取货单号
         createOrderByShopRequest.setNote(deliverBaseOrder.getRemark());
         try {
+
             String response = meiTuanClient.deliver(createOrderByShopRequest);
             //发送美团返回结果
             CreateOrderResponse meiTuanOrderAddResult = Jackson.object(response, CreateOrderResponse.class);
