@@ -88,7 +88,7 @@ public class RefundApi {
             }
             return Payments.wx(config.getAppId(), config.getAppSecretKey(), config.getMerchantId(), config.getMerchantSecretKey())
                     .refund(certInput)
-                    .send(String.valueOf(outTradeNo), String.valueOf(outRefundNo), refund.getFee(), refund.getFee(), refund.getNotifyUrl())
+                    .send(String.valueOf(outTradeNo), String.valueOf(outRefundNo), record.getFee(), refund.getFee(), refund.getNotifyUrl())
                     ? ResponseEntity.ok().build()
                     : ResponseEntity.badRequest().body("微信退款失败");
         }
