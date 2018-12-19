@@ -295,10 +295,8 @@ public class OrderService {
                 }
                 break;
             case FAILURE:
-                if (Objects.equals(nowStatus, OrderStatus.WAIT_PAYMENT)) {
                     map.put("nowStatus", OrderStatus.WAIT_PAYMENT);
-                    break;
-                }
+                break;
             default:
                 return Tips.warn(nowStatus.getDescription() + "状态不可直接修改为" + modifyStatus.getDescription() + "状态");
         }

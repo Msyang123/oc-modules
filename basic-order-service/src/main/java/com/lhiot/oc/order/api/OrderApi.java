@@ -165,7 +165,7 @@ public class OrderApi {
     }
 
 
-    @ApiOperation(value = "修改订单状态(DISPATCHING,RECEIVED,其它状态请使用特定接口)", response = ResponseEntity.class)
+    @ApiOperation(value = "修改订单状态(DISPATCHING,RECEIVED,FAILURE,其它状态请使用特定接口)", response = ResponseEntity.class)
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = ApiParamType.PATH, name = "orderCode", value = "订单Code", required = true, dataType = "String"),
             @ApiImplicitParam(paramType = ApiParamType.QUERY, name = "orderStatus", value = "修改后订单状态", required = true, dataTypeClass = OrderStatus.class)
