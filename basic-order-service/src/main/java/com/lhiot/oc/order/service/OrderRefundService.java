@@ -1,9 +1,9 @@
 package com.lhiot.oc.order.service;
 
+import com.leon.microx.exception.ServiceException;
 import com.leon.microx.openfeign.CustomFeignException;
 import com.leon.microx.util.BeanUtils;
 import com.leon.microx.util.Maps;
-import com.leon.microx.util.Pair;
 import com.leon.microx.util.StringUtils;
 import com.leon.microx.web.result.Tips;
 import com.lhiot.oc.order.entity.OrderProduct;
@@ -21,7 +21,6 @@ import com.lhiot.oc.order.model.OrderDetailResult;
 import com.lhiot.oc.order.model.ReturnOrderParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -49,13 +48,17 @@ public class OrderRefundService {
         this.haiDingService = haiDingService;
     }
 
-    public Tips validateRefund(String orderCode, ReturnOrderParam param) {
-        if (Objects.equals(RefundType.PART, param.getRefundType()) && StringUtils.isBlank(param.getOrderProductIds())) {
-            return Tips.warn("部分退货，商品不可为空！");
-        }
+    public Tips validateRefund(String orderCode, RefundType refundType, String productIds) {
         OrderDetailResult order = baseOrderMapper.selectByCode(orderCode);
         if (Objects.isNull(order)) {
             return Tips.warn("订单不存在！");
+        }
+        if (!Objects.equals(OrderStatus.WAIT_SEND_OUT, order.getStatus()) && !Objects.equals(OrderStatus.SEND_OUTING, order.getStatus()) &&
+                !Objects.equals(OrderStatus.WAIT_DISPATCHING, order.getStatus()) && !Objects.equals(OrderStatus.RECEIVED, order.getStatus())) {
+            return Tips.warn("订单状态不可退款");
+        }
+        if (Objects.equals(RefundType.PART, refundType) && StringUtils.isBlank(productIds)) {
+            return Tips.warn("部分退货，商品不可为空！");
         }
         if (Objects.equals(order.getAllowRefund(), AllowRefund.NO)) {
             return Tips.warn("该订单不可以退货！");
@@ -87,17 +90,18 @@ public class OrderRefundService {
 
     /**
      * 第三方退款
+     *
      * @param payId 支付记录Id
      * @param param 退款入参
      */
-    public void refund(String payId,ReturnOrderParam param){
+    public void refund(String payId, ReturnOrderParam param) {
         RefundParam refundParam = new RefundParam();
         refundParam.setFee(param.getFee());
         refundParam.setReason(param.getReason());
         refundParam.setNotifyUrl(param.getNotifyUrl());
         ResponseEntity response = paymentService.refund(payId, refundParam);
         if (response.getStatusCode().isError()) {
-            throw new CustomFeignException(response);
+            throw new ServiceException("退款失败");
         }
     }
 
@@ -117,15 +121,16 @@ public class OrderRefundService {
             this.updateOrderProduct(order.getId(), param.getRefundType(), param.getOrderProductIds());
             //记录退款日志
             this.insertRefundLog(order, param);
-
-           this.refund(order.getPayId(),param);
+            this.refund(order.getPayId(), param);
         }
+        throw new ServiceException("订单退款，更新状态失败");
     }
 
     /**
      * 发送海鼎未备货退款
+     *
      * @param orderCode 订单编号
-     * @param param 退款入参
+     * @param param     退款入参
      */
     public void sendHdRefund(String orderCode, ReturnOrderParam param) {
         //更新订单状态
@@ -140,19 +145,20 @@ public class OrderRefundService {
 
             ResponseEntity hdResponse = haiDingService.hdCancel(orderCode, param.getReason());
             if (hdResponse.getStatusCode().isError()) {
-                throw new CustomFeignException(hdResponse);
+                throw new ServiceException("海鼎取消失败，订单退款失败");
             }
-
-            this.refund(order.getPayId(),param);
+            this.refund(order.getPayId(), param);
         }
+        throw new ServiceException("更新订单退款状态失败");
     }
 
     /**
      * 退货退款，提交海鼎退货申请
+     *
      * @param orderCode 订单编号
-     * @param param 退货入参
+     * @param param     退货入参
      */
-    public void applyHdReturns(String orderCode, ReturnOrderParam param){
+    public void applyHdReturns(String orderCode, ReturnOrderParam param) {
         //更新订单状态
         int count = baseOrderMapper.updateStatusToReturning(orderCode);
         if (count == 1) {
@@ -162,29 +168,31 @@ public class OrderRefundService {
             //添加退款日志
             this.insertRefundLog(order, param);
             //提交海鼎退货申请
-            this.hdReturns(order,param);
+            this.hdReturns(order, param);
         }
+        throw new ServiceException("退货失败");
     }
 
     /**
      * 退款回调确认
-     * @param orderCode 订单编号
+     *
+     * @param orderCode    订单编号
      * @param refundStatus 退款回调状态
      * @return Tips
      */
-    public Tips confirmRefund(String orderCode,OrderRefundStatus refundStatus){
+    public Tips confirmRefund(String orderCode, OrderRefundStatus refundStatus) {
         OrderStatus modifyStatus = OrderStatus.ALREADY_RETURN;
-        if (Objects.equals(OrderRefundStatus.RETURN_FAILURE,refundStatus)){
+        if (Objects.equals(OrderRefundStatus.RETURN_FAILURE, refundStatus)) {
             modifyStatus = OrderStatus.RETURN_FAILURE;
         }
-       int count =  baseOrderMapper.updateStatusByCode(Maps.of("nowStatus",OrderStatus.RETURNING,"modifyStatus",modifyStatus,"orderCode",orderCode));
-        if (count ==1){
-           OrderDetailResult order =  baseOrderMapper.selectByCode(orderCode);
-            count = refundMapper.updateByOrderId(Maps.of("orderId",order.getId(),"refundStatus",refundStatus));
-            if (count ==1 ){
+        int count = baseOrderMapper.updateStatusByCode(Maps.of("nowStatus", OrderStatus.RETURNING, "modifyStatus", modifyStatus, "orderCode", orderCode));
+        if (count == 1) {
+            OrderDetailResult order = baseOrderMapper.selectByCode(orderCode);
+            count = refundMapper.updateByOrderId(Maps.of("orderId", order.getId(), "refundStatus", refundStatus));
+            if (count == 1) {
                 return Tips.empty();
             }
-            throw new RuntimeException("修改订单退款记录失败");
+            throw new ServiceException("修改订单退款记录失败");
         }
         return Tips.warn("确认退款失败");
     }
@@ -210,6 +218,26 @@ public class OrderRefundService {
         if (Objects.isNull(refundResponse) || refundResponse.getStatusCode().isError()) {
             throw new CustomFeignException(refundResponse);
         }
+    }
+
+    /**
+     * 计算应退金额
+     *
+     * @param order      订单详情
+     * @param productIds 应退商品Id集合
+     * @return Integer
+     */
+    public Integer fee(OrderDetailResult order, String productIds) {
+        final int[] fee = {0};
+        List<OrderProduct> list = order.getOrderProductList();
+        List<String> idList = Arrays.asList(StringUtils.tokenizeToStringArray(productIds, ","));
+        idList.forEach(id ->
+                list.stream().filter(product -> Objects.equals(id, product.getId().toString()))
+                        .forEach(product -> fee[0] = fee[0] + product.getDiscountPrice()));
+        if (Objects.equals(ReceivingWay.TO_THE_HOME, order.getReceivingWay()) && !Objects.equals(OrderStatus.RECEIVED, order.getStatus())) {
+            fee[0] += order.getDeliveryAmount();
+        }
+        return fee[0];
     }
 
 }
