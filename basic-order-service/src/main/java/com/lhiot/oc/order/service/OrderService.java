@@ -1,5 +1,6 @@
 package com.lhiot.oc.order.service;
 
+import com.leon.microx.exception.ServiceException;
 import com.leon.microx.id.Generator;
 import com.leon.microx.openfeign.CustomFeignException;
 import com.leon.microx.util.*;
@@ -167,7 +168,7 @@ public class OrderService {
         if (count == 1) {
             OrderDetailResult order = this.findByCode(orderCode, true, false);
             if (Objects.isNull(order)) {
-                throw new RuntimeException("未查询到订单信息");
+                throw new ServiceException("未查询到订单信息");
             }
             Store store = new Store();
             store.setId(order.getOrderStore().getStoreId());
@@ -175,7 +176,7 @@ public class OrderService {
             store.setName(order.getOrderStore().getStoreName());
             Tips tips = this.hdReduce(order, store, order.getHdOrderCode());
             if (tips.err()) {
-                throw new RuntimeException(tips.getMessage());
+                throw new ServiceException(tips.getMessage());
             }
         }
 

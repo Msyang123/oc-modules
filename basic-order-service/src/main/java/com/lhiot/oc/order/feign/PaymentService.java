@@ -15,11 +15,24 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Component
 public interface PaymentService {
 
+    /**
+     * 支付完成，修改支付日志状态为PAID
+     * @param payId 支付Id
+     * @param paidModel 支付信息
+     * @return ResponseEntity
+     */
     @RequestMapping(value = "/records/{outTradeNo}/completed", method = RequestMethod.PUT)
     ResponseEntity updatePaymentLog(@PathVariable("outTradeNo") String payId, @RequestBody PaidModel paidModel);
 
-    @RequestMapping(value = "/payed/{outTradeNo}/refunds", method = RequestMethod.PUT)
+    /**
+     * 支付退款
+     * @param payId 支付Id
+     * @param refundParam 退款信息
+     * @return ResponseEntity
+     */
+    @RequestMapping(value = "/paid/{outTradeNo}/refunds", method = RequestMethod.POST)
     ResponseEntity refund(@PathVariable("outTradeNo") String payId, @RequestBody RefundParam refundParam);
+
 
     @RequestMapping(value = "/records/{outTradeNo}", method = RequestMethod.GET)
     ResponseEntity findPaymentLog(@PathVariable("outTradeNo") String outTradeNo);

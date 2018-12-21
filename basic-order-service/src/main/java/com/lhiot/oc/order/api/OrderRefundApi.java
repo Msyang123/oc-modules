@@ -147,7 +147,7 @@ public class OrderRefundApi {
             @ApiImplicitParam(paramType = ApiParamType.QUERY, name = "refundType", value = "退款类型", dataTypeClass = RefundType.class)
     })
     @GetMapping("orders/{orderCode}/refund/fee")
-    public ResponseEntity fee(@PathVariable("orderCode") String orderCode, @RequestBody String productIds, @RequestParam RefundType refundType) {
+    public ResponseEntity fee(@PathVariable("orderCode") String orderCode, @RequestParam String productIds, @RequestParam RefundType refundType) {
         Tips tips = refundService.validateRefund(orderCode, refundType, productIds);
         if (tips.err()) {
             return ResponseEntity.badRequest().body(tips.getMessage());

@@ -21,6 +21,7 @@ import com.lhiot.oc.order.model.OrderDetailResult;
 import com.lhiot.oc.order.model.ReturnOrderParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -32,6 +33,7 @@ import java.util.Objects;
  * @author zhangfeng create in 12:02 2018/12/6
  */
 @Service
+@Transactional
 public class OrderRefundService {
 
     private BaseOrderMapper baseOrderMapper;
@@ -122,6 +124,7 @@ public class OrderRefundService {
             //记录退款日志
             this.insertRefundLog(order, param);
             this.refund(order.getPayId(), param);
+            return;
         }
         throw new ServiceException("订单退款，更新状态失败");
     }
@@ -148,6 +151,7 @@ public class OrderRefundService {
                 throw new ServiceException("海鼎取消失败，订单退款失败");
             }
             this.refund(order.getPayId(), param);
+            return;
         }
         throw new ServiceException("更新订单退款状态失败");
     }
@@ -169,6 +173,7 @@ public class OrderRefundService {
             this.insertRefundLog(order, param);
             //提交海鼎退货申请
             this.hdReturns(order, param);
+            return;
         }
         throw new ServiceException("退货失败");
     }
