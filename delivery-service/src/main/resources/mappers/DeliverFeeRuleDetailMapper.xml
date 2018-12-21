@@ -53,8 +53,8 @@
 
     <select id="search" parameterType="map" resultType="com.lhiot.oc.delivery.entity.DeliverFeeRuleDetail">
         select first_weight,first_fee,additional_weight,additional_fee
-        from delivery_fee_rules_detail a
-        left join delivery_fee_rules b on a.id = b.delivery_fee_rule_id
+        from delivery_fee_rules_detail b
+        left join delivery_fee_rules a on a.id = b.delivery_fee_rule_id
         where a.min_order_amount &lt;= #{orderFee} AND a.max_order_amount &gt; #{orderFee}
         AND b.min_distance &lt;= #{distance} AND b.max_distance &gt; #{distance}
         AND (a.delivery_at_type = #{deliveryAtType} OR a.delivery_at_type = 'All') ORDER BY a.update_at DESC LIMIT 1

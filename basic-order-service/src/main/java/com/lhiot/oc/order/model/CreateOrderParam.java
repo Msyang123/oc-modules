@@ -1,7 +1,6 @@
 package com.lhiot.oc.order.model;
 
 import com.leon.microx.util.BeanUtils;
-import com.lhiot.dc.dictionary.DictionaryClient;
 import com.lhiot.dc.dictionary.HasEntries;
 import com.lhiot.oc.order.entity.BaseOrder;
 import com.lhiot.oc.order.entity.OrderProduct;

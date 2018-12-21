@@ -18,11 +18,6 @@
     </properties>
 
     <dependencies>
-        <!-- microx-utils -->
-        <dependency>
-            <groupId>com.leon.microx.core</groupId>
-            <artifactId>microx-core</artifactId>
-        </dependency>
         <!-- microx-restful (web / swagger / openfeign) -->
         <dependency>
             <groupId>com.leon.microx</groupId>

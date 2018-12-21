@@ -5,7 +5,6 @@ import com.leon.microx.probe.annotation.Sniffer;
 import com.leon.microx.probe.collector.ProbeEventPublisher;
 import com.leon.microx.probe.event.ProbeEvent;
 import com.leon.microx.util.Maps;
-import com.leon.microx.util.StringUtils;
 import com.leon.microx.web.result.Pages;
 import com.leon.microx.web.result.Tips;
 import com.leon.microx.web.result.Tuple;
@@ -31,7 +30,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * zhangfeng created in 2018/9/19 9:42
@@ -77,12 +75,12 @@ public class OrderApi {
             return ResponseEntity.badRequest().body(backMsg.getMessage());
         }
         ResponseEntity response = userService.findUserById(orderParam.getUserId());
-        if (response.getStatusCode().isError() || Objects.isNull(response.getBody())){
+        if (response.getStatusCode().isError() || Objects.isNull(response.getBody())) {
             return ResponseEntity.badRequest().body("查询用户失败");
         }
         User user = (User) response.getBody();
         //写库
-        OrderDetailResult result = orderService.createOrder(orderParam, OrderStatus.WAIT_PAYMENT,user);
+        OrderDetailResult result = orderService.createOrder(orderParam, OrderStatus.WAIT_PAYMENT, user);
         //写订单流水
         publisher.publishEvent(new OrderFlowEvent(null, result.getStatus(), result.getId()));
         return ResponseEntity.ok(result);
@@ -104,12 +102,12 @@ public class OrderApi {
             return ResponseEntity.badRequest().body(backMsg.getMessage());
         }
         ResponseEntity userResponse = userService.findUserById(orderParam.getUserId());
-        if (userResponse.getStatusCode().isError() || Objects.isNull(userResponse.getBody())){
+        if (userResponse.getStatusCode().isError() || Objects.isNull(userResponse.getBody())) {
             return ResponseEntity.badRequest().body("查询用户失败");
         }
         User user = (User) userResponse.getBody();
         //写库
-        OrderDetailResult result = orderService.createOrder(orderParam, OrderStatus.WAIT_SEND_OUT,user);
+        OrderDetailResult result = orderService.createOrder(orderParam, OrderStatus.WAIT_SEND_OUT, user);
         //写订单流水
         publisher.publishEvent(new OrderFlowEvent(null, result.getStatus(), result.getId()));
         return ResponseEntity.ok(result);

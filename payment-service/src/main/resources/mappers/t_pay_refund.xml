@@ -11,7 +11,7 @@
     </update>
 
     <select id="historicalAmount" parameterType="long" resultType="long">
-        select sum(fee) from t_pay_refund where record_id = #{0}
+        select IFNULL(sum(fee),0) from t_pay_refund where record_id = #{0}
     </select>
 
     <insert id="insert" parameterType="com.lhiot.oc.payment.entity.Refund">
