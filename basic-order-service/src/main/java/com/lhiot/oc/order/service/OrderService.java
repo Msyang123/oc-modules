@@ -315,6 +315,7 @@ public class OrderService {
         haiDingOrderParam.setStoreCode(store.getCode());
         haiDingOrderParam.setStoreId(store.getId());
         haiDingOrderParam.setHdOrderCode(hdOrderCode);
+        haiDingOrderParam.setOrderProducts(order.getOrderProductList());
 
         //海鼎减库存失败重试机制
         Retry retry = Retry.of(() -> haiDingService.reduce(haiDingOrderParam)).count(3).intervalMs(30).run();
