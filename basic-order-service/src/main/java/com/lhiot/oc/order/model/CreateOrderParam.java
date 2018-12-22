@@ -49,7 +49,7 @@ public class CreateOrderParam {
     @ApiModelProperty(notes = "提货截止时间", dataType = "String")
     private Date deliveryEndAt;
     @ApiModelProperty(notes = "配送时间 json格式如 {\"display\":\"立即配送\",\"startTime\":\"2018-08-15 11:30:00\",\"endTime\":\"2018-08-15 12:30:00\"}", dataType = "String")
-    private String deliveryAt;
+    private String deliverAt;
     @NotNull
     @ApiModelProperty(notes = "是否允许退款YES是NO否", dataType = "AllowRefund")
     private AllowRefund allowRefund;
