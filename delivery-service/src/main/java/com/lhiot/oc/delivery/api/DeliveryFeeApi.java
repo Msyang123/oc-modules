@@ -1,15 +1,17 @@
 package com.lhiot.oc.delivery.api;
 
+import com.leon.microx.util.Calculator;
 import com.leon.microx.util.Maps;
 import com.leon.microx.util.Position;
 import com.leon.microx.web.result.Pages;
 import com.leon.microx.web.result.Tips;
-import com.leon.microx.web.result.Tuple;
 import com.leon.microx.web.swagger.ApiParamType;
-import com.lhiot.oc.delivery.api.calculator.FeeCalculator;
 import com.lhiot.oc.delivery.entity.DeliverFeeRuleDetail;
 import com.lhiot.oc.delivery.feign.Store;
-import com.lhiot.oc.delivery.model.*;
+import com.lhiot.oc.delivery.model.DeliverFeeQuery;
+import com.lhiot.oc.delivery.model.DeliverFeeRuleParam;
+import com.lhiot.oc.delivery.model.DeliverFeeRulesResult;
+import com.lhiot.oc.delivery.model.DeliverFeeSearchParam;
 import com.lhiot.oc.delivery.repository.DeliveryFeeRuleDetailMapper;
 import com.lhiot.oc.delivery.repository.DeliveryFeeRuleMapper;
 import com.lhiot.oc.delivery.service.DeliveryFeeRuleService;
@@ -21,7 +23,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -61,7 +62,7 @@ public class DeliveryFeeApi {
     @PutMapping("/delivery-fee-rule/{id}")
     public ResponseEntity updateRules(@PathVariable("id") Long ruleId, @RequestBody DeliverFeeRuleParam deliverFeeRuleParam) {
         deliverFeeRuleParam.setId(ruleId);
-        if (!CollectionUtils.isEmpty(deliverFeeRuleParam.getDeleteIds())){
+        if (!CollectionUtils.isEmpty(deliverFeeRuleParam.getDeleteIds())) {
             deliveryFeeRuleDetailMapper.batchDelete(deliverFeeRuleParam.getDeleteIds());
         }
         ruleService.updateRules(deliverFeeRuleParam);
@@ -74,10 +75,10 @@ public class DeliveryFeeApi {
     public ResponseEntity query(@RequestBody DeliverFeeSearchParam param) {
         List<DeliverFeeRulesResult> resultList = deliveryFeeRuleMapper.query(param);
         int count = 0;
-        if (Objects.nonNull(param.getStartRows())){
+        if (Objects.nonNull(param.getStartRows())) {
             count = deliveryFeeRuleMapper.count(param);
         }
-        return ResponseEntity.ok(Pages.of(count,resultList));
+        return ResponseEntity.ok(Pages.of(count, resultList));
 
     }
 
@@ -113,15 +114,16 @@ public class DeliveryFeeApi {
         }
         double distance = Position.base(store.get().getLatitude().doubleValue(), store.get().getLongitude().doubleValue())
                 .distance(Position.base(feeQuery.getTargetLng(), feeQuery.getTargetLat())).doubleValue();
+        distance = Calculator.div(distance, 1000.0);
         DeliverFeeRuleDetail ruleDetail = deliveryFeeRuleDetailMapper.search(Maps.of("orderFee", feeQuery.getOrderFee(), "distance", distance,
                 "deliveryAtType", feeQuery.getDeliverAtType()));
         if (Objects.isNull(ruleDetail)) {
             return ResponseEntity.badRequest().body("超出配送范围");
         }
-        Tips<String> tips = ruleService.fee(feeQuery.getWeight(), ruleDetail);
+        Tips<Integer> tips = ruleService.fee(feeQuery.getWeight(), ruleDetail);
         if (tips.err()) {
             return ResponseEntity.badRequest().body("超出配送重量");
         }
-        return ResponseEntity.ok().body(tips);
+        return ResponseEntity.ok().body(Maps.of("fee", tips.getData()));
     }
 }

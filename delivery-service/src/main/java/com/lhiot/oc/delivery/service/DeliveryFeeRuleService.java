@@ -3,7 +3,6 @@ package com.lhiot.oc.delivery.service;
 import com.leon.microx.util.BeanUtils;
 import com.leon.microx.util.Calculator;
 import com.leon.microx.web.result.Tips;
-import com.lhiot.oc.delivery.api.calculator.FeeCalculator;
 import com.lhiot.oc.delivery.entity.DeliverFeeRule;
 import com.lhiot.oc.delivery.entity.DeliverFeeRuleDetail;
 import com.lhiot.oc.delivery.entity.UpdateWay;
@@ -74,14 +73,14 @@ public class DeliveryFeeRuleService {
         deliverFeeRule.setUpdateAt(Date.from(Instant.now()));
         deliveryFeeRuleMapper.updateById(deliverFeeRule);
 
-       List<DeliverFeeRuleDetail> insertList = param.getDetailList().stream().filter(detail -> Objects.equals(detail.getUpdateWay(), UpdateWay.INSERT))
-                            .collect(Collectors.toList());
-       if (!CollectionUtils.isEmpty(insertList)){
-           deliveryFeeRuleDetailMapper.batchInsert(insertList);
-       }
+        List<DeliverFeeRuleDetail> insertList = param.getDetailList().stream().filter(detail -> Objects.equals(detail.getUpdateWay(), UpdateWay.INSERT))
+                .collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(insertList)) {
+            deliveryFeeRuleDetailMapper.batchInsert(insertList);
+        }
         List<DeliverFeeRuleDetail> updateList = param.getDetailList().stream().filter(detail -> Objects.equals(detail.getUpdateWay(), UpdateWay.UPDATE))
                 .collect(Collectors.toList());
-        if (!CollectionUtils.isEmpty(updateList)){
+        if (!CollectionUtils.isEmpty(updateList)) {
             deliveryFeeRuleDetailMapper.updateBatch(updateList);
         }
     }
@@ -96,29 +95,32 @@ public class DeliveryFeeRuleService {
 
     /**
      * 计算配送费
-     * @param weight 订单重量
+     *
+     * @param weight     订单重量
      * @param ruleDetail 规则详情
      * @return Tips
      */
-    public Tips<String> fee(double weight, DeliverFeeRuleDetail ruleDetail) {
+    public Tips<Integer> fee(double weight, DeliverFeeRuleDetail ruleDetail) {
         if (Calculator.gt(weight, MAX_DELIVERY_WEIGHT)) {
             return Tips.warn("超出配送重量");
         }
         double firstWeight = ruleDetail.getFirstWeight().doubleValue();
-        int deliveryFee = ruleDetail.getFirstFee();
+        double deliveryFee = ruleDetail.getFirstFee();
         if (Calculator.lt(firstWeight, weight)) {
             double overstep = firstWeight - weight;
             double remainder = Calculator.div(overstep, ruleDetail.getAdditionalWeight().doubleValue());
-            remainder = (long) Math.ceil(remainder);
+            remainder = Math.ceil(remainder);
             deliveryFee += remainder * ruleDetail.getAdditionalFee();
         }
-        return Tips.info(deliveryFee + "");
+        Tips<Integer> tips = Tips.empty();
+        tips.setData((int) deliveryFee);
+        return tips;
     }
 
-    public boolean deleteRule(Long id){
-        boolean flag = deliveryFeeRuleMapper.deleteById(id)>0;
-        if (flag){
-            flag = deliveryFeeRuleDetailMapper.deleteByRuleId(id)>0;
+    public boolean deleteRule(Long id) {
+        boolean flag = deliveryFeeRuleMapper.deleteById(id) > 0;
+        if (flag) {
+            flag = deliveryFeeRuleDetailMapper.deleteByRuleId(id) > 0;
         }
         return flag;
     }

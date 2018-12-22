@@ -3,9 +3,9 @@
 <mapper namespace="com.lhiot.oc.order.mapper.BaseOrderMapper">
     <insert id="insert" parameterType="com.lhiot.oc.order.entity.BaseOrder" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO base_order (order_code,application_type,user_id,nickname,total_amount,delivery_amount,coupon_amount,amount_payable,receiving_way,status
-        ,receive_user,contact_phone,address,remark,delivery_end_at,hd_order_code,deliver_at,allow_refund,create_at,order_type)
+        ,receive_user,contact_phone,address,remark,delivery_end_at,hd_order_code,deliver_at,allow_refund,create_at,order_type,user_phone)
         VALUE (#{code},#{applicationType},#{userId},#{nickname},#{totalAmount},#{deliveryAmount},#{couponAmount},#{amountPayable},#{receivingWay},#{status}
-        ,#{receiveUser},#{contactPhone},#{address},#{remark},#{deliveryEndAt},#{hdOrderCode},#{deliverAt},#{allowRefund},#{createAt},#{orderType})
+        ,#{receiveUser},#{contactPhone},#{address},#{remark},#{deliveryEndAt},#{hdOrderCode},#{deliverAt},#{allowRefund},#{createAt},#{orderType},#{userPhone})
     </insert>
 
     <update id="updateOrderStatusById" parameterType="com.lhiot.oc.order.entity.BaseOrder">
@@ -69,20 +69,21 @@
                     #{status}
                 </foreach>
             </if>
+            <if test="orderCode !=null and orderCode != ''">and order_code like concat('%',#{orderCode},'%')</if>
+            <if test="phone !=null and phone != ''">and user_phone like concat('%',#{phone},'%')</if>
+            <if test="applicationType != null">and application_type = #{applicationType}</if>
         </trim>
     </sql>
 
     <!--查询订单集合-->
     <select id="findList" resultMap="orderDetails" parameterType="com.lhiot.oc.order.model.BaseOrderParam">
         select a.id, order_code as code, application_type, user_id, order_type, nickname, total_amount, delivery_amount,
-        coupon_amount,
-        amount_payable, receiving_way, status, receive_user, contact_phone, address, remark, delivery_end_at,
-        hd_stock_at,
-        a.hd_order_code, deliver_at, allow_refund, a.create_at,
+        coupon_amount, amount_payable, receiving_way, status, receive_user, contact_phone, address, remark,
+        delivery_end_at,
+        hd_stock_at, a.hd_order_code, deliver_at, allow_refund, a.create_at,user_phone,
         b.id as
         opid,b.order_id,b.barcode,b.total_price,b.product_name,b.specification_id,b.product_qty,b.shelf_qty,b.refund_status,b.discount_price,
-        b.image,b.total_weight,b.shelf_id,
-        c.store_id,c.store_name,c.store_code
+        b.image,b.total_weight,b.shelf_id, c.store_id,c.store_name,c.store_code
         from base_order a
         left join order_product b on a.id = b.order_id
         left join order_store c on a.hd_order_code = c.hd_order_code
@@ -110,6 +111,7 @@
             order_code as code,
             application_type,
             user_id,
+            user_phone,
             order_type,
             nickname,
             total_amount,
@@ -138,6 +140,7 @@
         <result column="application_type" property="applicationType"/>
         <result column="order_type" property="orderType"/>
         <result column="user_id" property="userId"/>
+        <result column="user_phone" property="userPhone"/>
         <result column="nickname" property="nickname"/>
         <result column="total_amount" property="totalAmount"/>
         <result column="delivery_amount" property="deliveryAmount"/>

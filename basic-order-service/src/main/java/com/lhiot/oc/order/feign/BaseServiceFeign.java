@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 
 /**
- * 用户中心基础服务
+ * 数据中心基础服务
  * Created by yj
  */
 @FeignClient("basic-data-service-v1-0")

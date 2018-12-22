@@ -1,7 +1,6 @@
 package com.lhiot.oc.order.model;
 
 import com.leon.microx.util.BeanUtils;
-import com.lhiot.dc.dictionary.DictionaryClient;
 import com.lhiot.dc.dictionary.HasEntries;
 import com.lhiot.oc.order.entity.BaseOrder;
 import com.lhiot.oc.order.entity.OrderProduct;
@@ -44,15 +43,13 @@ public class CreateOrderParam {
     private String address;
     @ApiModelProperty(notes = "收货人", dataType = "String")
     private String receiveUser;
-    @ApiModelProperty(notes = "收货人昵称", dataType = "String")
-    private String nickname;
     @ApiModelProperty(notes = "收货人联系方式", dataType = "String")
     private String contactPhone;
     private String remark;
     @ApiModelProperty(notes = "提货截止时间", dataType = "String")
     private Date deliveryEndAt;
     @ApiModelProperty(notes = "配送时间 json格式如 {\"display\":\"立即配送\",\"startTime\":\"2018-08-15 11:30:00\",\"endTime\":\"2018-08-15 12:30:00\"}", dataType = "String")
-    private String deliveryAt;
+    private String deliverAt;
     @NotNull
     @ApiModelProperty(notes = "是否允许退款YES是NO否", dataType = "AllowRefund")
     private AllowRefund allowRefund;

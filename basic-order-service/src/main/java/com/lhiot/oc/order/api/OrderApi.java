@@ -11,10 +11,7 @@ import com.leon.microx.web.result.Tuple;
 import com.leon.microx.web.swagger.ApiParamType;
 import com.lhiot.oc.order.entity.type.OrderStatus;
 import com.lhiot.oc.order.event.OrderFlowEvent;
-import com.lhiot.oc.order.feign.BaseServiceFeign;
-import com.lhiot.oc.order.feign.HaiDingService;
-import com.lhiot.oc.order.feign.PaidModel;
-import com.lhiot.oc.order.feign.PaymentService;
+import com.lhiot.oc.order.feign.*;
 import com.lhiot.oc.order.mapper.BaseOrderMapper;
 import com.lhiot.oc.order.model.*;
 import com.lhiot.oc.order.model.type.ApplicationType;
@@ -52,9 +49,10 @@ public class OrderApi {
     private HaiDingService haiDingService;
     private Generator<Long> generator;
     private PaymentService paymentService;
+    private UserService userService;
     private static final String HD_CANCEL_ORDER_SUCCESS_RESULT_STRING = "{\"success\":true}";
 
-    public OrderApi(OrderService orderService, BaseOrderMapper baseOrderMapper, BaseServiceFeign baseServiceFeign, ApplicationEventPublisher publisher, ProbeEventPublisher probeEventPublisher, HaiDingService haiDingService, Generator<Long> generator, PaymentService paymentService) {
+    public OrderApi(OrderService orderService, BaseOrderMapper baseOrderMapper, BaseServiceFeign baseServiceFeign, ApplicationEventPublisher publisher, ProbeEventPublisher probeEventPublisher, HaiDingService haiDingService, Generator<Long> generator, PaymentService paymentService, UserService userService) {
         this.orderService = orderService;
         this.baseOrderMapper = baseOrderMapper;
         this.baseServiceFeign = baseServiceFeign;
@@ -63,6 +61,7 @@ public class OrderApi {
         this.haiDingService = haiDingService;
         this.generator = generator;
         this.paymentService = paymentService;
+        this.userService = userService;
     }
 
     @PostMapping({"/", ""})
@@ -75,8 +74,13 @@ public class OrderApi {
         if (backMsg.err()) {
             return ResponseEntity.badRequest().body(backMsg.getMessage());
         }
+        ResponseEntity response = userService.findUserById(orderParam.getUserId());
+        if (response.getStatusCode().isError() || Objects.isNull(response.getBody())) {
+            return ResponseEntity.badRequest().body("查询用户失败");
+        }
+        User user = (User) response.getBody();
         //写库
-        OrderDetailResult result = orderService.createOrder(orderParam, OrderStatus.WAIT_PAYMENT);
+        OrderDetailResult result = orderService.createOrder(orderParam, OrderStatus.WAIT_PAYMENT, user);
         //写订单流水
         publisher.publishEvent(new OrderFlowEvent(null, result.getStatus(), result.getId()));
         return ResponseEntity.ok(result);
@@ -97,8 +101,13 @@ public class OrderApi {
         if (backMsg.err()) {
             return ResponseEntity.badRequest().body(backMsg.getMessage());
         }
+        ResponseEntity userResponse = userService.findUserById(orderParam.getUserId());
+        if (userResponse.getStatusCode().isError() || Objects.isNull(userResponse.getBody())) {
+            return ResponseEntity.badRequest().body("查询用户失败");
+        }
+        User user = (User) userResponse.getBody();
         //写库
-        OrderDetailResult result = orderService.createOrder(orderParam, OrderStatus.WAIT_SEND_OUT);
+        OrderDetailResult result = orderService.createOrder(orderParam, OrderStatus.WAIT_SEND_OUT, user);
         //写订单流水
         publisher.publishEvent(new OrderFlowEvent(null, result.getStatus(), result.getId()));
         return ResponseEntity.ok(result);
@@ -154,7 +163,7 @@ public class OrderApi {
     }
 
 
-    @ApiOperation(value = "修改订单状态(DISPATCHING,RECEIVED,其它状态请使用特定接口)", response = ResponseEntity.class)
+    @ApiOperation(value = "修改订单状态(DISPATCHING,RECEIVED,FAILURE,其它状态请使用特定接口)", response = ResponseEntity.class)
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = ApiParamType.PATH, name = "orderCode", value = "订单Code", required = true, dataType = "String"),
             @ApiImplicitParam(paramType = ApiParamType.QUERY, name = "orderStatus", value = "修改后订单状态", required = true, dataTypeClass = OrderStatus.class)

@@ -1,5 +1,6 @@
 package com.lhiot.oc.order.service;
 
+import com.leon.microx.exception.ServiceException;
 import com.leon.microx.id.Generator;
 import com.leon.microx.openfeign.CustomFeignException;
 import com.leon.microx.util.*;
@@ -106,12 +107,14 @@ public class OrderService {
      * @param orderStatus 插入时，订单的状态（已支付 WAIT_SEND_OUT,未支付 WAIT_PAYMENT）
      * @return OrderDetailResult
      */
-    public OrderDetailResult createOrder(CreateOrderParam param, OrderStatus orderStatus) {
+    public OrderDetailResult createOrder(CreateOrderParam param, OrderStatus orderStatus,User user) {
         BaseOrder baseOrder = param.toOrderObject();
         String orderCode = generator.get(0, ApplicationType.ref(param.getApplicationType()));
         baseOrder.setCode(orderCode);
         baseOrder.setHdOrderCode(orderCode);
         baseOrder.setStatus(orderStatus);
+        baseOrder.setUserPhone(user.getPhone());
+        baseOrder.setNickname(user.getNickname());
         baseOrderMapper.insert(baseOrder);
 
         List<OrderProduct> productList = param.getOrderProducts();
@@ -165,7 +168,7 @@ public class OrderService {
         if (count == 1) {
             OrderDetailResult order = this.findByCode(orderCode, true, false);
             if (Objects.isNull(order)) {
-                throw new RuntimeException("未查询到订单信息");
+                throw new ServiceException("未查询到订单信息");
             }
             Store store = new Store();
             store.setId(order.getOrderStore().getStoreId());
@@ -173,7 +176,7 @@ public class OrderService {
             store.setName(order.getOrderStore().getStoreName());
             Tips tips = this.hdReduce(order, store, order.getHdOrderCode());
             if (tips.err()) {
-                throw new RuntimeException(tips.getMessage());
+                throw new ServiceException(tips.getMessage());
             }
         }
 
@@ -293,10 +296,8 @@ public class OrderService {
                 }
                 break;
             case FAILURE:
-                if (Objects.equals(nowStatus, OrderStatus.WAIT_PAYMENT)) {
                     map.put("nowStatus", OrderStatus.WAIT_PAYMENT);
-                    break;
-                }
+                break;
             default:
                 return Tips.warn(nowStatus.getDescription() + "状态不可直接修改为" + modifyStatus.getDescription() + "状态");
         }
