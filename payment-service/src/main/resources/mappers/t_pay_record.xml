@@ -3,7 +3,7 @@
 <mapper namespace="com.lhiot.oc.payment.mapper.RecordMapper">
 
     <update id="timeout" parameterType="long">
-        update t_pay_record SET pay_step = 'TIMEOUT' where id = #{0}
+        update t_pay_record SET pay_step = 'TIMEOUT' where id = #{0} and pay_step = 'SIGN'
     </update>
 
     <update id="completed" parameterType="map">

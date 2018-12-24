@@ -4,6 +4,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 /**
@@ -15,7 +16,7 @@ public interface BaseDataService {
 	/**
 	 * 根据支付商户名称简称查询支付签名信息
 	 */
-    @GetMapping("/payment-config/{alias}")
-    ResponseEntity<PaymentConfig> findPaymentConfig(@PathVariable("alias") String alias);
+    @GetMapping("/payment-config")
+    ResponseEntity<PaymentConfig> findPaymentConfig(@RequestParam("name") String name);
 
 }
