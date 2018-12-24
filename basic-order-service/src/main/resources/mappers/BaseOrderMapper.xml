@@ -90,6 +90,7 @@
         inner join (
         select id from base_order
         <include refid="filter"/>
+        order by id desc
         <if test="rows != null and rows > 0 ">
             limit #{startRow} , #{rows}
         </if>
