@@ -78,7 +78,9 @@ public class DeliveryApi {
 
         while (latest.compareTo(current) >= 0) {
             LocalDateTime next = current.plusHours(1);
-            String display = current.getHour() == now.getHour() ? "立即配送" : StringUtils.format("{}-{}", current.format(FULL), next.format(FULL));
+            String display = current.getDayOfYear() == now.getDayOfYear() && current.getHour() == now.getHour()
+                    ? "立即配送"
+                    : StringUtils.format("{}-{}", current.format(FULL), next.format(FULL));
             times.add(DeliverTime.of(display, DateTime.convert(Objects.equals("立即配送", display) ? begin : current), DateTime.convert(next)));
             current = next;
         }
