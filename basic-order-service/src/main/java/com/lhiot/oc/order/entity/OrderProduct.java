@@ -28,7 +28,7 @@ public class OrderProduct {
     @ApiModelProperty(notes = "购买份数", dataType = "Integer")
     @Min(1)
     private Integer productQty;
-    @ApiModelProperty(notes = "规格数量", dataType = "BigDecimal")
+    @ApiModelProperty(notes = "上架数量", dataType = "BigDecimal")
     @Min(0)
     private BigDecimal shelfQty;
     @ApiModelProperty(notes = "除去优惠金额后单个商品总价", dataType = "Integer")
