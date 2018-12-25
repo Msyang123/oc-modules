@@ -2,7 +2,9 @@ package com.lhiot.oc.delivery.api;
 
 import com.leon.microx.id.Generator;
 import com.leon.microx.predefine.Day;
-import com.leon.microx.util.*;
+import com.leon.microx.util.DateTime;
+import com.leon.microx.util.Maps;
+import com.leon.microx.util.StringUtils;
 import com.leon.microx.web.result.Id;
 import com.leon.microx.web.result.Tips;
 import com.lhiot.oc.delivery.client.AdaptableClient;
@@ -40,7 +42,7 @@ public class DeliveryApi {
     private final DeliveryService deliveryService;
     private final Generator<Long> generator;
 
-    public DeliveryApi( DeliveryService deliveryService, Generator<Long> generator) {
+    public DeliveryApi(DeliveryService deliveryService, Generator<Long> generator) {
         this.generator = generator;
         this.deliveryService = deliveryService;
     }
@@ -77,7 +79,7 @@ public class DeliveryApi {
         while (latest.compareTo(current) >= 0) {
             LocalDateTime next = current.plusHours(1);
             String display = current.getHour() == now.getHour() ? "立即配送" : StringUtils.format("{}-{}", current.format(FULL), next.format(FULL));
-            times.add(DeliverTime.of(display, DateTime.convert(current), DateTime.convert(next)));
+            times.add(DeliverTime.of(display, DateTime.convert(Objects.equals("立即配送", display) ? begin : current), DateTime.convert(next)));
             current = next;
         }
         return times;
@@ -136,7 +138,7 @@ public class DeliveryApi {
         deliverNote.setFailureCause(reason.getReason());
         deliverNote.setCancelTime(new Date());
         deliverNote.setDeliverStatus(DeliverStatus.FAILURE);
-        deliveryService.saveDeliverFlow(deliverNote,preStatus);
+        deliveryService.saveDeliverFlow(deliverNote, preStatus);
         return ResponseEntity.ok().build();
     }
 
@@ -173,13 +175,13 @@ public class DeliveryApi {
     }
 
     @GetMapping("/delivery-notes/{code}")
-    @ApiOperation(value = "查询本地配送单详情",response = DeliverNote.class)
-    public ResponseEntity localDetail(@PathVariable("code") String code){
-       DeliverNote deliverNote =  deliveryService.deliverNote(code);
-       if (Objects.isNull(deliverNote)){
-           return ResponseEntity.badRequest().body("该配送单不存在");
-       }
-       return ResponseEntity.ok().body(deliverNote);
+    @ApiOperation(value = "查询本地配送单详情", response = DeliverNote.class)
+    public ResponseEntity localDetail(@PathVariable("code") String code) {
+        DeliverNote deliverNote = deliveryService.deliverNote(code);
+        if (Objects.isNull(deliverNote)) {
+            return ResponseEntity.badRequest().body("该配送单不存在");
+        }
+        return ResponseEntity.ok().body(deliverNote);
     }
 
     @ApiOperation(value = "配送单回调验签")

@@ -72,6 +72,8 @@
             <if test="orderCode !=null and orderCode != ''">and order_code like concat('%',#{orderCode},'%')</if>
             <if test="phone !=null and phone != ''">and user_phone like concat('%',#{phone},'%')</if>
             <if test="applicationType != null">and application_type = #{applicationType}</if>
+            <if test="startAt != null">and create_at >= #{startAt}</if>
+            <if test="endAt !=null">and create_at &lt;= #{endAt}</if>
         </trim>
     </sql>
 
@@ -90,6 +92,7 @@
         inner join (
         select id from base_order
         <include refid="filter"/>
+        order by id desc
         <if test="rows != null and rows > 0 ">
             limit #{startRow} , #{rows}
         </if>
