@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 import java.util.List;
@@ -35,6 +36,7 @@ public class DeliverOrder {
     private String storeName;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "创建时间", dataType = "Date")
     private Date createAt;
     @ApiModelProperty(value = "海鼎订单编码", dataType = "String")
@@ -67,6 +69,7 @@ public class DeliverOrder {
     @ApiModelProperty(value = "纬度", dataType = "Double")
     private Double lat;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "配送时间", dataType = "Date")
     private Date deliveryTime;
 
