@@ -1,10 +1,13 @@
 package com.lhiot.oc.order.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.lhiot.oc.order.entity.type.OrderStatus;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+
+import java.util.Date;
 
 /**
  * @author xiaojian  created in  2018/12/8 11:28
@@ -26,6 +29,15 @@ public class BaseOrderParam {
     private String orderCode;
     @ApiModelProperty(notes = "phone",dataType = "String")
     private String phone;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @ApiModelProperty(notes = "订单创建开始时间",dataType = "Date")
+    private Date startAt;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @ApiModelProperty(notes = "订单创建结束时间",dataType = "Date")
+    private Date endAt;
+
 
     private String applicationType;
 
