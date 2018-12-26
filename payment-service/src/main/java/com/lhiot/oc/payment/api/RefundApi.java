@@ -2,6 +2,7 @@ package com.lhiot.oc.payment.api;
 
 import com.leon.microx.pay.Payments;
 import com.leon.microx.pay.type.TradeType;
+import com.leon.microx.util.Maps;
 import com.leon.microx.web.swagger.ApiParamType;
 import com.lhiot.oc.payment.entity.Record;
 import com.lhiot.oc.payment.feign.PaymentConfig;
@@ -43,7 +44,7 @@ public class RefundApi {
     }
 
     @PostMapping("/paid/{outTradeNo}/refunds")
-    @ApiOperation("支付 - 退款（支持部分、多次退款）")
+    @ApiOperation("支付 - 退款（支持部分、多次退款） 余额退款不需要再调用/refunds/xxx/completed接口")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = ApiParamType.PATH, name = "outTradeNo", value = "支付ID", dataType = "Long", required = true),
             @ApiImplicitParam(paramType = ApiParamType.BODY, name = "refund", value = "第三方回调验签参数", dataType = "RefundModel", required = true)
@@ -64,7 +65,7 @@ public class RefundApi {
 
         if (Objects.isNull(record.getSignAt()) && record.getTradeType().equals(TradeType.OTHER_PAY)) {
             boolean completed = refundService.balanceRefund(record, refund);
-            return completed ? ResponseEntity.ok().build() : ResponseEntity.badRequest().body("退还余额失败！");
+            return completed ? ResponseEntity.ok().body(Maps.of("completed", true)) : ResponseEntity.badRequest().body("退还余额失败！");
         }
 
         PaymentConfig config = paymentService.findPaymentConfig(record.getConfigName());
