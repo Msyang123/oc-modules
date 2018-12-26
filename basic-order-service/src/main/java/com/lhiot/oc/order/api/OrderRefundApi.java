@@ -122,14 +122,13 @@ public class OrderRefundApi {
 
     @ApiOperation("退款确认，修改订单状态")
     @ApiImplicitParams({
-            @ApiImplicitParam(paramType = ApiParamType.PATH, name = "orderCode", value = "订单编号", dataType = "String", required = true),
+            @ApiImplicitParam(paramType = ApiParamType.PATH, name = "payId", value = "订单支付Id", dataType = "String", required = true),
             @ApiImplicitParam(paramType = ApiParamType.QUERY, name = "refundStatus", value = "退款状态", dataTypeClass = OrderRefundStatus.class, required = true)
     })
-    @PutMapping("orders/{orderCode}/refund/confirmation")
-    @DistributedLock(name = "'order-flow-lock-' + #orderCode")
-    public ResponseEntity confirmRefund(@PathVariable("orderCode") String orderCode, @RequestParam OrderRefundStatus refundStatus) {
+    @PutMapping("orders/{payId}/refund/confirmation")
+    public ResponseEntity confirmRefund(@PathVariable("payId") String payId, @RequestParam OrderRefundStatus refundStatus) {
         try {
-            Tips tips = refundService.confirmRefund(orderCode, refundStatus);
+            Tips tips = refundService.confirmRefund(payId, refundStatus);
             if (tips.err()) {
                 return ResponseEntity.badRequest().body("确认退款失败");
             }

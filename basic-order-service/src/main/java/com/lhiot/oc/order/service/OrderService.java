@@ -21,6 +21,8 @@ import com.lhiot.oc.order.model.*;
 import com.lhiot.oc.order.model.type.ApplicationType;
 import com.lhiot.oc.order.model.type.PayType;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -40,6 +42,9 @@ import static com.lhiot.oc.order.entity.type.OrderStatus.WAIT_SEND_OUT;
 @Transactional
 public class OrderService {
 
+    @Value("${lhiot.basic-order-service.finished-delay:172800000}")
+    private Long finishedDelay;
+
     private BaseOrderMapper baseOrderMapper;
     private OrderProductMapper orderProductMapper;
     private OrderStoreMapper orderStoreMapper;
@@ -48,8 +53,9 @@ public class OrderService {
     private HaiDingService haiDingService;
     private PaymentService paymentService;
     private DeliverService deliverService;
+    private RabbitTemplate rabbit;
 
-    public OrderService(BaseOrderMapper baseOrderMapper, OrderProductMapper orderProductMapper, OrderStoreMapper orderStoreMapper, OrderFlowMapper orderFlowMapper, Generator<Long> generator, HaiDingService haiDingService, PaymentService paymentService, DeliverService deliverService) {
+    public OrderService(BaseOrderMapper baseOrderMapper, OrderProductMapper orderProductMapper, OrderStoreMapper orderStoreMapper, OrderFlowMapper orderFlowMapper, Generator<Long> generator, HaiDingService haiDingService, PaymentService paymentService, DeliverService deliverService, RabbitTemplate rabbit) {
         this.baseOrderMapper = baseOrderMapper;
         this.orderProductMapper = orderProductMapper;
         this.orderStoreMapper = orderStoreMapper;
@@ -58,6 +64,7 @@ public class OrderService {
         this.haiDingService = haiDingService;
         this.paymentService = paymentService;
         this.deliverService = deliverService;
+        this.rabbit = rabbit;
     }
 
     /**
@@ -107,7 +114,7 @@ public class OrderService {
      * @param orderStatus 插入时，订单的状态（已支付 WAIT_SEND_OUT,未支付 WAIT_PAYMENT）
      * @return OrderDetailResult
      */
-    public OrderDetailResult createOrder(CreateOrderParam param, OrderStatus orderStatus,User user) {
+    public OrderDetailResult createOrder(CreateOrderParam param, OrderStatus orderStatus, User user) {
         BaseOrder baseOrder = param.toOrderObject();
         String orderCode = generator.get(0, ApplicationType.ref(param.getApplicationType()));
         baseOrder.setCode(orderCode);
@@ -294,9 +301,15 @@ public class OrderService {
                 if (Objects.equals(nowStatus, WAIT_SEND_OUT)) {
                     map.put("hdStockAt", Date.from(Instant.now()));
                 }
+                //发送订单完成延时消息
+                rabbit.convertAndSend("basic-order.finished-delay", "basic-order-OrderFinishedConsume-dlx", orderCode, message -> {
+                    message.getMessageProperties().setExpiration(String.valueOf(finishedDelay));
+                    return message;
+                });
+//                BaseOrderQueue.DelayQueue.AUTO_FINISHED.send(rabbit,orderCode,finishedDelay);
                 break;
             case FAILURE:
-                    map.put("nowStatus", OrderStatus.WAIT_PAYMENT);
+                map.put("nowStatus", OrderStatus.WAIT_PAYMENT);
                 break;
             default:
                 return Tips.warn(nowStatus.getDescription() + "状态不可直接修改为" + modifyStatus.getDescription() + "状态");
@@ -316,6 +329,7 @@ public class OrderService {
         haiDingOrderParam.setStoreId(store.getId());
         haiDingOrderParam.setHdOrderCode(hdOrderCode);
         haiDingOrderParam.setOrderProducts(order.getOrderProductList());
+        haiDingOrderParam.setPayAt(Date.from(Instant.now()));
 
         //海鼎减库存失败重试机制
         Retry retry = Retry.of(() -> haiDingService.reduce(haiDingOrderParam)).count(3).intervalMs(30).run();

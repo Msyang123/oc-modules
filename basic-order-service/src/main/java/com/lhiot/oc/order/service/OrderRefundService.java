@@ -22,12 +22,10 @@ import com.lhiot.oc.order.model.ReturnOrderParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @author zhangfeng create in 12:02 2018/12/6
@@ -105,6 +103,12 @@ public class OrderRefundService {
         if (response.getStatusCode().isError()) {
             throw new ServiceException("退款失败");
         }
+        //鲜果币退款，修改订单为退款完成，退款日志为完成
+        Map<?, ?> map = (Map<?, ?>) response.getBody();
+        if (!CollectionUtils.isEmpty(map) && (Boolean) map.get("completed")) {
+            baseOrderMapper.updateStatusByPayId(Maps.of("status",OrderStatus.ALREADY_RETURN,"payId",payId));
+            refundMapper.updateByPayId(Maps.of("refundStatus",OrderRefundStatus.ALREADY_RETURN,"payId",payId));
+        }
     }
 
     /**
@@ -181,19 +185,18 @@ public class OrderRefundService {
     /**
      * 退款回调确认
      *
-     * @param orderCode    订单编号
+     * @param payId        订单支付Id
      * @param refundStatus 退款回调状态
      * @return Tips
      */
-    public Tips confirmRefund(String orderCode, OrderRefundStatus refundStatus) {
+    public Tips confirmRefund(String payId, OrderRefundStatus refundStatus) {
         OrderStatus modifyStatus = OrderStatus.ALREADY_RETURN;
         if (Objects.equals(OrderRefundStatus.RETURN_FAILURE, refundStatus)) {
             modifyStatus = OrderStatus.RETURN_FAILURE;
         }
-        int count = baseOrderMapper.updateStatusByCode(Maps.of("nowStatus", OrderStatus.RETURNING, "modifyStatus", modifyStatus, "orderCode", orderCode));
+        int count = baseOrderMapper.updateStatusByPayId(Maps.of("status", modifyStatus, "payId", payId));
         if (count == 1) {
-            OrderDetailResult order = baseOrderMapper.selectByCode(orderCode);
-            count = refundMapper.updateByOrderId(Maps.of("orderId", order.getId(), "refundStatus", refundStatus));
+            count = refundMapper.updateByPayId(Maps.of("payId", payId, "refundStatus", refundStatus));
             if (count == 1) {
                 return Tips.empty();
             }

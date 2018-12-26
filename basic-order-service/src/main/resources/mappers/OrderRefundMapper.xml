@@ -6,7 +6,8 @@
         VALUE (#{hdOrderCode},#{orderId},#{userId},#{refundStatus},#{applyAt},#{disposeAt},#{orderProductIds},#{refundType},#{reason})
     </insert>
 
-    <update id="updateByOrderId" parameterType="map">
-        update order_refund set refund_status = #{refundStatus} , dispose_at = now() where order_id = #{orderId}
+    <update id="updateByPayId" parameterType="map">
+        update order_refund a LEFT JOIN base_order b ON a.order_id = b.id
+        set a.refund_status = #{refundStatus} , dispose_at = now() where b.pay_id = #{payId}
     </update>
 </mapper>

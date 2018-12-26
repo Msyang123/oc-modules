@@ -2,6 +2,7 @@ package com.lhiot.oc.delivery.service;
 
 import com.leon.microx.util.BeanUtils;
 import com.leon.microx.util.Calculator;
+import com.leon.microx.util.StringUtils;
 import com.leon.microx.web.result.Tips;
 import com.lhiot.oc.delivery.entity.DeliverFeeRule;
 import com.lhiot.oc.delivery.entity.DeliverFeeRuleDetail;
@@ -17,10 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.time.Instant;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -117,10 +115,11 @@ public class DeliveryFeeRuleService {
         return tips;
     }
 
-    public boolean deleteRule(Long id) {
-        boolean flag = deliveryFeeRuleMapper.deleteById(id) > 0;
+    public boolean deleteRule(String ids) {
+        List<String> idList = Arrays.asList(StringUtils.tokenizeToStringArray(ids,","));
+        boolean flag = deliveryFeeRuleMapper.deleteById(idList) > 0;
         if (flag) {
-            flag = deliveryFeeRuleDetailMapper.deleteByRuleId(id) > 0;
+            flag = deliveryFeeRuleDetailMapper.deleteByRuleId(idList) > 0;
         }
         return flag;
     }

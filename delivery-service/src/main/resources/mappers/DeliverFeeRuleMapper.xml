@@ -18,8 +18,11 @@
         where id = #{id}
     </update>
 
-    <delete id="deleteById" parameterType="Long">
-        delete from delivery_fee_rules where  id = #{0}
+    <delete id="deleteById" parameterType="list">
+        delete from delivery_fee_rules where  id in
+        <foreach collection="list" item="item" close=")" open="(" separator=",">
+            #{item}
+        </foreach>
     </delete>
 
     <select id="query" parameterType="com.lhiot.oc.delivery.model.DeliverFeeSearchParam" resultMap="rules">
