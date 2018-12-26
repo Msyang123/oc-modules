@@ -1,9 +1,11 @@
 package com.lhiot.oc.delivery.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lhiot.oc.delivery.model.DeliverStatus;
 import com.lhiot.oc.delivery.model.DeliverType;
 import lombok.Data;
 import lombok.ToString;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
@@ -24,6 +26,8 @@ public class DeliverNote {
     /**
      * 创建时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
 
@@ -65,12 +69,16 @@ public class DeliverNote {
     /**
      * 配送取消时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date cancelTime;
 
 
     /**
      * 接单时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date receiveTime;
 
     /**
