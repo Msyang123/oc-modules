@@ -1,5 +1,6 @@
 package com.lhiot.oc.order.service;
 
+import com.leon.microx.exception.ServiceException;
 import com.leon.microx.id.Generator;
 import com.leon.microx.openfeign.CustomFeignException;
 import com.leon.microx.util.*;
@@ -167,7 +168,7 @@ public class OrderService {
         if (count == 1) {
             OrderDetailResult order = this.findByCode(orderCode, true, false);
             if (Objects.isNull(order)) {
-                throw new RuntimeException("未查询到订单信息");
+                throw new ServiceException("未查询到订单信息");
             }
             Store store = new Store();
             store.setId(order.getOrderStore().getStoreId());
@@ -175,7 +176,7 @@ public class OrderService {
             store.setName(order.getOrderStore().getStoreName());
             Tips tips = this.hdReduce(order, store, order.getHdOrderCode());
             if (tips.err()) {
-                throw new RuntimeException(tips.getMessage());
+                throw new ServiceException(tips.getMessage());
             }
         }
 
@@ -295,10 +296,8 @@ public class OrderService {
                 }
                 break;
             case FAILURE:
-                if (Objects.equals(nowStatus, OrderStatus.WAIT_PAYMENT)) {
                     map.put("nowStatus", OrderStatus.WAIT_PAYMENT);
-                    break;
-                }
+                break;
             default:
                 return Tips.warn(nowStatus.getDescription() + "状态不可直接修改为" + modifyStatus.getDescription() + "状态");
         }
@@ -316,6 +315,7 @@ public class OrderService {
         haiDingOrderParam.setStoreCode(store.getCode());
         haiDingOrderParam.setStoreId(store.getId());
         haiDingOrderParam.setHdOrderCode(hdOrderCode);
+        haiDingOrderParam.setOrderProducts(order.getOrderProductList());
 
         //海鼎减库存失败重试机制
         Retry retry = Retry.of(() -> haiDingService.reduce(haiDingOrderParam)).count(3).intervalMs(30).run();

@@ -1,5 +1,6 @@
 package com.lhiot.oc.order.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.lhiot.oc.order.entity.type.AllowRefund;
@@ -8,6 +9,7 @@ import com.lhiot.oc.order.entity.type.ReceivingWay;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.Instant;
 import java.util.Date;
@@ -32,6 +34,8 @@ public class BaseOrder {
     private Integer deliveryAmount;
     private Integer couponAmount;
     private OrderStatus status;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createAt = Date.from(Instant.now());
     @ApiModelProperty(notes = "收货人", dataType = "String")
     private String receiveUser;
@@ -41,7 +45,11 @@ public class BaseOrder {
     private String address;
     private String remark;
     @ApiModelProperty(notes = "提货截止时间", dataType = "String")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date deliveryEndAt;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date hdStockAt;
     private String hdOrderCode;
     @ApiModelProperty(notes = "用户昵称", dataType = "String")

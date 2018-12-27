@@ -72,15 +72,19 @@
             <if test="orderCode !=null and orderCode != ''">and order_code like concat('%',#{orderCode},'%')</if>
             <if test="phone !=null and phone != ''">and user_phone like concat('%',#{phone},'%')</if>
             <if test="applicationType != null">and application_type = #{applicationType}</if>
+            <if test="startAt != null">and create_at >= #{startAt}</if>
+            <if test="endAt !=null">and create_at &lt;= #{endAt}</if>
         </trim>
     </sql>
 
     <!--查询订单集合-->
     <select id="findList" resultMap="orderDetails" parameterType="com.lhiot.oc.order.model.BaseOrderParam">
         select a.id, order_code as code, application_type, user_id, order_type, nickname, total_amount, delivery_amount,
-        coupon_amount, amount_payable, receiving_way, status, receive_user, contact_phone, address, remark, delivery_end_at,
+        coupon_amount, amount_payable, receiving_way, status, receive_user, contact_phone, address, remark,
+        delivery_end_at,
         hd_stock_at, a.hd_order_code, deliver_at, allow_refund, a.create_at,user_phone,
-        b.id as opid,b.order_id,b.barcode,b.total_price,b.product_name,b.specification_id,b.product_qty,b.shelf_qty,b.refund_status,b.discount_price,
+        b.id as
+        opid,b.order_id,b.barcode,b.total_price,b.product_name,b.specification_id,b.product_qty,b.shelf_qty,b.refund_status,b.discount_price,
         b.image,b.total_weight,b.shelf_id, c.store_id,c.store_name,c.store_code
         from base_order a
         left join order_product b on a.id = b.order_id
@@ -88,6 +92,7 @@
         inner join (
         select id from base_order
         <include refid="filter"/>
+        order by id desc
         <if test="rows != null and rows > 0 ">
             limit #{startRow} , #{rows}
         </if>

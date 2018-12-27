@@ -4,9 +4,10 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 /**
@@ -23,8 +24,9 @@ public class PaidModel {
     @ApiModelProperty(value = "付款方式", dataType = "String", required = true)
     private String bankType;
 
-    @NotEmpty
+    @NotNull
     @ApiModelProperty(value = "付款时间", dataType = "Date", required = true)
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date payAt;
 }

@@ -1,10 +1,12 @@
 package com.lhiot.oc.order.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lhiot.oc.order.entity.*;
 import com.lhiot.oc.order.entity.type.*;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 import java.util.List;
@@ -37,6 +39,8 @@ public class OrderDetailResult {
     @ApiModelProperty(notes = "优惠金额", dataType = "Integer")
     private Integer couponAmount;
     @ApiModelProperty(notes = "海鼎备货时间",dataType = "Date")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date hdStockAt;
     @ApiModelProperty(notes = "订单状态", dataType = "OrderStatus")
     private OrderStatus status;
@@ -49,6 +53,8 @@ public class OrderDetailResult {
     @ApiModelProperty(notes = "备注", dataType = "String")
     private String remark;
     @ApiModelProperty(notes = "提货截止时间", dataType = "Date")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date deliveryEndAt;
     @ApiModelProperty(notes = "海鼎的订单编码", dataType = "String")
     private String hdOrderCode;
@@ -59,6 +65,8 @@ public class OrderDetailResult {
     @ApiModelProperty(notes = "是否允许退款YES是NO否", dataType = "AllowRefund")
     private AllowRefund allowRefund = AllowRefund.YES;
     @ApiModelProperty(notes = "订单创建时间",dataType = "Date")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createAt;
     @ApiModelProperty(notes = "支付Id",dataType = "String")
     private String payId;

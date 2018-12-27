@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 /**
  * @author zhangfeng created in 2018/9/29 9:19
  **/
-@FeignClient("hai-ding-service-v1-0")
+@FeignClient("thirdparty-service-v1-0")
 public interface HaiDingService {
 
 
