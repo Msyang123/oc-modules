@@ -2,38 +2,49 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.lhiot.oc.order.mapper.OrderProductMapper">
 
-    <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="true" keyColumn="id">
+    <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO order_product(order_id,specification_id,barcode,
-        total_price,product_qty,specification_qty,refund_status,discount_price,
-        product_name,image,total_weight,source_id,source_type)
+        total_price,product_qty,shelf_qty,refund_status,discount_price,
+        product_name,image,total_weight,shelf_id)
         VALUE
         <foreach collection="list" item="item" separator=",">
             (
             #{item.orderId},#{item.specificationId},#{item.barcode},#{item.totalPrice},#{item.productQty},
-            #{item.specificationQty},#{item.refundStatus},#{item.discountPrice},
-            #{item.productName}, #{item.image},#{item.totalWeight},#{item.sourceId},#{item.sourceType}
+            #{item.shelfQty},#{item.refundStatus},#{item.discountPrice},
+            #{item.productName}, #{item.image},#{item.totalWeight},#{item.shelfId}
             )
         </foreach>
     </insert>
 
-    <select id="findOrderProductsByOrderId" parameterType="Long" resultType="com.lhiot.oc.order.model.OrderProduct">
-        select * from order_product where order_id=#{0}
+    <select id="selectOrderProductsByOrderId" parameterType="Long" resultType="com.lhiot.oc.order.entity.OrderProduct">
+        select <include refid="columns"/> from order_product where order_id=#{0}
     </select>
 
-    <select id="findOrderProductsByIds" parameterType="list" resultType="com.lhiot.oc.order.model.OrderProduct">
-        SELECT id,order_id,specification_id,barcode,total_price,product_qty,specification_qty,refund_status,discount_price,product_name
+    <select id="selectOrderProductsByIds" parameterType="list" resultType="com.lhiot.oc.order.entity.OrderProduct">
+        SELECT <include refid="columns"/>
         FROM order_product
         WHERE id IN
-        <foreach collection="list" item="item" close=")" open=")" separator=",">
+        <foreach collection="list" item="item" close=")" open="(" separator=",">
             #{item}
         </foreach>
     </select>
 
     <update id="updateOrderProductByIds" parameterType="map">
         UPDATE order_product SET refund_status = #{refundStatus}
-        WHERE order_id = #{orderId} AND id IN
+        WHERE order_id = #{orderId}
+        <if test="orderProductIds != null">
+        AND id IN
         <foreach collection="orderProductIds" item="item" separator="," close=")" open="(">
             #{item}
         </foreach>
+        </if>
     </update>
+
+    <sql id="columns">
+        <trim suffixOverrides=",">
+            id,order_id,specification_id,barcode,
+            total_price,product_qty,shelf_qty,refund_status,discount_price,
+            product_name,image,total_weight,shelf_id
+        </trim>
+    </sql>
 </mapper>

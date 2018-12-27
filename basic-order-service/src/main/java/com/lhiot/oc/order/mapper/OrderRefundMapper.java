@@ -1,8 +1,10 @@
 package com.lhiot.oc.order.mapper;
 
-import com.lhiot.oc.order.model.OrderRefund;
+import com.lhiot.oc.order.entity.OrderRefund;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
+
+import java.util.Map;
 
 /**
  * @uthor zhangfeng created in 2018/9/25 17:11
@@ -12,4 +14,6 @@ import org.springframework.stereotype.Repository;
 public interface OrderRefundMapper {
 
     int insert(OrderRefund orderRefund);
+
+    int updateByOrderId(Map<String,Object> map);
 }

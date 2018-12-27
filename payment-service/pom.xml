@@ -18,11 +18,6 @@
     </properties>
 
     <dependencies>
-        <!-- microx-utils -->
-        <dependency>
-            <groupId>com.leon.microx.core</groupId>
-            <artifactId>microx-core</artifactId>
-        </dependency>
         <!-- microx-restful (web / swagger / openfeign) -->
         <dependency>
             <groupId>com.leon.microx</groupId>
@@ -59,17 +54,22 @@
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
         </dependency>
-        <!--alipay-->
+        <!--dictionary-->
         <dependency>
-            <groupId>com.alipay</groupId>
-            <artifactId>alipay-sdk-java</artifactId>
+            <groupId>com.lhiot.dc</groupId>
+            <artifactId>dictionary-client</artifactId>
             <version>1.0</version>
         </dependency>
-        <!--httpClient-->
+        <!--payment-sdk-->
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.2</version>
+            <groupId>com.leon.microx.common</groupId>
+            <artifactId>microx-pay-core</artifactId>
+            <version>2.0-20180620</version>
+        </dependency>
+        <!-- rabbit-mq -->
+        <dependency>
+            <groupId>com.leon.microx.common</groupId>
+            <artifactId>microx-amqp-core</artifactId>
         </dependency>
     </dependencies>
 

@@ -1,6 +1,6 @@
 package com.lhiot.oc.order.model;
 
-import com.leon.microx.util.BeanUtils;
+import com.lhiot.oc.order.entity.OrderProduct;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -28,7 +28,6 @@ public class HaiDingOrderParam {
     private Integer amountPayable;
     private Integer deliveryAmount;
     private Integer couponAmount;
-    private String hdStatus;
     private String orderStatus;
     @ApiModelProperty(notes = "收货地址：门店自提订单填写门店地址", dataType = "String")
     private String address;

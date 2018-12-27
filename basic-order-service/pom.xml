@@ -53,7 +53,15 @@
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
-
+        <dependency>
+            <groupId>com.leon.microx.common</groupId>
+            <artifactId>microx-redis-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.lhiot.dc</groupId>
+            <artifactId>dictionary-client</artifactId>
+            <version>1.0</version>
+        </dependency>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>

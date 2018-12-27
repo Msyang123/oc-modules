@@ -1,15 +1,14 @@
 package com.lhiot.oc.order.service;
 
 import com.lhiot.oc.order.mapper.OrderFlowMapper;
-import com.lhiot.oc.order.model.OrderFlow;
-import com.lhiot.oc.order.model.type.OrderStatus;
+import com.lhiot.oc.order.entity.OrderFlow;
+import com.lhiot.oc.order.entity.type.OrderStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Date;
-import java.util.List;
 
 @Service
 @Slf4j
@@ -36,10 +35,5 @@ public class OrderFlowService {
         orderFlow.setPreStatus(preStatus);
         orderFlow.setCreateAt(Date.from(Instant.now()));
         orderFlowMapper.create(orderFlow);
-    }
-
-    //根据订单id查询
-    public List<OrderFlow> flowByOrderId(Long orderId) {
-        return orderFlowMapper.flowByOrderId(orderId);
     }
 }

@@ -107,7 +107,4 @@ public class Store {
     @ApiModelProperty(notes = "距离用户多远", dataType = "String")
     private String distance;
 
-    @ApiModelProperty(notes = "门店位置信息", dataType = "StorePosition")
-    private StorePosition storePosition;
-
 }

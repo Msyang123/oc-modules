@@ -1,6 +1,6 @@
 package com.lhiot.oc.order.mapper;
 
-import com.lhiot.oc.order.model.OrderFlow;
+import com.lhiot.oc.order.entity.OrderFlow;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
@@ -19,5 +19,5 @@ public interface OrderFlowMapper {
     int create(OrderFlow orderFlow);
 
     //根据订单id查询
-    List<OrderFlow> flowByOrderId(Long orderId);
+    List<OrderFlow> selectFlowByOrderId(Long orderId);
 }

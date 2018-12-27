@@ -2,7 +2,6 @@ package com.lhiot.oc.order.model;
 
 import com.lhiot.oc.order.model.type.AvailableStatus;
 import com.lhiot.oc.order.model.type.InventorySpecification;
-import com.lhiot.oc.order.model.type.ProductAttachment;
 import com.lhiot.oc.order.model.type.ShelfStatus;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

@@ -1,6 +1,6 @@
 package com.lhiot.oc.order.mapper;
 
-import com.lhiot.oc.order.model.OrderProduct;
+import com.lhiot.oc.order.entity.OrderProduct;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
@@ -16,10 +16,10 @@ public interface OrderProductMapper {
 
     int batchInsert(List<OrderProduct> orderProducts);
 
-    List<OrderProduct> findOrderProductsByOrderId(long orderId);
+    List<OrderProduct> selectOrderProductsByOrderId(long orderId);
 
     int updateOrderProductByIds(Map<String, Object> map);
 
-    List<OrderProduct> findOrderProductsByIds(List<String> idList);
+    List<OrderProduct> selectOrderProductsByIds(List<String> idList);
 
 }
