@@ -191,12 +191,17 @@
         </trim>
         where
         <if test="nowStatus != null">status = #{nowStatus}</if>
-        <if test="nowStatus == null">(status = 'SEND_OUTING' or status = 'DISPATCHING')</if>
+        <if test="nowStatus == null">((status = 'SEND_OUTING' and receiving_way = 'TO_THE_STORE') or status = 'DISPATCHING')</if>
         and order_code = #{orderCode}
     </update>
 
     <update id="updateStatusToReturning" parameterType="String">
         update base_order set status = 'RETURNING'
         where (status = 'WAIT_DISPATCHING' or status = 'RECEIVED') AND order_code = #{0}
+    </update>
+
+    <update id="updateStatusByPayId" parameterType="map">
+        update base_order set status = #{status}
+        where status = 'RETURNING' and pay_id = #{payId}
     </update>
 </mapper>

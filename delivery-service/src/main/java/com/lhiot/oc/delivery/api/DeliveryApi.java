@@ -36,7 +36,7 @@ public class DeliveryApi {
     private static final LocalTime END_DELIVER_OF_DAY = LocalTime.parse("21:30:01");
 
     private static final DateTimeFormatter MM_DD = DateTimeFormatter.ofPattern("MM-dd");
-    private static final DateTimeFormatter FULL = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter FULL = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss");
     private static final String NOT_FIND_DELIVERY_WAY_MESSAGE = "不支持的配送方式！";
     private static final String NOT_FIND_DELIVERY_ORDER_MESSAGE = "未找到配送单！";
     private final DeliveryService deliveryService;

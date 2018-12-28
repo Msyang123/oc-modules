@@ -22,7 +22,7 @@ public class FeeCalculator {
     private static final int FREE_DELIVERY_FEE_THRESHOLD = 3800;
 
     // 最大配送范围
-    public static final double MAX_DELIVERY_RANGE = 5.00;
+    public static final double MAX_DELIVERY_RANGE = 10.00;
 
     // 最终配送费用
     private long ultimateFee = DEFAULT_DELIVERY_FEE;
