@@ -19,6 +19,7 @@ import com.lhiot.oc.order.mapper.OrderRefundMapper;
 import com.lhiot.oc.order.model.HaiDingOrderParam;
 import com.lhiot.oc.order.model.OrderDetailResult;
 import com.lhiot.oc.order.model.ReturnOrderParam;
+import com.lhiot.oc.order.model.type.NotPayRefundWay;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -106,8 +107,8 @@ public class OrderRefundService {
         //鲜果币退款，修改订单为退款完成，退款日志为完成
         Map<?, ?> map = (Map<?, ?>) response.getBody();
         if (!CollectionUtils.isEmpty(map) && (Boolean) map.get("completed")) {
-            baseOrderMapper.updateStatusByPayId(Maps.of("status",OrderStatus.ALREADY_RETURN,"payId",payId));
-            refundMapper.updateByPayId(Maps.of("refundStatus",OrderRefundStatus.ALREADY_RETURN,"payId",payId));
+            baseOrderMapper.updateStatusByPayId(Maps.of("status", OrderStatus.ALREADY_RETURN, "payId", payId));
+            refundMapper.updateByPayId(Maps.of("refundStatus", OrderRefundStatus.ALREADY_RETURN, "payId", payId));
         }
     }
 
@@ -163,14 +164,13 @@ public class OrderRefundService {
     /**
      * 退货退款，提交海鼎退货申请
      *
-     * @param orderCode 订单编号
-     * @param param     退货入参
+     * @param order 订单
+     * @param param 退货入参
      */
-    public void applyHdReturns(String orderCode, ReturnOrderParam param) {
+    public void applyHdReturns(OrderDetailResult order, ReturnOrderParam param) {
         //更新订单状态
-        int count = baseOrderMapper.updateStatusToReturning(orderCode);
+        int count = baseOrderMapper.updateStatusToReturning(order.getCode());
         if (count == 1) {
-            OrderDetailResult order = baseOrderMapper.selectByCode(orderCode);
             //更新订单商品状态
             this.updateOrderProduct(order.getId(), param.getRefundType(), param.getOrderProductIds());
             //添加退款日志
@@ -248,4 +248,30 @@ public class OrderRefundService {
         return fee[0];
     }
 
+
+    public Tips notPayRefund(String orderCode, NotPayRefundWay refundWay) {
+        Map<String, Object> map;
+        switch (refundWay) {
+            case NOT_SEND_HD:
+                map = Maps.of("nowStatus", OrderStatus.WAIT_SEND_OUT, "modifyStatus", OrderStatus.ALREADY_RETURN,
+                        "orderCode", orderCode);
+                break;
+            case NOT_STOCKING:
+                ResponseEntity response = haiDingService.hdCancel(orderCode, "正常退货");
+                if (response.getStatusCode().isError()) {
+                    return Tips.warn("海鼎取消失败");
+                }
+                map = Maps.of("nowStatus", OrderStatus.SEND_OUTING, "modifyStatus", OrderStatus.ALREADY_RETURN,
+                        "orderCode", orderCode);
+                break;
+            case STOCKING:
+                map = Maps.of("nowStatus", OrderStatus.RETURNING, "modifyStatus", OrderStatus.ALREADY_RETURN,
+                        "orderCode", orderCode);
+                break;
+            default:
+                return Tips.warn("未找到退货方式");
+        }
+        baseOrderMapper.updateStatusByCode(map);
+        return Tips.empty();
+    }
 }

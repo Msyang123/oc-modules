@@ -24,4 +24,4 @@ eureka:
       defaultZone: ${EUREKA_REPLICAS_LIST:http://172.16.10.203:1111/eureka}
 lhiot:
   basic-order-service:
-    finished-delay: 60000
+    finished-delay: 172800000

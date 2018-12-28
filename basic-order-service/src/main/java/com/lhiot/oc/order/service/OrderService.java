@@ -32,7 +32,7 @@ import org.springframework.util.CollectionUtils;
 import java.time.Instant;
 import java.util.*;
 
-import static com.lhiot.oc.order.entity.type.OrderStatus.WAIT_SEND_OUT;
+import static com.lhiot.oc.order.entity.type.OrderStatus.SEND_OUTING;
 
 /**
  * @author zhangfeng created in 2018/9/19 9:19
@@ -170,7 +170,7 @@ public class OrderService {
      * @param orderCode 订单编号
      */
     public void updateWaitSendOutToSendOuting(String orderCode) {
-        int count = baseOrderMapper.updateStatusByCode(Maps.of("modifyStatus", OrderStatus.SEND_OUTING,
+        int count = baseOrderMapper.updateStatusByCode(Maps.of("modifyStatus", SEND_OUTING,
                 "nowStatus", OrderStatus.WAIT_SEND_OUT, "orderCode", orderCode));
         if (count == 1) {
             OrderDetailResult order = this.findByCode(orderCode, true, false);
@@ -197,7 +197,7 @@ public class OrderService {
      */
     public void sendDelivery(OrderDetailResult order, DeliverParam param) {
         int count = baseOrderMapper.updateStatusByCode(Maps.of("modifyStatus", OrderStatus.WAIT_DISPATCHING, "nowStatus"
-                , OrderStatus.SEND_OUTING, "orderCode", order.getCode(), "hdStockAt", Date.from(Instant.now())));
+                , SEND_OUTING, "orderCode", order.getCode(), "hdStockAt", Date.from(Instant.now())));
         if (count == 1) {
             DeliverOrder deliverOrder = this.convert(order, param);
             ResponseEntity response = deliverService.create(param.getDeliveryType(), param.getCoordinate(), deliverOrder);
@@ -237,7 +237,7 @@ public class OrderService {
         order.getOrderProductList().forEach(item -> {
             DeliverProduct deliverProduct = new DeliverProduct();
             deliverProduct.setBarcode(item.getBarcode());
-            deliverProduct.setBaseWeight(item.getTotalWeight().doubleValue());
+            deliverProduct.setTotalWeight(item.getTotalWeight().doubleValue());
             deliverProduct.setDeliverBaseOrderId(order.getId());
             deliverProduct.setDiscountPrice(item.getDiscountPrice());
             deliverProduct.setImage(item.getImage());
@@ -294,11 +294,11 @@ public class OrderService {
         map.put("orderCode", orderCode);
         switch (modifyStatus) {
             case DISPATCHING:
-                map.put("nowStatus", OrderStatus.SEND_OUTING);
+                map.put("nowStatus", SEND_OUTING);
                 break;
             case RECEIVED:
                 map.put("nowStatus", null);
-                if (Objects.equals(nowStatus, WAIT_SEND_OUT)) {
+                if (Objects.equals(nowStatus, SEND_OUTING)) {
                     map.put("hdStockAt", Date.from(Instant.now()));
                 }
                 //发送订单完成延时消息
@@ -306,7 +306,6 @@ public class OrderService {
                     message.getMessageProperties().setExpiration(String.valueOf(finishedDelay));
                     return message;
                 });
-//                BaseOrderQueue.DelayQueue.AUTO_FINISHED.send(rabbit,orderCode,finishedDelay);
                 break;
             case FAILURE:
                 map.put("nowStatus", OrderStatus.WAIT_PAYMENT);
