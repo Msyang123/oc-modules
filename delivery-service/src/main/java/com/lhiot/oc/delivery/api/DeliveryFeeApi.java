@@ -82,14 +82,6 @@ public class DeliveryFeeApi {
 
     }
 
-    @ApiOperation("根据配送费详细规则Id删除")
-    @ApiImplicitParam(paramType = ApiParamType.PATH, name = "id", value = "配送费详细规则Id", dataType = "Long", required = true)
-    @DeleteMapping("/delivery-fee-rule/detail/{id}")
-    public ResponseEntity deleteDetail(@PathVariable("id") Long id) {
-        deliveryFeeRuleDetailMapper.deleteById(id);
-        return ResponseEntity.ok().build();
-    }
-
     @ApiOperation("根据配送费规则模板Id删除")
     @ApiImplicitParam(paramType = ApiParamType.PATH, name = "ids", value = "配送费规则Id", dataType = "String", required = true)
     @DeleteMapping("/delivery-fee-rule/{ids}")

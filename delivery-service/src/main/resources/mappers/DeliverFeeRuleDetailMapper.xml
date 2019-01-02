@@ -67,9 +67,12 @@
         </foreach>
     </delete>
     
-    <delete id="deleteByRuleId" parameterType="Long">
+    <delete id="batchDeleteByRuleId" parameterType="list">
         delete from delivery_fee_rules_detail
-        where delivery_fee_rule_id = #{0}
+        where delivery_fee_rule_id in
+        <foreach collection="list" separator="," open="(" close=")" item="item">
+            #{item}
+        </foreach>
     </delete>
 
     <delete id="batchDelete" parameterType="list">

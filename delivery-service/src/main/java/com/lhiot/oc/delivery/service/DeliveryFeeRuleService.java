@@ -15,6 +15,7 @@ import com.lhiot.oc.delivery.repository.DeliveryFeeRuleMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.Instant;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
+@Transactional
 public class DeliveryFeeRuleService {
     public static final double MAX_DELIVERY_WEIGHT = 10.00;
     private DeliveryFeeRuleMapper deliveryFeeRuleMapper;
@@ -119,7 +121,7 @@ public class DeliveryFeeRuleService {
         List<String> idList = Arrays.asList(StringUtils.tokenizeToStringArray(ids,","));
         boolean flag = deliveryFeeRuleMapper.deleteById(idList) > 0;
         if (flag) {
-            flag = deliveryFeeRuleDetailMapper.deleteByRuleId(idList) > 0;
+            flag = deliveryFeeRuleDetailMapper.batchDeleteByRuleId(idList) > 0;
         }
         return flag;
     }
