@@ -17,9 +17,7 @@ public interface DeliveryFeeRuleDetailMapper {
 
     DeliverFeeRuleDetail search(Map<String,Object> map);
 
-    int deleteById(Long id);
-
-    int deleteByRuleId(List<String> ruleIdList);
+    int batchDeleteByRuleId(List<String> ruleIdList);
 
     void batchDelete(List<String> list);
 }
