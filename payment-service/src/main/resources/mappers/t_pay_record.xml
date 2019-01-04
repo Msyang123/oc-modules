@@ -38,6 +38,7 @@
         <if test="userIdCard != null">, user_id_card</if>
         <if test="configName != null">, config_name</if>
         <if test="signedAt != null">, signed_at</if>
+        <if test="paidAt != null">, paid_at</if>
         <if test="openId != null">, open_id</if>
         <if test="clientIp != null">, client_ip</if>
         <if test="attach != null">, attach</if>
@@ -48,6 +49,7 @@
         <if test="userIdCard != null">, #{userIdCard}</if>
         <if test="configName != null">, #{configName}</if>
         <if test="signedAt != null">, #{signedAt}</if>
+        <if test="paidAt != null">, #{paidAt}</if>
         <if test="openId != null">, #{openId}</if>
         <if test="clientIp != null">, #{clientIp}</if>
         <if test="attach != null">, #{attach}</if>
