@@ -21,7 +21,7 @@ public class Refund implements Serializable {
 
     private RefundStep refundStep;
 
-    private Date createAt;
+    private Date createdAt;
 
     private Date completedAt;
 }
