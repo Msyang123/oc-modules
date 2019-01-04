@@ -37,7 +37,6 @@ import java.util.Objects;
 @RestController
 @Slf4j
 @RequestMapping("/orders")
-@Transactional
 @Validated
 public class OrderApi {
 

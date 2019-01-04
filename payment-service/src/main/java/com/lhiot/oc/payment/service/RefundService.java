@@ -10,7 +10,6 @@ import com.lhiot.oc.payment.feign.BaseUserService;
 import com.lhiot.oc.payment.mapper.RefundMapper;
 import com.lhiot.oc.payment.model.RefundModel;
 import com.lhiot.oc.payment.type.RefundStep;
-import com.lhiot.oc.payment.type.SourceType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +40,7 @@ public class RefundService {
     }
 
     public boolean balanceRefund(Record record, RefundModel refund) {
-        this.createRefund(record, refund);
+        long refundId = this.createRefund(record, refund);
         Balance balance = new Balance();
         balance.setMoney(refund.getFee());
         balance.setApplicationType(record.getApplicationType());
@@ -49,7 +48,8 @@ public class RefundService {
         balance.setSourceId(String.valueOf(record.getId()));
         balance.setMemo("订单退款");
         ResponseEntity response = userService.updateBalance(record.getUserId(), balance);
-        return response.getStatusCode().is2xxSuccessful();
+        return response.getStatusCode().is2xxSuccessful()
+                && this.refundCompleted(refundId);
     }
 
     public long createRefund(Record record, RefundModel model) {
@@ -57,7 +57,7 @@ public class RefundService {
         Refund refund = new Refund();
         refund.setId(id);
         refund.setRecordId(record.getId());
-        refund.setCreateAt(Date.from(Instant.now()));
+        refund.setCreatedAt(Date.from(Instant.now()));
         refund.setFee(model.getFee());
         refund.setReason(model.getReason());
         refund.setRefundStep(RefundStep.SENT);

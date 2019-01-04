@@ -15,5 +15,5 @@ public interface OrderRefundMapper {
 
     int insert(OrderRefund orderRefund);
 
-    int updateByOrderId(Map<String,Object> map);
+    int updateByPayId(Map<String,Object> map);
 }

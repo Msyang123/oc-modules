@@ -42,9 +42,9 @@ public class Record implements Serializable {
 
     private String tradeId;
 
-    private Date signAt;
+    private Date signedAt;
 
-    private Date payAt;
+    private Date paidAt;
 
     private String memo;
 
@@ -68,7 +68,7 @@ public class Record implements Serializable {
         record.setFee(payModel.getFee());
         record.setMemo(payModel.getMemo());
         record.setPayStep(PayStep.SIGN);
-        record.setSignAt(java.sql.Date.from(Instant.now()));
+        record.setSignedAt(Date.from(Instant.now()));
         record.setAttach(payModel.getAttach());
         return record;
     }
