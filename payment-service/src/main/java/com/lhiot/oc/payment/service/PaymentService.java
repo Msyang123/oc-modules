@@ -36,12 +36,6 @@ public class PaymentService {
 
     private static final int DEFAULT_SIGN_TTL = 6;
 
-    private static final String DEFAULT_PAY_TIMEOUT_EXCHANGE_NAME = "oc-payment-timeout-exchange";
-
-    private static final String DEFAULT_PAY_TIMEOUT_DLX_QUEUE_NAME = "oc-payment-timeout-dlx-queue";
-
-    static final String DEFAULT_PAY_TIMEOUT_DLX_RECEIVE_NAME = "oc-payment-timeout-receive-queue";
-
     private final RabbitTemplate rabbit;
 
     private BaseDataService dataService;
@@ -52,15 +46,7 @@ public class PaymentService {
 
     private Generator<Long> idGenerator;
 
-    public PaymentService(
-            RabbitInitializer initializer, RabbitTemplate rabbit,
-            BaseDataService dataService, BaseUserService userService,
-            RecordMapper recordMapper, Generator<Long> idGenerator) {
-        initializer.delay(
-                DEFAULT_PAY_TIMEOUT_EXCHANGE_NAME,
-                DEFAULT_PAY_TIMEOUT_DLX_QUEUE_NAME,
-                DEFAULT_PAY_TIMEOUT_DLX_RECEIVE_NAME
-        );
+    public PaymentService(RabbitTemplate rabbit, BaseDataService dataService, BaseUserService userService, RecordMapper recordMapper, Generator<Long> idGenerator) {
         this.rabbit = rabbit;
         this.dataService = dataService;
         this.userService = userService;
@@ -96,10 +82,10 @@ public class PaymentService {
         User payUser = this.findUser(balancePay.getUserId());
         Record record = Record.from(idGenerator.get(), payUser, balancePay);
         record.setOrderCode(balancePay.getOrderCode());
-        record.setSignAt(null);             // 余额支付时，签名时间为空
+        record.setSignedAt(null);             // 余额支付时，签名时间为空
         record.setPayStep(PayStep.PAID);   // 余额支付直接为支付完成状态
         record.setTradeType(TradeType.OTHER_PAY);
-        record.setPayAt(Date.from(Instant.now()));
+        record.setPaidAt(Date.from(Instant.now()));
         if (recordMapper.insert(record) == 1) {
             Balance balance = new Balance();
             balance.setMoney(balancePay.getFee());
@@ -155,11 +141,15 @@ public class PaymentService {
             throw new ServiceException("创建支付记录失败");
         }
         // 发延时队列，检查超时
-        rabbit.convertAndSend(DEFAULT_PAY_TIMEOUT_EXCHANGE_NAME, DEFAULT_PAY_TIMEOUT_DLX_QUEUE_NAME, String.valueOf(record.getId()), message -> {
-            long ms = TimeUnit.MILLISECONDS.convert(DEFAULT_SIGN_TTL - 1, TimeUnit.MINUTES);
-            message.getMessageProperties().setExpiration(String.valueOf(ms));
-            return message;
-        });
+        rabbit.convertAndSend(
+                TimeoutConsumer.DEFAULT_PAY_TIMEOUT_EXCHANGE_NAME,
+                TimeoutConsumer.DEFAULT_PAY_TIMEOUT_DLX_QUEUE_NAME,
+                String.valueOf(record.getId()),
+                message -> {
+                    long ms = TimeUnit.MILLISECONDS.convert(DEFAULT_SIGN_TTL - 1, TimeUnit.MINUTES);
+                    message.getMessageProperties().setExpiration(String.valueOf(ms));
+                    return message;
+                });
         return SignAttrs.builder()
                 .outTradeNo(String.valueOf(record.getId()))
                 .title(record.getMemo())
@@ -196,7 +186,7 @@ public class PaymentService {
                         "id", outTradeNo,
                         "tradeId", paid.getTradeId(),
                         "bankType", paid.getBankType(),
-                        "payAt", paid.getPayAt(),
+                        "paidAt", paid.getPaidAt(),
                         "payStep", PayStep.PAID
                 )
         ) == 1;

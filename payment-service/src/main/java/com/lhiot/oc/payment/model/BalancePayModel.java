@@ -9,7 +9,7 @@ import lombok.ToString;
 import javax.validation.constraints.NotBlank;
 
 @Data
-@ToString
+@ToString(callSuper = true)
 @ApiModel(description = "余额支付参数")
 @EqualsAndHashCode(callSuper = true)
 public class BalancePayModel extends PayModel {
