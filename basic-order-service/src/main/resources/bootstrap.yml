@@ -22,3 +22,6 @@ eureka:
     registry-fetch-interval-seconds: 5
     serviceUrl:
       defaultZone: ${EUREKA_REPLICAS_LIST:http://172.16.10.203:1111/eureka}
+lhiot:
+  basic-order-service:
+    finished-delay: 172800000

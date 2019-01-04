@@ -14,6 +14,7 @@ import com.lhiot.oc.order.entity.type.RefundType;
 import com.lhiot.oc.order.mapper.BaseOrderMapper;
 import com.lhiot.oc.order.model.OrderDetailResult;
 import com.lhiot.oc.order.model.ReturnOrderParam;
+import com.lhiot.oc.order.model.type.NotPayRefundWay;
 import com.lhiot.oc.order.service.OrderRefundService;
 import com.lhiot.oc.order.service.OrderService;
 import io.swagger.annotations.ApiImplicitParam;
@@ -90,7 +91,8 @@ public class OrderRefundApi {
     @DistributedLock(name = "'order-flow-lock-' + #orderCode")
     public ResponseEntity stockUpRefund(@PathVariable("orderCode") String orderCode, @RequestBody ReturnOrderParam param) {
         try {
-            refundService.applyHdReturns(orderCode, param);
+            OrderDetailResult order = orderService.findByCode(orderCode);
+            refundService.applyHdReturns(order, param);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return ResponseEntity.badRequest().body("提交海鼎退货申请失败");
@@ -122,14 +124,13 @@ public class OrderRefundApi {
 
     @ApiOperation("退款确认，修改订单状态")
     @ApiImplicitParams({
-            @ApiImplicitParam(paramType = ApiParamType.PATH, name = "orderCode", value = "订单编号", dataType = "String", required = true),
+            @ApiImplicitParam(paramType = ApiParamType.PATH, name = "payId", value = "订单支付Id", dataType = "String", required = true),
             @ApiImplicitParam(paramType = ApiParamType.QUERY, name = "refundStatus", value = "退款状态", dataTypeClass = OrderRefundStatus.class, required = true)
     })
-    @PutMapping("orders/{orderCode}/refund/confirmation")
-    @DistributedLock(name = "'order-flow-lock-' + #orderCode")
-    public ResponseEntity confirmRefund(@PathVariable("orderCode") String orderCode, @RequestParam OrderRefundStatus refundStatus) {
+    @PutMapping("orders/{payId}/refund/confirmation")
+    public ResponseEntity confirmRefund(@PathVariable("payId") String payId, @RequestParam OrderRefundStatus refundStatus) {
         try {
-            Tips tips = refundService.confirmRefund(orderCode, refundStatus);
+            Tips tips = refundService.confirmRefund(payId, refundStatus);
             if (tips.err()) {
                 return ResponseEntity.badRequest().body("确认退款失败");
             }
@@ -155,6 +156,20 @@ public class OrderRefundApi {
         OrderDetailResult order = orderService.findByCode(orderCode, true, false);
         Integer fee = refundService.fee(order, productIds);
         return ResponseEntity.ok(Maps.of("fee", fee));
+    }
+
+    @ApiOperation("订单实际未支付退货（无需退款）")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = ApiParamType.PATH, name = "orderCode", value = "订单Code", dataType = "String", required = true),
+            @ApiImplicitParam(paramType = ApiParamType.QUERY, name = "notPayRefundWay", value = "无需退款的退货方式", dataTypeClass = NotPayRefundWay.class, required = true)
+    })
+    @PutMapping("orders/{orderCode}/not-payed/refund")
+    public ResponseEntity notPayRefund(@PathVariable("orderCode") String orderCode, @RequestParam("notPayRefundWay") NotPayRefundWay refundWay) {
+        Tips tips = refundService.notPayRefund(orderCode, refundWay);
+        if (tips.err()) {
+            return ResponseEntity.badRequest().body(tips.getMessage());
+        }
+        return ResponseEntity.ok().build();
     }
 
 }

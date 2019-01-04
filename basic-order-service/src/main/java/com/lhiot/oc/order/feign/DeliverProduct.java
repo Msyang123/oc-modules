@@ -35,8 +35,8 @@ public class DeliverProduct {
     @ApiModelProperty(value = "商品数量或者重量(规格表对应的数量或者重量)", dataType = "Double")
     private Double standardQty;
 
-    @ApiModelProperty(value = "商品基础重量)", dataType = "Double")
-    private Double baseWeight;
+    @ApiModelProperty(value = "单个商品总重量)", dataType = "Double")
+    private Double totalWeight;
 
     @ApiModelProperty(value = "除去优惠金额后单个商品的价格", dataType = "Integer")
     private Integer discountPrice;

@@ -60,13 +60,19 @@
         AND (a.delivery_at_type = #{deliveryAtType} OR a.delivery_at_type = 'All') ORDER BY a.update_at DESC LIMIT 1
     </select>
 
-    <delete id="deleteById" parameterType="Long">
-        delete from delivery_fee_rules_detail where id = #{0}
+    <delete id="deleteById" parameterType="list">
+        delete from delivery_fee_rules_detail where id in
+        <foreach collection="list" separator="," open="(" close=")" item="item">
+            #{item}
+        </foreach>
     </delete>
     
-    <delete id="deleteByRuleId" parameterType="Long">
+    <delete id="batchDeleteByRuleId" parameterType="list">
         delete from delivery_fee_rules_detail
-        where delivery_fee_rule_id = #{0}
+        where delivery_fee_rule_id in
+        <foreach collection="list" separator="," open="(" close=")" item="item">
+            #{item}
+        </foreach>
     </delete>
 
     <delete id="batchDelete" parameterType="list">

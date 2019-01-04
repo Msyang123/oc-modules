@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import java.util.Map;
+
 /**
  * @author zhangfeng create in 10:39 2018/12/4
  */
@@ -31,7 +33,7 @@ public interface PaymentService {
      * @return ResponseEntity
      */
     @RequestMapping(value = "/paid/{outTradeNo}/refunds", method = RequestMethod.POST)
-    ResponseEntity refund(@PathVariable("outTradeNo") String payId, @RequestBody RefundParam refundParam);
+    ResponseEntity<Map<String,Object>> refund(@PathVariable("outTradeNo") String payId, @RequestBody RefundParam refundParam);
 
 
     @RequestMapping(value = "/records/{outTradeNo}", method = RequestMethod.GET)

@@ -59,4 +59,6 @@ public interface BaseOrderMapper {
      * @return 总数
      */
     int findCount(BaseOrderParam param);
+
+    int updateStatusByPayId(Map<String,Object> map);
 }
