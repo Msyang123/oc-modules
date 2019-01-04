@@ -57,7 +57,7 @@ public class RefundService {
         Refund refund = new Refund();
         refund.setId(id);
         refund.setRecordId(record.getId());
-        refund.setCreateAt(Date.from(Instant.now()));
+        refund.setCreatedAt(Date.from(Instant.now()));
         refund.setFee(model.getFee());
         refund.setReason(model.getReason());
         refund.setRefundStep(RefundStep.SENT);

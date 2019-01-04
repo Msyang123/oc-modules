@@ -19,6 +19,12 @@ import java.util.Objects;
 @Transactional
 public class TimeoutConsumer {
 
+    public static final String DEFAULT_PAY_TIMEOUT_EXCHANGE_NAME = "oc-payment-timeout-exchange";
+
+    public static final String DEFAULT_PAY_TIMEOUT_DLX_QUEUE_NAME = "oc-payment-timeout-dlx-queue";
+
+    public static final String DEFAULT_PAY_TIMEOUT_DLX_RECEIVE_NAME = "oc-payment-timeout-receive-queue";
+
     private final PaymentService service;
 
     @Autowired
@@ -28,7 +34,7 @@ public class TimeoutConsumer {
 
     @RabbitHandler
     @Transactional
-    @RabbitListener(queues = PaymentService.DEFAULT_PAY_TIMEOUT_DLX_RECEIVE_NAME)
+    @RabbitListener(queues = DEFAULT_PAY_TIMEOUT_DLX_RECEIVE_NAME)
     public void timeout(String outTradeId) {
         Record record = service.record(Long.valueOf(outTradeId));
         if (Objects.isNull(record)) {

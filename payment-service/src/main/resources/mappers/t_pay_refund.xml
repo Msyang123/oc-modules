@@ -16,10 +16,10 @@
 
     <insert id="insert" parameterType="com.lhiot.oc.payment.entity.Refund">
         insert into t_pay_refund(
-          id, record_id, fee, refund_step, create_at
+          id, record_id, fee, refund_step, created_at
           <if test="reason != null">, reason </if>
         ) values (
-          #{id}, #{recordId}, #{fee}, #{refundStep}, #{createAt}
+          #{id}, #{recordId}, #{fee}, #{refundStep}, #{createdAt}
           <if test="reason != null">, #{reason} </if>
         )
     </insert>

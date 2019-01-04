@@ -63,7 +63,7 @@ public class RefundApi {
             return ResponseEntity.badRequest().body("退款金额不符。");
         }
 
-        if (Objects.isNull(record.getSignAt()) && record.getTradeType().equals(TradeType.OTHER_PAY)) {
+        if (Objects.isNull(record.getSignedAt()) && record.getTradeType().equals(TradeType.OTHER_PAY)) {
             boolean completed = refundService.balanceRefund(record, refund);
             return completed ? ResponseEntity.ok().body(Maps.of("completed", true)) : ResponseEntity.badRequest().body("退还余额失败！");
         }

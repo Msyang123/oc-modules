@@ -7,7 +7,7 @@
     </update>
 
     <update id="completed" parameterType="map">
-        update t_pay_record set trade_id = #{tradeId}, bank_type = #{bankType}, pay_at = #{payAt}, pay_step = #{payStep} where id = #{id} and pay_step = 'SIGN'
+        update t_pay_record set trade_id = #{tradeId}, bank_type = #{bankType}, paid_at = #{paidAt}, pay_step = #{payStep} where id = #{id} and pay_step = 'SIGN'
     </update>
 
     <select id="count" parameterType="map" resultType="long">
@@ -18,7 +18,7 @@
         select * from t_pay_record where user_id = #{userId}
         <if test="step != null" > and pay_step = #{step}</if>
         <if test="start != null AND rows > 0">
-            order by pay_at desc limit #{start}, #{rows}
+            order by paid_at desc limit #{start}, #{rows}
         </if>
     </select>
 
@@ -37,7 +37,7 @@
         <if test="userRealName != null">, user_real_name</if>
         <if test="userIdCard != null">, user_id_card</if>
         <if test="configName != null">, config_name</if>
-        <if test="signAt != null">, sign_at</if>
+        <if test="signedAt != null">, signed_at</if>
         <if test="openId != null">, open_id</if>
         <if test="clientIp != null">, client_ip</if>
         <if test="attach != null">, attach</if>
@@ -47,7 +47,7 @@
         <if test="userRealName != null">, #{userRealName}</if>
         <if test="userIdCard != null">, #{userIdCard}</if>
         <if test="configName != null">, #{configName}</if>
-        <if test="signAt != null">, #{signAt}</if>
+        <if test="signedAt != null">, #{signedAt}</if>
         <if test="openId != null">, #{openId}</if>
         <if test="clientIp != null">, #{clientIp}</if>
         <if test="attach != null">, #{attach}</if>
@@ -66,13 +66,13 @@
         <result column="user_phone" property="userPhone"/>
         <result column="user_real_name" property="userRealName"/>
         <result column="user_id_card" property="userIdCard"/>
-        <result column="sign_at" property="signAt"/>
+        <result column="signed_at" property="signedAt"/>
         <result column="open_id" property="openId"/>
         <result column="client_ip" property="clientIp"/>
         <result column="attach" property="attach"/>
         <result column="config_name" property="configName"/>
         <result column="trade_id" property="tradeId"/>
-        <result column="pay_at" property="payAt"/>
+        <result column="paid_at" property="paidAt"/>
         <result column="bank_type" property="bankType"/>
     </resultMap>
 </mapper>

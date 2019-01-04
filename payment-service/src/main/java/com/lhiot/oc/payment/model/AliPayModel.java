@@ -9,7 +9,7 @@ import lombok.ToString;
 import javax.validation.constraints.NotBlank;
 
 @Data
-@ToString
+@ToString(callSuper = true)
 @ApiModel(description = "蚂蚁金服支付签名参数")
 @EqualsAndHashCode(callSuper = true)
 public class AliPayModel extends PayModel {

@@ -2,8 +2,11 @@ package com.lhiot.oc.payment;
 
 
 import com.leon.microx.amqp.ConsumeExceptionResolver;
+import com.leon.microx.amqp.RabbitInitRunner;
+import com.leon.microx.amqp.RabbitInitializer;
 import com.leon.microx.probe.collector.ProbeEventPublisher;
 import com.leon.microx.util.Maps;
+import com.lhiot.oc.payment.service.TimeoutConsumer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
@@ -26,8 +29,17 @@ public class PaymentServiceApplication {
 
     @Bean
     @LoadBalanced
-    public RestTemplate restTemplate(){
+    public RestTemplate restTemplate() {
         return new RestTemplate();
+    }
+
+    @Bean
+    public RabbitInitRunner rabbitInitRunner(RabbitInitializer initializer) {
+        return args -> initializer.delay(
+                TimeoutConsumer.DEFAULT_PAY_TIMEOUT_EXCHANGE_NAME,
+                TimeoutConsumer.DEFAULT_PAY_TIMEOUT_DLX_QUEUE_NAME,
+                TimeoutConsumer.DEFAULT_PAY_TIMEOUT_DLX_RECEIVE_NAME
+        );
     }
 
     @Bean
