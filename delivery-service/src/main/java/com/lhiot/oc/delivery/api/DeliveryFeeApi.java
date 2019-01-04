@@ -104,7 +104,7 @@ public class DeliveryFeeApi {
             feeQuery.setTargetLng(amap.getLongitude());
             feeQuery.setTargetLat(amap.getLatitude());
         }
-        double distance = Position.base(store.get().getLatitude().doubleValue(), store.get().getLongitude().doubleValue())
+        double distance = Position.base(store.get().getLongitude().doubleValue(),store.get().getLatitude().doubleValue())
                 .distance(Position.base(feeQuery.getTargetLng(), feeQuery.getTargetLat())).doubleValue();
         distance = Calculator.div(distance, 1000.0);
         DeliverFeeRuleDetail ruleDetail = deliveryFeeRuleDetailMapper.search(Maps.of("orderFee", feeQuery.getOrderFee(), "distance", distance,

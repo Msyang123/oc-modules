@@ -9,6 +9,7 @@ import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author xiaojian  created in  2018/12/8 11:28
@@ -28,6 +29,8 @@ public class BaseOrderParam {
     private Integer page;
     @ApiModelProperty(notes = "订单编号",dataType = "String")
     private String orderCode;
+    @ApiModelProperty(notes = "订单编号集合",dataType = "List")
+    private List<String> orderCodeList;
     @ApiModelProperty(notes = "phone",dataType = "String")
     private String phone;
 

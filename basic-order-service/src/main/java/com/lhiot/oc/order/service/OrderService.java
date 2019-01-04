@@ -33,6 +33,7 @@ import java.time.Instant;
 import java.util.*;
 
 import static com.lhiot.oc.order.entity.type.OrderStatus.SEND_OUTING;
+import static com.lhiot.oc.order.entity.type.OrderStatus.WAIT_DISPATCHING;
 
 /**
  * @author zhangfeng created in 2018/9/19 9:19
@@ -294,7 +295,7 @@ public class OrderService {
         map.put("orderCode", orderCode);
         switch (modifyStatus) {
             case DISPATCHING:
-                map.put("nowStatus", SEND_OUTING);
+                map.put("nowStatus", WAIT_DISPATCHING);
                 break;
             case RECEIVED:
                 map.put("nowStatus", null);

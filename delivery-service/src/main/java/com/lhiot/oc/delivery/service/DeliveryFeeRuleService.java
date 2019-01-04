@@ -50,6 +50,7 @@ public class DeliveryFeeRuleService {
         DeliverFeeRule deliverFeeRule = new DeliverFeeRule();
         BeanUtils.of(deliverFeeRule).populate(param);
         deliverFeeRule.setCreateAt(Date.from(Instant.now()));
+        deliverFeeRule.setUpdateAt(Date.from(Instant.now()));
         boolean flag = deliveryFeeRuleMapper.insert(deliverFeeRule) == 1;
         if (flag) {
             if (CollectionUtils.isEmpty(param.getDetailList())) {

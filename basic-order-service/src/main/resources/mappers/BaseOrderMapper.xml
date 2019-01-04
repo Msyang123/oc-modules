@@ -70,6 +70,11 @@
                 </foreach>
             </if>
             <if test="orderCode !=null and orderCode != ''">and order_code like concat('%',#{orderCode},'%')</if>
+            <if test="orderCodeList !=null">and order_code in
+                <foreach collection="orderCodeList" item="code" close=")" open="(" separator=",">
+                    #{code}
+                </foreach>
+            </if>
             <if test="phone !=null and phone != ''">and user_phone like concat('%',#{phone},'%')</if>
             <if test="applicationType != null">and application_type = #{applicationType}</if>
             <if test="startAt != null">and create_at >= #{startAt}</if>
