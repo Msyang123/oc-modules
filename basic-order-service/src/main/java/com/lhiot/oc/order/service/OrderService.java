@@ -31,6 +31,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.function.Predicate;
 
 import static com.lhiot.oc.order.entity.type.OrderStatus.SEND_OUTING;
 
@@ -321,6 +322,11 @@ public class OrderService {
     }
 
     public Tips hdReduce(OrderDetailResult order, Store store, String hdOrderCode) {
+        Predicate<OrderProduct> totalLessThanDiscount = orderProduct -> orderProduct.getTotalPrice() < orderProduct.getDiscountPrice();
+        if (order.getOrderProductList().parallelStream().anyMatch(totalLessThanDiscount)){
+            return Tips.warn("商品列表中存在【总价小于折扣价】的商品！发送海鼎失败");
+        }
+
         HaiDingOrderParam haiDingOrderParam = new HaiDingOrderParam();
         BeanUtils.of(haiDingOrderParam).populate(order);
         haiDingOrderParam.setStoreName(store.getName());
