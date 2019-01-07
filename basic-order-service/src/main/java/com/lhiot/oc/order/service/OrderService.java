@@ -33,7 +33,6 @@ import java.time.Instant;
 import java.util.*;
 
 import static com.lhiot.oc.order.entity.type.OrderStatus.SEND_OUTING;
-import static com.lhiot.oc.order.entity.type.OrderStatus.WAIT_DISPATCHING;
 
 /**
  * @author zhangfeng created in 2018/9/19 9:19
@@ -322,6 +321,13 @@ public class OrderService {
 
     public Tips hdReduce(OrderDetailResult order, Store store, String hdOrderCode) {
         HaiDingOrderParam haiDingOrderParam = Beans.from(Beans.toMap(order)).populate(HaiDingOrderParam::new);
+        Predicate<OrderProduct> totalLessThanDiscount = orderProduct -> orderProduct.getTotalPrice() < orderProduct.getDiscountPrice();
+        if (order.getOrderProductList().parallelStream().anyMatch(totalLessThanDiscount)){
+            return Tips.warn("商品列表中存在【总价小于折扣价】的商品！发送海鼎失败");
+        }
+
+        HaiDingOrderParam haiDingOrderParam = new HaiDingOrderParam();
+        BeanUtils.of(haiDingOrderParam).populate(order);
         haiDingOrderParam.setStoreName(store.getName());
         haiDingOrderParam.setStoreCode(store.getCode());
         haiDingOrderParam.setStoreId(store.getId());
