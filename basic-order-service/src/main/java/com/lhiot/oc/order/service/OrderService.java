@@ -34,6 +34,7 @@ import java.util.*;
 import java.util.function.Predicate;
 
 import static com.lhiot.oc.order.entity.type.OrderStatus.SEND_OUTING;
+import static com.lhiot.oc.order.entity.type.OrderStatus.WAIT_DISPATCHING;
 
 /**
  * @author zhangfeng created in 2018/9/19 9:19
@@ -137,8 +138,7 @@ public class OrderService {
         orderStore.setOrderId(baseOrder.getId());
         orderStoreMapper.insert(orderStore);
 
-        OrderDetailResult orderDetail = new OrderDetailResult();
-        BeanUtils.of(orderDetail).populate(baseOrder);
+        OrderDetailResult orderDetail = Beans.from(baseOrder).populate(OrderDetailResult::new);
         orderDetail.setOrderProductList(productList);
         orderDetail.setOrderStore(orderStore);
         return orderDetail;
@@ -295,7 +295,7 @@ public class OrderService {
         map.put("orderCode", orderCode);
         switch (modifyStatus) {
             case DISPATCHING:
-                map.put("nowStatus", SEND_OUTING);
+                map.put("nowStatus", WAIT_DISPATCHING);
                 break;
             case RECEIVED:
                 map.put("nowStatus", null);
@@ -327,8 +327,7 @@ public class OrderService {
             return Tips.warn("商品列表中存在【总价小于折扣价】的商品！发送海鼎失败");
         }
 
-        HaiDingOrderParam haiDingOrderParam = new HaiDingOrderParam();
-        BeanUtils.of(haiDingOrderParam).populate(order);
+        HaiDingOrderParam haiDingOrderParam = Beans.from(order).populate(HaiDingOrderParam::new);
         haiDingOrderParam.setStoreName(store.getName());
         haiDingOrderParam.setStoreCode(store.getCode());
         haiDingOrderParam.setStoreId(store.getId());

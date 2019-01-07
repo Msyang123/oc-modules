@@ -1,6 +1,6 @@
 package com.lhiot.oc.delivery.service;
 
-import com.leon.microx.util.BeanUtils;
+import com.leon.microx.util.Beans;
 import com.leon.microx.util.Calculator;
 import com.leon.microx.util.StringUtils;
 import com.leon.microx.web.result.Tips;
@@ -47,9 +47,9 @@ public class DeliveryFeeRuleService {
      * @return boolean
      */
     public boolean create(DeliverFeeRuleParam param) {
-        DeliverFeeRule deliverFeeRule = new DeliverFeeRule();
-        BeanUtils.of(deliverFeeRule).populate(param);
+        DeliverFeeRule deliverFeeRule = Beans.from(param).populate(DeliverFeeRule::new);
         deliverFeeRule.setCreateAt(Date.from(Instant.now()));
+        deliverFeeRule.setUpdateAt(Date.from(Instant.now()));
         boolean flag = deliveryFeeRuleMapper.insert(deliverFeeRule) == 1;
         if (flag) {
             if (CollectionUtils.isEmpty(param.getDetailList())) {
@@ -68,8 +68,7 @@ public class DeliveryFeeRuleService {
      * @return boolean
      */
     public void updateRules(DeliverFeeRuleParam param) {
-        DeliverFeeRule deliverFeeRule = new DeliverFeeRule();
-        BeanUtils.of(deliverFeeRule).populate(param);
+        DeliverFeeRule deliverFeeRule = Beans.from(param).populate(DeliverFeeRule::new);
         deliverFeeRule.setUpdateAt(Date.from(Instant.now()));
         deliveryFeeRuleMapper.updateById(deliverFeeRule);
 
@@ -118,7 +117,7 @@ public class DeliveryFeeRuleService {
     }
 
     public boolean deleteRule(String ids) {
-        List<String> idList = Arrays.asList(StringUtils.tokenizeToStringArray(ids,","));
+        List<String> idList = Arrays.asList(StringUtils.tokenizeToStringArray(ids, ","));
         boolean flag = deliveryFeeRuleMapper.deleteById(idList) > 0;
         if (flag) {
             flag = deliveryFeeRuleDetailMapper.batchDeleteByRuleId(idList) > 0;

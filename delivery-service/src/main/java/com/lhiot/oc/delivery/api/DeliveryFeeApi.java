@@ -34,6 +34,7 @@ import java.util.Optional;
 @Slf4j
 public class DeliveryFeeApi {
 
+    private static final  Integer DEFAULT_DELIVER_FEE = 500;//无配送模板默认配送费为5元
     private DeliveryFeeRuleService ruleService;
     private DeliveryFeeRuleMapper deliveryFeeRuleMapper;
     private DeliveryFeeRuleDetailMapper deliveryFeeRuleDetailMapper;
@@ -104,13 +105,13 @@ public class DeliveryFeeApi {
             feeQuery.setTargetLng(amap.getLongitude());
             feeQuery.setTargetLat(amap.getLatitude());
         }
-        double distance = Position.base(store.get().getLatitude().doubleValue(), store.get().getLongitude().doubleValue())
+        double distance = Position.base(store.get().getLongitude().doubleValue(),store.get().getLatitude().doubleValue())
                 .distance(Position.base(feeQuery.getTargetLng(), feeQuery.getTargetLat())).doubleValue();
         distance = Calculator.div(distance, 1000.0);
         DeliverFeeRuleDetail ruleDetail = deliveryFeeRuleDetailMapper.search(Maps.of("orderFee", feeQuery.getOrderFee(), "distance", distance,
                 "deliveryAtType", feeQuery.getDeliverAtType()));
         if (Objects.isNull(ruleDetail)) {
-            return ResponseEntity.badRequest().body("超出配送范围");
+            return ResponseEntity.ok().body(Maps.of("fee", DEFAULT_DELIVER_FEE));
         }
         Tips<Integer> tips = ruleService.fee(feeQuery.getWeight(), ruleDetail);
         if (tips.err()) {
