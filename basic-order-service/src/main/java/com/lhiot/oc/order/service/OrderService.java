@@ -137,8 +137,7 @@ public class OrderService {
         orderStore.setOrderId(baseOrder.getId());
         orderStoreMapper.insert(orderStore);
 
-        OrderDetailResult orderDetail = new OrderDetailResult();
-        BeanUtils.of(orderDetail).populate(baseOrder);
+        OrderDetailResult orderDetail = Beans.from(baseOrder).populate(OrderDetailResult::new);
         orderDetail.setOrderProductList(productList);
         orderDetail.setOrderStore(orderStore);
         return orderDetail;
@@ -322,8 +321,7 @@ public class OrderService {
     }
 
     public Tips hdReduce(OrderDetailResult order, Store store, String hdOrderCode) {
-        HaiDingOrderParam haiDingOrderParam = new HaiDingOrderParam();
-        BeanUtils.of(haiDingOrderParam).populate(order);
+        HaiDingOrderParam haiDingOrderParam = Beans.from(Beans.toMap(order)).populate(HaiDingOrderParam::new);
         haiDingOrderParam.setStoreName(store.getName());
         haiDingOrderParam.setStoreCode(store.getCode());
         haiDingOrderParam.setStoreId(store.getId());

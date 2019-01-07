@@ -1,7 +1,7 @@
 package com.lhiot.oc.order.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.leon.microx.util.BeanUtils;
+import com.leon.microx.util.Beans;
 import com.lhiot.dc.dictionary.HasEntries;
 import com.lhiot.oc.order.entity.BaseOrder;
 import com.lhiot.oc.order.entity.OrderProduct;
@@ -25,11 +25,11 @@ public class CreateOrderParam {
     @ApiModelProperty(notes = "业务用户Id", dataType = "Long")
     @NotNull
     private Long userId;
-    @HasEntries(from = "applications",message = "不存在该字典项")
+    @HasEntries(from = "applications", message = "不存在该字典项")
     @ApiModelProperty(notes = "应用类型", dataType = "String")
     @NotNull
     private String applicationType;
-    @HasEntries(from = "orderTypes",message = "不存在该字典项")
+    @HasEntries(from = "orderTypes", message = "不存在该字典项")
     @NotNull
     private String orderType;
     @NotNull
@@ -63,7 +63,7 @@ public class CreateOrderParam {
     @ApiModelProperty(notes = "门店信息", dataType = "OrderStoreParam")
     private OrderStore orderStore;
 
-    @ApiModelProperty(notes = "支付Id",dataType = "String")
+    @ApiModelProperty(notes = "支付Id", dataType = "String")
     private String payId;
 
     /**
@@ -72,10 +72,8 @@ public class CreateOrderParam {
      * @return
      */
     public BaseOrder toOrderObject() {
-        BaseOrder baseOrder = new BaseOrder();
         this.applicationType = this.applicationType.toUpperCase();
         this.orderType = this.orderType.toUpperCase();
-        BeanUtils.of(baseOrder).populate(BeanUtils.of(this).toMap());
-        return baseOrder;
+        return Beans.from(this).populate(BaseOrder::new);
     }
 }

@@ -2,7 +2,7 @@ package com.lhiot.oc.order.service;
 
 import com.leon.microx.exception.ServiceException;
 import com.leon.microx.openfeign.CustomFeignException;
-import com.leon.microx.util.BeanUtils;
+import com.leon.microx.util.Beans;
 import com.leon.microx.util.Maps;
 import com.leon.microx.util.StringUtils;
 import com.leon.microx.web.result.Tips;
@@ -68,8 +68,7 @@ public class OrderRefundService {
     }
 
     private void insertRefundLog(OrderDetailResult order, ReturnOrderParam param) {
-        OrderRefund orderRefund = new OrderRefund();
-        BeanUtils.of(orderRefund).populate(param);
+        OrderRefund orderRefund = Beans.from(param).populate(OrderRefund::new);
         orderRefund.setHdOrderCode(order.getHdOrderCode());
         orderRefund.setOrderId(order.getId());
         orderRefund.setUserId(order.getUserId());
@@ -213,8 +212,7 @@ public class OrderRefundService {
      * @return Pair
      */
     private void hdReturns(OrderDetailResult order, ReturnOrderParam refundParam) {
-        HaiDingOrderParam haiDingOrderParam = new HaiDingOrderParam();
-        BeanUtils.of(haiDingOrderParam).populate(order);
+        HaiDingOrderParam haiDingOrderParam = Beans.from(order).populate(HaiDingOrderParam::new);
         List<OrderProduct> refundProducts = productMapper.selectOrderProductsByIds(Arrays.asList(StringUtils.tokenizeToStringArray(refundParam.getOrderProductIds(), ",")));
         OrderStore store = order.getOrderStore();
         haiDingOrderParam.setStoreName(store.getStoreName());
@@ -272,6 +270,8 @@ public class OrderRefundService {
                 return Tips.warn("未找到退货方式");
         }
         baseOrderMapper.updateStatusByCode(map);
+        OrderDetailResult order = baseOrderMapper.selectByCode(orderCode);
+        productMapper.updateOrderProductByIds(Maps.of("orderId",order.getId(),"refundStatus",RefundStatus.REFUND));
         return Tips.empty();
     }
 }
