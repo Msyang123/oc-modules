@@ -21,4 +21,5 @@ public class OrderRefund {
     private RefundType refundType;
     private Date applyAt;
     private Date disposeAt;
+    private Integer fee;
 }
