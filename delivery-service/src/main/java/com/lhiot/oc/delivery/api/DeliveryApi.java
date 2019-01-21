@@ -2,6 +2,7 @@ package com.lhiot.oc.delivery.api;
 
 import com.leon.microx.id.Generator;
 import com.leon.microx.predefine.Day;
+import com.leon.microx.util.Beans;
 import com.leon.microx.util.DateTime;
 import com.leon.microx.util.Maps;
 import com.leon.microx.util.StringUtils;
@@ -9,7 +10,9 @@ import com.leon.microx.web.result.Id;
 import com.leon.microx.web.result.Tips;
 import com.lhiot.oc.delivery.client.AdaptableClient;
 import com.lhiot.oc.delivery.entity.DeliverNote;
+import com.lhiot.oc.delivery.feign.Delivery;
 import com.lhiot.oc.delivery.feign.Store;
+import com.lhiot.oc.delivery.feign.ThirdpartyService;
 import com.lhiot.oc.delivery.model.*;
 import com.lhiot.oc.delivery.service.DeliveryService;
 import io.swagger.annotations.Api;
@@ -41,10 +44,12 @@ public class DeliveryApi {
     private static final String NOT_FIND_DELIVERY_ORDER_MESSAGE = "未找到配送单！";
     private final DeliveryService deliveryService;
     private final Generator<Long> generator;
+    private final ThirdpartyService thirdpartyService;
 
-    public DeliveryApi(DeliveryService deliveryService, Generator<Long> generator) {
+    public DeliveryApi(DeliveryService deliveryService, Generator<Long> generator, ThirdpartyService thirdpartyService) {
         this.generator = generator;
         this.deliveryService = deliveryService;
+        this.thirdpartyService = thirdpartyService;
     }
 
 
@@ -198,5 +203,23 @@ public class DeliveryApi {
             return ResponseEntity.badRequest().body(tips.getMessage());
         }
         return ResponseEntity.ok(tips);
+    }
+
+    @ApiOperation("配送完成修改海鼎订单状态")
+    @PutMapping("/delivery-notes/{code}/hd-status")
+    public ResponseEntity updateHdStatus(@PathVariable("code") String code) {
+        DeliverNote deliverNote = deliveryService.deliverNote(code);
+        if (Objects.isNull(deliverNote)) {
+            return ResponseEntity.badRequest().body("未找到改配送单");
+        }
+        Delivery delivery = new Delivery();
+        Beans.from(deliverNote).populate(delivery);
+        delivery.setDeliverId(deliverNote.getId().toString());
+        delivery.setOrderId(deliverNote.getDeliverCode());
+        ResponseEntity response = thirdpartyService.updateHdStatus(delivery);
+        if (response.getStatusCode().isError()) {
+            return ResponseEntity.badRequest().body("调用第三方失败");
+        }
+        return ResponseEntity.ok().build();
     }
 }
