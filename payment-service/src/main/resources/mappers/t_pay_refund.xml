@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhiot.oc.payment.mapper.RefundMapper">
+
+    <select id="selectByRecordId" parameterType="long" resultType="com.lhiot.oc.payment.entity.Refund">
+        select * from t_pay_refund where record_id = #{0}
+    </select>
+
+    <update id="completed" parameterType="map">
+        update t_pay_refund set refund_step = #{step}, completed_at = #{completedAt} where id = #{id} and refund_step = 'SENT'
+    </update>
+
+    <select id="historicalAmount" parameterType="long" resultType="long">
+        select IFNULL(sum(fee),0) from t_pay_refund where record_id = #{0}
+    </select>
+
+    <insert id="insert" parameterType="com.lhiot.oc.payment.entity.Refund">
+        insert into t_pay_refund(
+          id, record_id, fee, refund_step, created_at
+          <if test="reason != null">, reason </if>
+        ) values (
+          #{id}, #{recordId}, #{fee}, #{refundStep}, #{createdAt}
+          <if test="reason != null">, #{reason} </if>
+        )
+    </insert>
+</mapper>

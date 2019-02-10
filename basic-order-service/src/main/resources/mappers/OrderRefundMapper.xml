@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhiot.oc.order.mapper.OrderRefundMapper">
+    <insert id="insert" parameterType="com.lhiot.oc.order.entity.OrderRefund" useGeneratedKeys="true" keyColumn="id">
+        INSERT INTO order_refund (hd_order_code,order_id,user_id,refund_status,apply_at,dispose_at,order_product_ids,refund_type,reason)
+        VALUE (#{hdOrderCode},#{orderId},#{userId},#{refundStatus},#{applyAt},#{disposeAt},#{orderProductIds},#{refundType},#{reason})
+    </insert>
+
+    <update id="updateByPayId" parameterType="map">
+        update order_refund a LEFT JOIN base_order b ON a.order_id = b.id
+        set a.refund_status = #{refundStatus} , dispose_at = now() where b.pay_id = #{payId}
+    </update>
+</mapper>

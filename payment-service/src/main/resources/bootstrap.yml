@@ -1,0 +1,34 @@
+server:
+  port: 8311
+spring:
+  application:
+    name: payment-service-v1-0
+  cloud:
+    config:
+      name: payment-service-v1-0, rabbit-mq, application
+      profile: ${RUN_LEVEL:dev}
+      label: ${RUN_LEVEL:dev}
+      failFast: true
+      discovery:
+        enabled: true
+        service-id: microx-config
+eureka:
+  instance:
+    prefer-ip-address: true
+    status-page-url-path: /swagger-ui.html
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 10
+  client:
+    registry-fetch-interval-seconds: 5
+    serviceUrl:
+      defaultZone: ${EUREKA_REPLICAS_LIST:http://172.16.10.203:1111/eureka}
+
+microx-common:
+  microx-web:
+    id-generator:
+      snowflake-data-center-id: 5
+      snowflake-worker-id: 2
+lhiot:
+  dictionary:
+    server:
+      base-url: http://BASIC-DATA-SERVICE-V1-0

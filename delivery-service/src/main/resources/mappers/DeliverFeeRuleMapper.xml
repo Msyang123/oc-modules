@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhiot.oc.delivery.repository.DeliveryFeeRuleMapper">
+
+    <insert id="insert" parameterType="com.lhiot.oc.delivery.entity.DeliverFeeRule" useGeneratedKeys="true" keyProperty="id">
+        insert into delivery_fee_rules (min_order_amount,max_order_amount,delivery_at_type,create_at,update_at,create_by)
+        value (#{minOrderAmount},#{maxOrderAmount},#{deliveryAtType},#{createAt},#{updateAt},#{createBy})
+    </insert>
+
+    <update id="updateById" parameterType="com.lhiot.oc.delivery.entity.DeliverFeeRule">
+        update delivery_fee_rules set
+        <trim suffixOverrides=",">
+            <if test="minOrderAmount != null">min_order_amount = #{minOrderAmount},</if>
+            <if test="maxOrderAmount != null">max_order_amount = #{maxOrderAmount},</if>
+            <if test="deliveryAtType != null">delivery_at_type = #{deliveryAtType},</if>
+            <if test="updateAt != null">update_at = #{updateAt}</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="list">
+        delete from delivery_fee_rules where  id in
+        <foreach collection="list" item="item" close=")" open="(" separator=",">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="query" parameterType="com.lhiot.oc.delivery.model.DeliverFeeSearchParam" resultMap="rules">
+        select a.id,min_order_amount,max_order_amount,delivery_at_type,create_at,update_at,create_by,
+        b.id as d_id,delivery_fee_rule_id,min_distance,max_distance,first_weight,first_fee,additional_weight,additional_fee
+        from delivery_fee_rules  a
+        left join delivery_fee_rules_detail b on a.id = b.delivery_fee_rule_id
+        inner join (select id from delivery_fee_rules
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="minOrderAmount !=null"> and min_order_amount &gt;= #{minOrderAmount}</if>
+            <if test="maxOrderAmount !=null">and max_order_amount &lt;= #{maxOrderAmount}</if>
+            <if test="deliveryAtType != null">and delivery_at_type = #{deliveryAtType}</if>
+        </trim>
+        <if test="startRows != null"> limit #{startRows},#{rows}</if>
+        ) dr
+        on a.id = dr.id
+    </select>
+
+    <select id="count" parameterType="com.lhiot.oc.delivery.model.DeliverFeeSearchParam" resultType="int">
+        select count(id) from delivery_fee_rules
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="minOrderAmount !=null"> and min_order_amount &gt;= #{minOrderAmount}</if>
+            <if test="maxOrderAmount !=null">and max_order_amount &lt;= #{maxOrderAmount}</if>
+            <if test="deliveryAtType != null">and delivery_at_type = #{deliveryAtType}</if>
+        </trim>
+    </select>
+
+    <resultMap id="rules" type="com.lhiot.oc.delivery.model.DeliverFeeRulesResult">
+        <id column="id" property="id"/>
+        <result column="min_order_amount" property="minOrderAmount"/>
+        <result column="max_order_amount" property="maxOrderAmount"/>
+        <result column="delivery_at_type" property="deliveryAtType"/>
+        <result column="update_at" property="updateAt"/>
+        <result column="create_by" property="createBy"/>
+       <collection property="detailList" ofType="com.lhiot.oc.delivery.entity.DeliverFeeRuleDetail">
+           <id column="d_id" property="id"/>
+           <result column="delivery_fee_rule_id" property="deliveryFeeRuleId"/>
+           <result column="min_distance" property="minDistance"/>
+           <result column="max_distance" property="maxDistance"/>
+           <result column="first_weight" property="firstWeight"/>
+           <result column="first_fee" property="firstFee"/>
+           <result column="additional_weight" property="additionalWeight"/>
+           <result column="additional_fee" property="additionalFee"/>
+       </collection>
+    </resultMap>
+</mapper>
