@@ -4,14 +4,17 @@ import com.leon.microx.probe.annotation.Sniffer;
 import com.leon.microx.probe.collector.ProbeEventPublisher;
 import com.leon.microx.probe.event.ProbeEvent;
 import com.leon.microx.redisson.DistributedLock;
+import com.leon.microx.util.Beans;
 import com.leon.microx.util.Exceptions;
 import com.leon.microx.util.Maps;
 import com.leon.microx.web.result.Tips;
 import com.leon.microx.web.swagger.ApiHideBodyProperty;
 import com.leon.microx.web.swagger.ApiParamType;
+import com.lhiot.oc.order.entity.OrderRefund;
 import com.lhiot.oc.order.entity.type.OrderRefundStatus;
 import com.lhiot.oc.order.entity.type.RefundType;
 import com.lhiot.oc.order.mapper.BaseOrderMapper;
+import com.lhiot.oc.order.mapper.OrderRefundMapper;
 import com.lhiot.oc.order.model.OrderDetailResult;
 import com.lhiot.oc.order.model.ReturnOrderParam;
 import com.lhiot.oc.order.model.type.NotPayRefundWay;
@@ -36,12 +39,14 @@ public class OrderRefundApi {
     private BaseOrderMapper baseOrderMapper;
     private ProbeEventPublisher probeEventPublisher;
     private OrderService orderService;
+    private OrderRefundMapper refundMapper;
 
-    public OrderRefundApi(OrderRefundService refundService, BaseOrderMapper baseOrderMapper, ProbeEventPublisher probeEventPublisher, OrderService orderService) {
+    public OrderRefundApi(OrderRefundService refundService, BaseOrderMapper baseOrderMapper, ProbeEventPublisher probeEventPublisher, OrderService orderService, OrderRefundMapper refundMapper) {
         this.refundService = refundService;
         this.baseOrderMapper = baseOrderMapper;
         this.probeEventPublisher = probeEventPublisher;
         this.orderService = orderService;
+        this.refundMapper = refundMapper;
     }
 
 
@@ -110,6 +115,8 @@ public class OrderRefundApi {
     public ResponseEntity orderRefund(@PathVariable("orderCode") String orderCode, @RequestBody ReturnOrderParam param) {
         OrderDetailResult order = baseOrderMapper.selectByCode(orderCode);
         try {
+            OrderRefund orderRefund = refundMapper.selectByOrderCode(orderCode);
+            Beans.from(orderRefund).populate(param);
             refundService.refund(order.getPayId(), param);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
